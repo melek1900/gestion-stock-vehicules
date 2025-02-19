@@ -1,0 +1,27 @@
+@use '../../../styles/auth-form.scss';
+
+.register-card {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.login-link {
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+
+  a {
+    text-decoration: none;
+    color: #1976d2;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
