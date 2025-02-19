@@ -1,0 +1,18 @@
+@use '../../../styles/auth-form.scss';
+
+.login-card {
+  @extend .auth-form-card;
+}
+.register-link, .login-link {
+  margin-top: 15px;
+  font-size: 14px;
+
+  a {
+    text-decoration: none;
+    color: #1976d2;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

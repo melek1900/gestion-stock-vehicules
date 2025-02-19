@@ -1,0 +1,42 @@
+.auth-form-card {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 24px;
+    text-align: center;
+  
+    h2 {
+      margin-bottom: 24px;
+      font-size: 24px;
+      color: #2c3e50;
+    }
+  
+    form {
+      display: flex;
+      flex-direction: column;
+  
+      .full-width {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+  
+      button {
+        margin-top: 8px;
+      }
+  
+      .redirect-link {
+        margin-top: 16px;
+        font-size: 14px;
+  
+        a {
+          text-decoration: none;
+          color: #1976d2;
+          font-weight: 500;
+  
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+  
