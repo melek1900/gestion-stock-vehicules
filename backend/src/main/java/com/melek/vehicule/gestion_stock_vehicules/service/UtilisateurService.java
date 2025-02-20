@@ -26,20 +26,9 @@ public class UtilisateurService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + username));
 
-        try {
-            Utilisateur utilisateur = utilisateurRepository.findByEmail(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + username));
-
-            RoleUtilisateur role = utilisateur.getRole();
-
-            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role.name()));
-
-            return new User(utilisateur.getEmail(), utilisateur.getMotDePasse(), authorities);
-
-        } catch (UsernameNotFoundException e) {
-            System.err.println("Erreur d'authentification : " + e.getMessage()); // Log l'erreur
-            throw e; // Re-throw l'exception pour que Spring Security la gère
-        }
+        return utilisateur;
     }
 }
