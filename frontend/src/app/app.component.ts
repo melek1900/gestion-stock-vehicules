@@ -1,14 +1,24 @@
 import { Component } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss'],
+  standalone: true,
+  imports: [NavbarComponent, RouterOutlet],
 })
 export class AppComponent {
+  showNavbar: boolean = false;
+
   constructor(private router: Router) {
-    this.router.navigate(['/']);
+    // Écoute les changements d'URL
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.showNavbar = !(event.url === '/login' || event.url === '/register');
+      }
+    });
   }
 }

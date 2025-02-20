@@ -1,5 +1,6 @@
 package com.melek.vehicule.gestion_stock_vehicules.security;
 
+import com.melek.vehicule.gestion_stock_vehicules.model.Utilisateur;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -16,7 +17,6 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Component
 public class JwtUtil {
 
@@ -26,6 +26,7 @@ public class JwtUtil {
     private String secretKeyString;
     @Value("${jwt.expiration}")
     private long expiration;
+
     @PostConstruct
     public void init() {
         if (secretKeyString == null || secretKeyString.isBlank()) {
@@ -35,7 +36,12 @@ public class JwtUtil {
     }
 
     public String generateToken(Authentication authentication) {
-        Claims claims = Jwts.claims().setSubject(authentication.getName());
+        Utilisateur utilisateur = (Utilisateur) authentication.getPrincipal();
+
+        Claims claims = Jwts.claims().setSubject(utilisateur.getEmail());
+        claims.put("prenom", utilisateur.getPrenom());
+        claims.put("nom", utilisateur.getNom());
+        claims.put("role", utilisateur.getRole().name());
         claims.put("authorities", authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
@@ -53,12 +59,11 @@ public class JwtUtil {
 
     public String getUsernameFromToken(String token) {
         try {
-            return getClaimsFromToken(token).getSubject();
+            return getClaimsFromToken(token).getSubject(); // Récupère le "sub" du JWT
         } catch (Exception e) {
-            return null; // Gérer les exceptions (token invalide, expiré, etc.)
+            return null;
         }
     }
-
 
     public List<GrantedAuthority> getAuthorities(String token) {
         try {
@@ -70,12 +75,12 @@ public class JwtUtil {
             }
 
             return authoritiesList.stream()
-                    .filter(String.class::isInstance) // Filtrer les éléments non String
-                    .map(String.class::cast) // Caster en String
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            return List.of(); // Gérer les exceptions
+            return List.of();
         }
     }
 

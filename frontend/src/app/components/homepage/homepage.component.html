@@ -1,0 +1,25 @@
+<mat-card class="dashboard-card">
+    <h1>Bienvenue, {{ prenom }} {{ nom }}</h1>
+    <p>Rôle : {{ getRoleLabel(role) }}</p>
+  
+    <ng-container *ngIf="role === 'ADMIN'">
+      <button mat-raised-button color="primary" routerLink="/utilisateurs">Gestion des Utilisateurs</button>
+      <button mat-raised-button color="accent" routerLink="/rapports">Consulter les Rapports</button>
+    </ng-container>
+  
+    <ng-container *ngIf="role === 'GESTIONNAIRE_STOCK'">
+      <button mat-raised-button color="primary" routerLink="/enregistrer-vehicule">Enregistrer un Véhicule</button>
+      <button mat-raised-button color="accent" routerLink="/transfert">Transférer des Véhicules</button>
+      <button mat-raised-button color="warn" routerLink="/avaries">Gérer les Avaries</button>
+    </ng-container>
+  
+    <ng-container *ngIf="role === 'VENDEUR'">
+      <button mat-raised-button color="primary" routerLink="/ventes">Effectuer une Vente</button>
+      <button mat-raised-button color="accent" routerLink="/vehicules">Voir les Véhicules Disponibles</button>
+    </ng-container>
+  
+    <ng-container *ngIf="role === 'EXPERT'">
+      <button mat-raised-button color="primary" routerLink="/demandes-expertise">Traiter les Demandes d'Expertise</button>
+    </ng-container>
+  </mat-card>
+  

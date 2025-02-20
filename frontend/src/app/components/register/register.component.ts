@@ -16,7 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgIf,
+    //NgIf,
     NgFor,
     MatCardModule,
     MatFormFieldModule,
@@ -48,7 +48,9 @@ export class RegisterComponent {
       role: ['', Validators.required]
     });
   }
-
+  goToLogin() {
+    this.router.navigate(['/login']);
+  }
   register() {
     if (this.form.valid) {
       this.http.post('http://localhost:8080/auth/register', this.form.value, { responseType: 'text' })

@@ -1,0 +1,7 @@
+<mat-toolbar *ngIf="isVisible" color="primary">
+    <span>Gestion Stock Véhicules</span>
+    <span class="spacer"></span>
+    <span>{{ prenom }} {{ nom }} - {{ getRoleLabel() }}</span>
+    <button mat-button color="warn" (click)="logout()">Déconnexion</button>
+  </mat-toolbar>
+  
