@@ -31,7 +31,6 @@ export class RegisterComponent {
   roles = [
     { label: 'Administrateur', value: 'ROLE_ADMIN' },
     { label: 'Gestionnaire de Stock', value: 'ROLE_GESTIONNAIRE_STOCK' },
-    { label: 'Vendeur', value: 'ROLE_VENDEUR' },
     { label: 'Expert', value: 'ROLE_EXPERT' }
   ];
 

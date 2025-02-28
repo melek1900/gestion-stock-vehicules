@@ -1,4 +1,5 @@
 package com.melek.vehicule.gestion_stock_vehicules.model;
+
 import jakarta.persistence.*;
 import java.util.Date;
 
@@ -9,14 +10,21 @@ public class DemandeExpertise {
     private Long id;
 
     private Date dateDemande;
+    private String commentaire;
 
-    public StatutDemande getStatut() {
-        return statut;
-    }
 
-    public void setStatut(StatutDemande statut) {
-        this.statut = statut;
-    }
+    @Enumerated(EnumType.STRING)
+    private StatutDemande statut;
+
+    @ManyToOne
+    @JoinColumn(name = "vehicule_id")
+    private Vehicule vehicule;
+
+    @ManyToOne
+    @JoinColumn(name = "utilisateur_id")
+    private Utilisateur utilisateur;
+
+    // Getters et setters...
 
     public Long getId() {
         return id;
@@ -26,20 +34,15 @@ public class DemandeExpertise {
         this.id = id;
     }
 
-    public Date getDateDemande() {
-        return dateDemande;
+
+    public StatutDemande getStatut() { return statut; }
+    public void setStatut(StatutDemande statut) { this.statut = statut; }
+    public Utilisateur getUtilisateur() {
+        return utilisateur;
     }
 
-    public void setDateDemande(Date dateDemande) {
-        this.dateDemande = dateDemande;
-    }
-
-    public String getCommentaire() {
-        return commentaire;
-    }
-
-    public void setCommentaire(String commentaire) {
-        this.commentaire = commentaire;
+    public void setUtilisateur(Utilisateur utilisateur) {
+        this.utilisateur = utilisateur;
     }
 
     public Vehicule getVehicule() {
@@ -50,24 +53,21 @@ public class DemandeExpertise {
         this.vehicule = vehicule;
     }
 
-    public Utilisateur getUtilisateur() {
-        return utilisateur;
+
+
+    public String getCommentaire() {
+        return commentaire;
     }
 
-    public void setUtilisateur(Utilisateur utilisateur) {
-        this.utilisateur = utilisateur;
+    public void setCommentaire(String commentaire) {
+        this.commentaire = commentaire;
     }
 
-    @Enumerated(EnumType.STRING)
-    private StatutDemande statut;
+    public Date getDateDemande() {
+        return dateDemande;
+    }
 
-    private String commentaire;
-
-    @ManyToOne
-    @JoinColumn(name = "vehicule_id")
-    private Vehicule vehicule;
-
-    @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
-    private Utilisateur utilisateur;
+    public void setDateDemande(Date dateDemande) {
+        this.dateDemande = dateDemande;
+    }
 }

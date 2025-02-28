@@ -1,7 +1,8 @@
-import { NgFor, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { RouterModule } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Component({
@@ -11,16 +12,16 @@ import { JwtHelperService } from '@auth0/angular-jwt';
   standalone: true,
   imports: [
     MatCardModule,
-    MatButtonModule, 
+    RouterModule,
+    MatButtonModule,
     NgIf,
-    //NgFor,
   ],
 })
 export class HomepageComponent {
   prenom: string = '';
   nom: string = '';
   role: string = '';
-  
+
   getRoleLabel(role: string): string {
     switch (role) {
       case 'ADMIN':
@@ -35,15 +36,16 @@ export class HomepageComponent {
         return 'Utilisateur';
     }
   }
-  
+
   constructor() {
     const token = localStorage.getItem('token');
     if (token) {
       const jwtHelper = new JwtHelperService();
       const decodedToken = jwtHelper.decodeToken(token);
-      this.prenom = decodedToken.prenom; // Ces champs doivent être dans le token côté backend
+      this.prenom = decodedToken.prenom;
       this.nom = decodedToken.nom;
-      this.role = decodedToken.role; // Exemple : "ADMIN", "GESTIONNAIRE_STOCK", etc.
+      this.role = decodedToken.role.replace('ROLE_', '');
+      console.log('Role décodé :', this.role);
     }
   }
 }

@@ -1,5 +1,6 @@
 package com.melek.vehicule.gestion_stock_vehicules.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -53,6 +54,7 @@ public class Parc {
     }
 
     @OneToMany(mappedBy = "parc")
+    @JsonManagedReference // ✅ Gère la relation avec Vehicule
     private List<Vehicule> vehicules;
 
     @OneToMany(mappedBy = "parc")
