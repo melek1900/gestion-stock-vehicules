@@ -1,0 +1,86 @@
+:host ::ng-deep .mat-dialog-container {
+    width: 600px !important; /* ✅ Agrandir le popup */
+    max-width: 90vw;
+    overflow-y: auto;
+    border-radius: 10px;
+  }
+  
+  /* ✅ Mise en page verticale */
+  .popup-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  /* ✅ Assure que chaque champ est sur une ligne séparée */
+  mat-form-field {
+    width: 100% !important;
+    margin-bottom: 15px;
+  }
+  
+  /* ✅ Garde les boutons en bas */
+  mat-dialog-actions {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+  }
+  mat-dialog-actions {
+    display: flex;
+    flex-wrap: wrap; /* ✅ Permet d'aller à la ligne si nécessaire */
+    justify-content: center; /* ✅ Centre les boutons */
+    gap: 10px; /* ✅ Espacement entre les boutons */
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  /* ✅ Style uniforme pour tous les boutons */
+  mat-dialog-actions button {
+    flex: 1; /* ✅ Assure que tous les boutons prennent la même largeur */
+    min-width: 120px; /* ✅ Largeur minimale pour éviter qu'ils soient trop petits */
+    text-align: center;
+  }
+  /* ✅ Style pour la section des avaries */
+  .avarie-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    background: #f9f9f9;
+  }
+  
+  /* ✅ Style des photos */
+  .photo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .photo-preview {
+    display: flex;
+    flex-direction: column; /* ✅ Pour garder l'affichage vertical */
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .photo-preview img {
+    width: 150px;
+    height: auto;
+    max-height: 150px;
+    object-fit: contain;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  /* ✅ Style des boutons */
+  button {
+    width: 100%;
+  }
+  

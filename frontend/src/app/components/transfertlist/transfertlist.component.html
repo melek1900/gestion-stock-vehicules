@@ -1,0 +1,57 @@
+<div class="transfert-container">
+    <h2>📦 Liste des Transferts</h2>
+    <table mat-table [dataSource]="transferts" class="mat-elevation-z8">
+      <!-- ID -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let transfert">{{ transfert.id }}</td>
+      </ng-container>
+  
+      <!-- Date -->
+      <ng-container matColumnDef="dateTransfert">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let transfert">{{ transfert.dateTransfert | date:'short' }}</td>
+      </ng-container>
+  
+      <!-- Parc Source -->
+      <ng-container matColumnDef="parcSource">
+        <th mat-header-cell *matHeaderCellDef>Parc Source</th>
+        <td mat-cell *matCellDef="let transfert">{{ transfert.parcSource.nom }}</td>
+      </ng-container>
+  
+      <!-- Parc Destination -->
+      <ng-container matColumnDef="parcDestination">
+        <th mat-header-cell *matHeaderCellDef>Parc Destination</th>
+        <td mat-cell *matCellDef="let transfert">{{ transfert.parcDestination.nom }}</td>
+      </ng-container>
+  
+      <!-- Statut -->
+      <ng-container matColumnDef="statut">
+        <th mat-header-cell *matHeaderCellDef>Statut</th>
+        <td mat-cell *matCellDef="let transfert">
+          <span [ngClass]="{ 
+            'en-transit': transfert.statut === StatutTransfert.EN_TRANSIT, 
+            'receptionne': transfert.statut === StatutTransfert.RECEPTIONNE 
+          }">
+            {{ transfert.statut }}
+          </span>
+        </td>
+      </ng-container>
+  
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let transfert">
+          <button *ngIf="userRole === 'ROLE_ADMIN' || userRole === 'ROLE_GESTIONNAIRE_STOCK'" 
+          mat-button color="primary" (click)="receptionnerTransfert(transfert.id)" 
+          [disabled]="transfert.statut !== 'En transit'">
+        ✅ Réceptionner
+       </button>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="['id', 'dateTransfert', 'parcSource', 'parcDestination', 'statut', 'actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['id', 'dateTransfert', 'parcSource', 'parcDestination', 'statut', 'actions'];"></tr>
+    </table>
+  </div>
+  

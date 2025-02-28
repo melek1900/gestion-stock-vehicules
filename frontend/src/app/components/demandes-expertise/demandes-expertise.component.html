@@ -1,0 +1,41 @@
+<mat-card class="table-container">
+    <h1>📄 Demandes d'Expertise</h1>
+  
+    <table mat-table [dataSource]="demandes" class="mat-elevation-z8">
+      
+      <!-- ✅ Colonne ID -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let demande">{{ demande.id }}</td>
+      </ng-container>
+  
+      <!-- ✅ Colonne Véhicule -->
+      <ng-container matColumnDef="vehicule">
+        <th mat-header-cell *matHeaderCellDef>Véhicule</th>
+        <td mat-cell *matCellDef="let demande">{{ demande.vehicule.modele }} ({{ demande.vehicule.numeroChassis }})</td>
+      </ng-container>
+  
+      <!-- ✅ Colonne Statut -->
+      <ng-container matColumnDef="statut">
+        <th mat-header-cell *matHeaderCellDef>Statut</th>
+        <td mat-cell *matCellDef="let demande">
+          <span class="status" [ngClass]="demande.statut.toLowerCase()">{{ demande.statut }}</span>
+        </td>
+      </ng-container>
+  
+      <!-- ✅ Colonne Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let demande">
+          <button mat-button color="primary" (click)="traiterDemande(demande.id)" 
+            [disabled]="demande.statut !== 'EN_ATTENTE'">
+            ✔️ Traiter
+          </button>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="['id', 'vehicule', 'statut', 'actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['id', 'vehicule', 'statut', 'actions'];"></tr>
+    </table>
+  </mat-card>
+  

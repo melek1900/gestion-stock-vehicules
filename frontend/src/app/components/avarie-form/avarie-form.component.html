@@ -1,0 +1,20 @@
+<form [formGroup]="form" (ngSubmit)="enregistrerAvarie()">
+    <mat-form-field class="full-width">
+      <mat-label>Type d'avarie</mat-label>
+      <mat-select formControlName="type">
+        <mat-option *ngFor="let type of typesAvaries" [value]="type">{{ type }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  
+    <mat-form-field class="full-width">
+      <mat-label>Commentaire</mat-label>
+      <input matInput formControlName="commentaire" />
+    </mat-form-field>
+  
+    <input type="file" (change)="onFileSelected($event)" />
+  
+    <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+      Enregistrer l'Avarie
+    </button>
+  </form>
+  

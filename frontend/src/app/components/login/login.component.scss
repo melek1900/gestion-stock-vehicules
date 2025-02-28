@@ -3,16 +3,32 @@
 .login-card {
   @extend .auth-form-card;
 }
-.register-link, .login-link {
-  margin-top: 15px;
-  font-size: 14px;
+.dashboard-card {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  text-align: center;
 
-  a {
-    text-decoration: none;
-    color: #1976d2;
+  h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
 
-    &:hover {
-      text-decoration: underline;
+  p {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: #666;
+  }
+
+  .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 20px;
+
+    button {
+      min-width: 200px;
     }
   }
 }

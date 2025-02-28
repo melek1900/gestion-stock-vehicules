@@ -67,4 +67,25 @@ export class NavbarComponent {
     this.isVisible = false;
     this.router.navigate(['/login']);
   }
+  redirectToHome() {
+    let homeRoute = '/home'; // Page par défaut
+  
+    switch (this.role) {
+      case 'ADMIN':
+        homeRoute = '/admin-dashboard';
+        break;
+      case 'GESTIONNAIRE_STOCK':
+        homeRoute = '/vehicules';
+        break;
+      case 'VENDEUR':
+        homeRoute = '/ventes';
+        break;
+      case 'EXPERT':
+        homeRoute = '/demandes-expertise'; // 🔥 Page dédiée aux experts
+        break;
+    }
+  
+    this.router.navigate([homeRoute]);
+  }
+  
 }

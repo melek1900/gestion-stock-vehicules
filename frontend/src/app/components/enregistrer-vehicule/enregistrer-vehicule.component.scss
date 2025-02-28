@@ -1,0 +1,194 @@
+/* ✅ Styles globaux */
+.vehicule-form {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.avarie-container {
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* ✅ Modal centré pour la caméra */
+.camera-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.camera-content {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  background: black;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.camera-content video {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.camera-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.camera-buttons button {
+  background: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+
+.full-width {
+  width: 100%;
+  margin-bottom: 15px; /* ✅ Espacement entre les champs */
+}
+
+.section-title {
+  margin-top: 30px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #333;
+}
+
+
+
+/* ✅ Gestion des photos */
+.photo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.photo-preview {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-top: 10px;
+}
+
+/* ✅ Alignement des boutons pour les actions sur la photo */
+.photo-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ✅ Amélioration de la mise en page de la caméra */
+.camera-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Fond semi-transparent */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000; /* S'assurer que c'est au-dessus de tout */
+}
+
+/* ✅ Style du cadre vidéo */
+.video-wrapper {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  background: black;
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 3500; /* Toujours au-dessus du modal */
+}
+
+.video-wrapper video {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+  z-index: 3600;
+}
+
+/* ✅ Style des boutons dans la caméra */
+.camera-buttons {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  z-index: 3700; /* Assurer la visibilité */
+}
+
+.camera-buttons button {
+  background: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.camera-buttons button:hover {
+  background: #ddd;
+}
+
+/* ✅ Correction du modal noir */
+.mat-dialog-container {
+  background: rgba(255, 255, 255, 0.95) !important;
+  z-index: 2500 !important; /* S'assurer qu'il ne cache pas la caméra */
+}
+
+/* ✅ Corriger le problème de superposition */
+.photo-preview-container {
+  position: relative;
+  z-index: 3000; /* ✅ Toujours au-dessus */
+  text-align: center;
+  margin-top: 20px;
+}
+
+.photo-preview {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* ✅ Boutons pour supprimer ou capturer une autre photo */
+.photo-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ✅ Espacement du formulaire */
+.submit-container {
+  text-align: center;
+  margin-top: 20px;
+}

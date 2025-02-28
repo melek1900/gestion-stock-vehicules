@@ -1,0 +1,97 @@
+<mat-dialog-content class="popup-container">
+    <h2 mat-dialog-title>
+      {{ isModification ? 'Modifier le Véhicule' : 'Ajouter un Véhicule' }}
+    </h2>
+  
+    <form [formGroup]="form">
+      <mat-form-field>
+        <mat-label>Modèle</mat-label>
+        <input matInput formControlName="modele" required />
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Numéro de Châssis</mat-label>
+        <input matInput formControlName="numeroChassis" required />
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Couleur</mat-label>
+        <input matInput formControlName="couleur" required />
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Date d'Arrivée</mat-label>
+        <input matInput type="date" formControlName="dateArrivee" required />
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Provenance</mat-label>
+        <input matInput formControlName="provenance" required />
+      </mat-form-field>
+  
+      <h3>Avaries</h3>
+      <div formArrayName="avaries">
+        <div *ngFor="let avarie of avaries.controls; let i = index" [formGroupName]="i" class="avarie-container">
+          
+          <mat-form-field>
+            <mat-label>Type d'avarie</mat-label>
+            <mat-select formControlName="type">
+              <mat-option *ngFor="let type of typesAvaries" [value]="type">{{ type }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+  
+          <mat-form-field>
+            <mat-label>Commentaire</mat-label>
+            <input matInput formControlName="commentaire" />
+          </mat-form-field>
+  
+          <!-- ✅ Affichage des photos -->
+          <div class="photo-container">
+            <h4>Photos existantes</h4>
+            <div *ngIf="photosPreviews[i]?.length">
+              <div *ngFor="let photo of photosPreviews[i]; let j = index" class="photo-preview">
+                <img [src]="typeof photo === 'string' ? photo : ''" 
+                alt="Photo avarie" 
+                style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px;" />                <button mat-icon-button color="warn" (click)="supprimerPhoto(i, j)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+  
+          <!-- ✅ Ajout de nouvelles photos -->
+          <div class="photo-container">
+            <h4>Ajouter une nouvelle photo</h4>
+            <input type="file" #fileInput (change)="onFileChange($event, i)" accept="image/*" hidden />
+            <button mat-button color="primary" (click)="triggerFileInput(i)">
+              📸 Ajouter une Photo
+            </button>
+          </div>
+          <button mat-button color="accent" (click)="openCamera(i)">
+            📷 Ouvrir la Caméra
+          </button>
+          <video #videoElement 
+          *ngIf="isCameraOpen && activeIndex === i" 
+          autoplay 
+          style="width: 100%; max-height: 200px; border: 2px solid #ccc; border-radius: 8px;">
+        </video>
+             <button mat-button color="primary" *ngIf="isCameraOpen && activeIndex === i" (click)="capturePhoto(i)">
+            📸 Capturer la Photo
+          </button>
+          <button mat-icon-button color="warn" (click)="supprimerAvarie(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+  
+      <button mat-button color="accent" (click)="ajouterAvarie()" type="button">
+        ➕ Ajouter une Avarie
+      </button>
+    </form>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions>
+    <button mat-button color="warn" (click)="dialogRef.close()">❌ Annuler</button>
+    <button *ngIf="isModification" mat-button color="warn" (click)="supprimer()">🗑️ Supprimer</button>
+    <button mat-raised-button color="primary" (click)="enregistrer()">✅ {{ isModification ? 'Modifier' : 'Ajouter' }}</button>
+  </mat-dialog-actions>

@@ -1,7 +1,16 @@
-<mat-toolbar *ngIf="isVisible" color="primary">
-    <span>Gestion Stock Véhicules</span>
-    <span class="spacer"></span>
-    <span>{{ prenom }} {{ nom }} - {{ getRoleLabel() }}</span>
-    <button mat-button color="warn" (click)="logout()">Déconnexion</button>
-  </mat-toolbar>
+<mat-toolbar *ngIf="isVisible" class="custom-navbar">
+  <!-- ✅ Logo qui renvoie vers la page d'accueil -->
+  <button mat-button class="logo-button" (click)="redirectToHome()">
+    🚗 Gestion Stock Véhicules
+  </button>
   
+  <span class="spacer"></span>
+
+  <span class="user-info">
+    👤 {{ prenom }} {{ nom }} - <span class="role">{{ getRoleLabel() }}</span>
+  </span>
+
+  <button mat-button class="logout-button" (click)="logout()">
+    🚪 Déconnexion
+  </button>
+</mat-toolbar>
