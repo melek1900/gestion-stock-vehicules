@@ -42,30 +42,32 @@ export class LoginComponent {
 
   login() {
     if (this.form.valid) {
-      this.http
-        .post<{ token: string }>('http://localhost:8080/auth/login', this.form.value)
-        .subscribe({
-          next: (response) => {
-            const token = response.token;
-            localStorage.setItem('token', token);
-
-            const jwtHelper = new JwtHelperService();
-            const decodedToken = jwtHelper.decodeToken(token);
-            const role = decodedToken.role.replace('ROLE_', ''); // ADMIN, GESTIONNAIRE_STOCK...
-
-            console.log('Utilisateur connecté avec rôle :', role);
-
-            this.router.navigate(['/home']);
-          },
-          error: () => {
-            this.snackBar.open('Échec de la connexion. Vérifiez vos identifiants.', 'Fermer', {
-              duration: 3000,
-            });
-          },
-        });
+      console.log("📡 Envoi de la requête de connexion...");
+  
+      this.http.post<{ token: string }>('http://172.20.10.8:8080/auth/login', this.form.value).subscribe({
+        next: (response) => {
+          if (!response.token) {
+            console.error("🚨 Aucun token reçu !");
+            return;
+          }
+  
+          console.log("🔑 Token reçu :", response.token);
+          localStorage.setItem('token', response.token);
+  
+          const jwtHelper = new JwtHelperService();
+          const decodedToken = jwtHelper.decodeToken(response.token);
+          const role = decodedToken.role.replace('ROLE_', ''); // ADMIN, GESTIONNAIRE_STOCK...
+  
+          console.log('✅ Utilisateur connecté avec rôle :', role);
+          this.router.navigateByUrl('/home', { replaceUrl: true });
+   },
+        error: (err) => {
+          console.error("❌ Erreur lors de la connexion :", err);
+          this.snackBar.open("⚠️ Identifiants incorrects ou accès refusé.", "Fermer", { duration: 3000 });
+        }
+      });
     }
   }
-
   goToRegister() {
     this.router.navigate(['/register']);
   }

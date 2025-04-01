@@ -1,0 +1,91 @@
+.vehicule-transport-container {
+    width: 100%;
+    height: auto;
+    padding: 20px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+  }
+  
+  .actions-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  
+    button {
+      font-weight: bold;
+    }
+  }
+  
+  table.mat-mdc-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 10px;
+  
+    th,
+    td {
+      text-align: left;
+      padding: 12px 10px;
+      height: 56px;
+      vertical-align: middle;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 14px;
+      word-wrap: break-word;
+    }
+  
+    th {
+      background: #f5f5f5;
+      color: #333;
+      font-weight: bold;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+  
+    tr:hover td {
+      background-color: #f9f9f9;
+    }
+  
+    .mat-column-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+  
+    button.mat-icon-button {
+      transition: all 0.3s ease;
+    }
+  
+    button.mat-icon-button:hover {
+      transform: scale(1.1);
+    }
+  }
+  
+  .statut-dispo {
+    color: green;
+    font-weight: bold;
+  }
+  
+  .statut-indispo {
+    color: red;
+    font-weight: bold;
+  }
+  
+  @media (max-width: 768px) {
+    table.mat-mdc-table {
+      th,
+      td {
+        font-size: 12px;
+        padding: 6px;
+      }
+    }
+  }
+  

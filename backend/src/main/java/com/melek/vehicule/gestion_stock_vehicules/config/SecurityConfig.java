@@ -2,24 +2,32 @@ package com.melek.vehicule.gestion_stock_vehicules.config;
 
 import com.melek.vehicule.gestion_stock_vehicules.security.JwtFilter;
 import com.melek.vehicule.gestion_stock_vehicules.service.UtilisateurService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
     private final JwtFilter jwtFilter;
     private final UtilisateurService utilisateurService;
 
@@ -35,31 +43,39 @@ public class SecurityConfig {
                         "default-src 'self'; font-src 'self' https://fonts.gstatic.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline';"
                 )))
                 .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfiguration = new org.springframework.web.cors.CorsConfiguration();
-                    corsConfiguration.addAllowedOrigin("http://localhost:4200");
-                    corsConfiguration.addAllowedMethod("*");
-                    corsConfiguration.addAllowedHeader("*");
-                    corsConfiguration.setAllowCredentials(true);
-                    return corsConfiguration;
+                    var corsConfig = new CorsConfiguration();
+                    corsConfig.setAllowedOriginPatterns(List.of("*")); // ✅ accepte tous les origin patterns
+                    corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfig.setAllowedHeaders(List.of("*"));
+                    corsConfig.setAllowCredentials(true);
+                    return corsConfig;
                 }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/vehicules/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_GESTIONNAIRE_STOCK")
-                        .requestMatchers(HttpMethod.POST, "/api/vehicules/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_GESTIONNAIRE_STOCK")
-                        .requestMatchers(HttpMethod.PUT, "/api/vehicules/**").permitAll() // 🔥 TEMPORAIREMENT pour tester
-                        .requestMatchers(HttpMethod.DELETE, "/api/vehicules/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_GESTIONNAIRE_STOCK")
-                        .requestMatchers(HttpMethod.GET, "/api/transferts/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_GESTIONNAIRE_STOCK")
-                        .requestMatchers(HttpMethod.PUT, "/api/transferts/recevoir/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_GESTIONNAIRE_STOCK")
-                        .requestMatchers(HttpMethod.POST, "/api/transferts/initier").hasAnyAuthority("ROLE_ADMIN", "ROLE_GESTIONNAIRE_STOCK")// ✅ Ajout de GESTIONNAIRE_STOCK
-                        .requestMatchers(HttpMethod.PUT, "/api/transferts/receptionner/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_GESTIONNAIRE_STOCK")
+                        .requestMatchers("/auth/login", "/auth/register", "/auth/user-profile").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/parcs").permitAll()
                         .anyRequest().authenticated()
-
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            logger.error("🔐 User auth dans entry point : " + SecurityContextHolder.getContext().getAuthentication());
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Accès non autorisé\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            logger.error("⛔ Accès interdit : {}", accessDeniedException.getMessage());
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Accès refusé\"}");
+                        })
+                );
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -1,27 +1,15 @@
-<mat-card class="dashboard-card">
-  <h1>Bienvenue, {{ prenom }} {{ nom }}</h1>
-  <p>Rôle : {{ getRoleLabel(role) }}</p>
+<mat-card class="dashboard-container">
 
-  <!-- ADMIN -->
-  <div *ngIf="role === 'ADMIN'" class="button-container">
-    <button mat-raised-button color="primary" routerLink="/utilisateurs">Gestion des Utilisateurs</button>
-    <button mat-raised-button color="accent" routerLink="/rapports">Consulter les Rapports</button>
-  </div>
+  <!-- 🎯 Liste des véhicules pour Commercial, Administrateur et Gestionnaire Application -->
+  <app-vehicule-list *ngIf="role === 'COMMERCIAL' || role === 'ADMINISTRATEUR' || role === 'GESTIONNAIRE_APPLICATION'"></app-vehicule-list>
 
-  <!-- GESTIONNAIRE STOCK -->
-  <div *ngIf="role === 'GESTIONNAIRE_STOCK'" class="button-container">
-    <button mat-raised-button color="primary" [routerLink]="['/enregistrer-vehicule']">Enregistrer un Véhicule</button>
-    <button mat-raised-button color="accent" [routerLink]="['/transfert']">Transférer des Véhicules</button>
-    <button mat-raised-button color="warn" [routerLink]="['/avaries']">Gérer les Avaries</button>
-    <button mat-raised-button color="basic" [routerLink]="['/vehicules']">Liste des Véhicules</button>
-  </div>
+  <!-- 🎯 Dashboard spécifique pour le Gestionnaire de Stock -->
+  <app-gestionnaire-stock-dashboard *ngIf="role === 'GESTIONNAIRE_STOCK'"></app-gestionnaire-stock-dashboard>
 
- 
-  <!-- EXPERT -->
- <!-- EXPERT -->
-<div *ngIf="role === 'EXPERT'" class="button-container">
-  <button mat-raised-button color="primary" [routerLink]="['/demandes-expertise']">
-    📄 Traiter les Demandes d'Expertise
-  </button>
-</div>
+  <!-- 🎯 Liste des avaries pour les Experts -->
+  <app-reparation *ngIf="role === 'EXPERT'"></app-reparation>
+
+  <!-- 🎯 Dashboard Statistique pour les Managers -->
+  <app-dashboard-statistiques *ngIf="role === 'MANAGER'"></app-dashboard-statistiques>
+
 </mat-card>

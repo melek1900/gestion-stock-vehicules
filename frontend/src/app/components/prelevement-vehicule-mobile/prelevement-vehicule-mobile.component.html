@@ -1,0 +1,65 @@
+<div class="prelevement-mobile-container">
+    <h2>📦 Prélèvement des Véhicules</h2>
+  
+    <mat-form-field class="full-width">
+      <mat-label>Numéro d'Ordre de Mission</mat-label>
+      <input matInput [(ngModel)]="ordreMission" placeholder="Saisir ou scanner" (change)="chargerOrdreMission()">
+    </mat-form-field>
+  
+    <div class="button-scan">
+      <button mat-raised-button color="primary" (click)="activerScanner()">
+        <mat-icon>qr_code_scanner</mat-icon> Scanner un véhicule
+      </button>
+    </div>
+  
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate" color="accent"></mat-progress-bar>
+  
+    <div *ngIf="isScannerActif" class="scanner-modal">
+      <div class="scanner-content">
+        <zxing-scanner 
+          [formats]="formatsScanner"
+          (scanSuccess)="scannerVehicule($event)">
+        </zxing-scanner>
+        <button mat-button color="warn" (click)="desactiverScanner()">❌ Fermer Scanner</button>
+      </div>
+    </div>
+  
+    <div *ngIf="vehicules.length > 0" class="vehicules-list">
+      <h3>🚗 Véhicules à Prélever</h3>
+      <mat-card *ngFor="let vehicule of vehicules" [ngClass]="{'vehicule-card': true, 'preleve': vehicule.preleve}">
+        <mat-card-content>
+          <p><strong>Châssis :</strong> {{ vehicule.numeroChassis }}</p>
+          <p><strong>Modèle :</strong> {{ vehicule.modele }}</p>
+          <p><strong>Marque :</strong> {{ vehicule.shortDescription }}</p>
+
+          <p><strong>Couleur :</strong> {{ vehicule.shortColor }}</p>
+
+          shortDescription    
+          <mat-chip [color]="vehicule.preleve ? 'primary' : 'warn'" selected>
+            <mat-icon class="chip-icon">{{ vehicule.preleve ? 'check_circle' : 'hourglass_empty' }}</mat-icon>
+            {{ vehicule.preleve ? 'Prélevé' : 'Non Prélevé' }}
+          </mat-chip>
+  
+          <mat-chip *ngIf="vehicule.justScanned" color="accent">
+            🚀 Nouveau
+          </mat-chip>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  
+    <div *ngIf="vehiculesManquants.length > 0" class="vehicules-manquants">
+      <h3>⚠️ Véhicules non trouvés</h3>
+      <ul>
+        <li *ngFor="let vehicule of vehiculesManquants">
+          {{ vehicule.numeroChassis }} - {{ vehicule.modele }}
+        </li>
+      </ul>
+    </div>
+  
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="validerPrelevement()" [disabled]="!peutValiderPrelevement()">
+        ✅ Valider le Prélèvement
+      </button>
+    </div>
+  </div>
+  

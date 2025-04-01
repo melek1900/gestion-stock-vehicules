@@ -1,45 +1,122 @@
+// 🌟 CONTAINER PRINCIPAL
 .transfert-container {
-    max-width: 900px;
-    margin: auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.ligne-separation {
+  margin: 30px 0;
+  border-top: 1px solid black; // bleu moderne (tu peux adapter la couleur)
+  opacity: 1; // rend la ligne subtile
+}
+.espace {
+  margin-bottom: 20px;
+}
+// 🌟 TITRE
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
+  font-weight: bold;
+}
+
+// 🌟 FORMULAIRE DU CHOIX DE PARC
+mat-form-field {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+// 🌟 TABLE MODERNE
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th {
+  background: #003366;
+  color: black !important;
+  padding: 12px;
+  text-align: center;
+}
+
+td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+// 🌟 DESIGN DES STATUTS
+.en-transit {
+  background-color: #FF9800;
+  color: white;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 15px;
+}
+
+.receptionne {
+  background-color: #27ae60;
+  color: white;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 15px;
+}
+
+// 🌟 DESIGN BOUTONS
+button {
+  font-weight: bold;
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: 0.3s ease-in-out;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+// 🌟 CONFIRMATION DIALOG DESIGN
+.confirmation-dialog {
+  text-align: center;
+
   h2 {
-    text-align: center;
-    margin-bottom: 20px;
     color: #2c3e50;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
   }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
+
+  p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #666;
   }
-  
-  th {
-    background: #3498db;
-    color: white;
-    padding: 10px;
-  }
-  
-  td {
-    padding: 10px;
+
+  button, a {
+    display: block;
+    margin: 10px auto;
     text-align: center;
+    width: 80%;
   }
-  
-  .en-transit {
-    color: #e67e22;
-    font-weight: bold;
+}
+
+// 🌟 RESPONSIVE DESIGN
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
   }
-  
-  .receptionne {
-    color: #27ae60;
-    font-weight: bold;
+
+  .transfert-container {
+    padding: 15px;
   }
-  
-  button {
-    cursor: pointer;
+
+  button, a {
+    width: 100%;
   }
-  
+}

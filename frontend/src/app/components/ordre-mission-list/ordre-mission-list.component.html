@@ -1,0 +1,86 @@
+<mat-card class="ordre-mission-container">
+    <h2>📜 Liste des Ordres de Mission</h2>
+    <div class="filtres">
+        <!-- 🔍 Recherche à gauche -->
+        <div class="recherche-container">
+            <mat-form-field appearance="fill">
+                <mat-label>Rechercher par N° Mission</mat-label>
+                <input matInput [(ngModel)]="recherche" (input)="filtrerOrdres()">
+            </mat-form-field>
+        </div>
+    
+        <!-- 📌 Filtre Statut à droite -->
+        <div class="statut-container">
+            <mat-form-field appearance="fill">
+                <mat-label>Filtrer par statut</mat-label>
+                <mat-select [(ngModel)]="statutFiltre" (selectionChange)="filtrerOrdres()">
+                    <mat-option value="">Tous</mat-option>
+                    <mat-option value="EN_COURS">En cours</mat-option>
+                    <mat-option value="CLOTURE">Clôturé</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+      <table mat-table [dataSource]="ordresMissionFiltres" class="mat-elevation-z8">
+      
+      <!-- Numéro de Mission -->
+      <ng-container matColumnDef="numeroMission">
+        <th mat-header-cell *matHeaderCellDef> N° Mission </th>
+        <td mat-cell *matCellDef="let ordre"> {{  ordre.numeroOrdre  }} </td>
+      </ng-container>
+  
+      <!-- Date -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef> Date </th>
+        <td mat-cell *matCellDef="let ordre"> {{ ordre.dateCreation | date:'dd/MM/yyyy' }} </td>
+      </ng-container>
+  
+      <!-- Chauffeur -->
+      <ng-container matColumnDef="chauffeur">
+        <th mat-header-cell *matHeaderCellDef> Chauffeur </th>
+        <td mat-cell *matCellDef="let ordre"> {{ ordre.chauffeur.nom }} {{ ordre.chauffeur.prenom }} </td>
+      </ng-container>
+  
+      <!-- Véhicule Transport -->
+      <ng-container matColumnDef="vehicule">
+        <th mat-header-cell *matHeaderCellDef> Véhicule </th>
+        <td mat-cell *matCellDef="let ordre"> {{ ordre.vehiculeTransport.matricule }} - {{ ordre.vehiculeTransport.type }} </td>
+      </ng-container>
+  
+      <!-- Parc Départ -->
+      <ng-container matColumnDef="parcDepart">
+        <th mat-header-cell *matHeaderCellDef> Parc Départ </th>
+        <td mat-cell *matCellDef="let ordre"> {{ ordre.parcDepart.nom }} </td>
+      </ng-container>
+  
+      <!-- Parc Arrivée -->
+      <ng-container matColumnDef="parcArrivee">
+        <th mat-header-cell *matHeaderCellDef> Parc Arrivée </th>
+        <td mat-cell *matCellDef="let ordre"> {{ ordre.parcArrivee.nom }} </td>
+      </ng-container>
+  
+      <!-- Statut -->
+      <ng-container matColumnDef="statut">
+        <th mat-header-cell *matHeaderCellDef> Statut </th>
+        <td mat-cell *matCellDef="let ordre">
+          <span class="status" [ngClass]="ordre.statut?.toLowerCase()">
+            {{ ordre.statut }}
+          </span>
+        </td>
+      </ng-container>
+  
+      <!-- Actions
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let ordre">
+          <button mat-button color="primary" (click)="afficherOrdreMission(ordre.pdfUrl)">
+            📄 Voir
+          </button>
+        </td>
+      </ng-container> -->
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-card>
+  

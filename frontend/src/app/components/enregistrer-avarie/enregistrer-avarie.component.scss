@@ -1,0 +1,184 @@
+.vehicule-form {
+    max-width: 850px;
+    margin: 40px auto;
+    padding: 35px;
+    border-radius: 14px;
+    background: #fff4e5; // ✅ Fond orange clair
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    color: #212121; // ✅ Texte noir/gris foncé
+  
+    h3 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #ff6f00; // ✅ Orange foncé
+    }
+  }
+  
+  .full-width {
+    width: 100%;
+    margin-bottom: 20px;
+  
+    .mat-form-field-wrapper {
+      background: white;
+      border-radius: 6px;
+    }
+  }
+  
+  .avarie-container {
+    padding: 20px;
+    border-radius: 12px;
+    background: #eeeeee; // ✅ Gris clair
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .photo-container {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .photo-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  
+    img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #ff9800;
+      transition: transform 0.3s;
+      cursor: pointer;
+  
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  
+    button {
+      font-weight: bold;
+    }
+  }
+  
+  .submit-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  
+    button {
+      background-color: #ff9800;
+      color: white;
+      padding: 14px 24px;
+      font-size: 17px;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+  
+      &:hover {
+        background-color: #f57c00;
+      }
+    }
+  }
+  
+  button[mat-button], button[mat-raised-button] {
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  .camera-modal,
+  .image-modal {
+    background: rgba(0, 0, 0, 0.75);
+  }
+  
+  .camera-content {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .camera-content video {
+    border: 3px solid #ff9800;
+    border-radius: 10px;
+    max-width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .camera-buttons button {
+    font-weight: bold;
+  
+    &:nth-child(1) {
+      background-color: #4CAF50;
+    }
+    &:nth-child(2) {
+      background-color: #f44336;
+    }
+    &:nth-child(3) {
+      background-color: #ff9800;
+    }
+  
+    &:hover {
+      opacity: 0.9;
+      transform: scale(1.05);
+    }
+  }
+  
+  .image-modal img {
+    border: 4px solid #212121;
+  }
+  @media (max-width: 768px) {
+    .vehicule-form {
+      padding: 20px;
+      margin: 20px 10px;
+      border-radius: 10px;
+    }
+  
+    .full-width {
+      margin-bottom: 14px;
+    }
+  
+    .submit-container button {
+      font-size: 15px;
+      padding: 12px 20px;
+    }
+  
+    .photo-preview img {
+      width: 70px;
+      height: 70px;
+    }
+  
+    .camera-content video {
+      max-width: 100%;
+      height: auto;
+    }
+  
+    .camera-buttons button {
+      padding: 10px;
+      font-size: 13px;
+    }
+  
+    .photo-container {
+      padding: 12px;
+    }
+  
+    .confirmed-avarie p {
+      font-size: 14px;
+    }
+  
+    .camera-content {
+      padding: 12px;
+    }
+  }
+    

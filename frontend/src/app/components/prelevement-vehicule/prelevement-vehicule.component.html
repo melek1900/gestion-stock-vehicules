@@ -1,0 +1,69 @@
+<mat-card class="prelevement-container">
+    <h2>📦 Prélèvement des Véhicules</h2>
+  
+    <!-- ✅ Entrée du numéro d'ordre de mission -->
+    <mat-form-field class="full-width">
+      <mat-label>Numéro d'Ordre de Mission</mat-label>
+      <input matInput [(ngModel)]="ordreMission" placeholder="Saisir ou scanner" (change)="chargerOrdreMission()">
+    </mat-form-field>
+  
+    <!-- ✅ Bouton pour ouvrir le scanner -->
+    <div class="button-scan">
+      <button mat-raised-button color="primary" (click)="activerScanner()">
+        📷 Scanner un véhicule
+      </button>
+    </div>
+  
+    <!-- ✅ Scanner QR Code -->
+    <div *ngIf="isScannerActif" class="scan-container">
+      <h3>📷 Scanner un véhicule</h3>
+      <zxing-scanner (scanSuccess)="scannerVehicule($event)"></zxing-scanner>
+      <button mat-button color="warn" (click)="desactiverScanner()">❌ Fermer le Scanner</button>
+    </div>
+  
+    <!-- ✅ Liste des véhicules dans l'ordre de mission -->
+    <div *ngIf="vehicules.length > 0" class="vehicules-section">
+      <h3>🚗 Véhicules à Prélever</h3>
+      <mat-table [dataSource]="vehicules" class="vehicule-table mat-elevation-z2">
+        <ng-container matColumnDef="numeroChassis">
+          <mat-header-cell *matHeaderCellDef>Numéro de Châssis</mat-header-cell>
+          <mat-cell *matCellDef="let vehicule">{{ vehicule.numeroChassis }}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="modele">
+          <mat-header-cell *matHeaderCellDef>Modèle</mat-header-cell>
+          <mat-cell *matCellDef="let vehicule">{{ vehicule.modele }}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="statut">
+          <mat-header-cell *matHeaderCellDef>Statut</mat-header-cell>
+          <mat-cell *matCellDef="let vehicule">
+            <mat-chip [color]="vehicule.preleve ? 'primary' : 'warn'">
+              {{ vehicule.preleve ? 'Prélevé' : 'Non Prélevé' }}
+            </mat-chip>
+          </mat-cell>
+        </ng-container>
+  
+        <mat-header-row *matHeaderRowDef="['numeroChassis', 'modele', 'statut']"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: ['numeroChassis', 'modele', 'statut'];"></mat-row>
+      </mat-table>
+    </div>
+  
+    <!-- ✅ Résumé des véhicules manquants -->
+    <div *ngIf="vehiculesManquants.length > 0" class="vehicules-manquants">
+      <h3>⚠️ Véhicules non trouvés dans l'ordre</h3>
+      <ul>
+        <li *ngFor="let vehicule of vehiculesManquants">
+          {{ vehicule.numeroChassis }} - {{ vehicule.modele }}
+        </li>
+      </ul>
+    </div>
+  
+    <!-- ✅ Bouton de validation -->
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="validerPrelevement()" [disabled]="aDesVehiculesNonPreleves()">
+        ✅ Valider le Prélèvement
+      </button>
+    </div>
+  </mat-card>
+  

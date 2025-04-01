@@ -1,16 +1,14 @@
 package com.melek.vehicule.gestion_stock_vehicules.model;
+
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Entity
-public class Utilisateur  implements UserDetails {
+public class Utilisateur implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,25 +18,39 @@ public class Utilisateur  implements UserDetails {
     private String email;
     private String motDePasse;
 
+    @ManyToOne
+    @JoinColumn(name = "parc_id", nullable = true) // ✅ Le parc de travail
+    private Parc parc;
+
+    @ManyToMany
+    @JoinTable(
+            name = "utilisateur_parcs_acces",
+            joinColumns = @JoinColumn(name = "utilisateur_id"),
+            inverseJoinColumns = @JoinColumn(name = "parc_id")
+    )
+    private List<Parc> parcsAcces = new ArrayList<>();  // ✅ Les parcs où l'utilisateur a accès
 
     @Enumerated(EnumType.STRING)
     private RoleUtilisateur role;
+
     public Utilisateur() {}
-    public Utilisateur(Long id, String nom, String prenom, String email, String motDePasse, RoleUtilisateur role) {
+    public Utilisateur(String nom, String prenom, String email, String motDePasse, RoleUtilisateur role, Parc parc) {
+        this.nom = nom;
+        this.prenom = prenom;
+        this.email = email;
+        this.motDePasse = motDePasse;
+        this.role = role;
+        this.parc = parc;
+    }
+
+    public Utilisateur(Long id, String nom, String prenom, String email, String motDePasse, RoleUtilisateur role, Parc parc) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
         this.motDePasse = motDePasse;
         this.role = role;
-    }
-
-    public String getMotDePasse() {
-        return motDePasse;
-    }
-
-    public void setMotDePasse(String motDePasse) {
-        this.motDePasse = motDePasse;
+        this.parc = parc;
     }
 
     public String getPrenom() {
@@ -49,114 +61,62 @@ public class Utilisateur  implements UserDetails {
         this.prenom = prenom;
     }
 
-    public Long getId() {
-        return id;
+    public Parc getParc() {
+        return parc;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setParc(Parc parc) {
+        this.parc = parc;
     }
 
-    public String getNom() {
-        return nom;
+    public List<Parc> getParcsAcces() {
+        return parcsAcces;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setParcsAcces(List<Parc> parcsAcces) {
+        this.parcsAcces = parcsAcces;
     }
 
-    public String getEmail() {
-        return email;
-    }
+    public Long getId() { return id; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public void setId(Long id) { this.id = id; }
 
-    public RoleUtilisateur getRole() {
-        return role;
-    }
+    public String getNom() { return nom; }
 
-    public void setRole(RoleUtilisateur role) {
-        this.role = role;
-    }
+    public void setNom(String nom) { this.nom = nom; }
 
-    public List<Vente> getVentes() {
-        return ventes;
-    }
+    public String getEmail() { return email; }
 
-    public void setVentes(List<Vente> ventes) {
-        this.ventes = ventes;
-    }
+    public void setEmail(String email) { this.email = email; }
 
-    public List<Vehicule> getVehicules() {
-        return vehicules;
-    }
+    public RoleUtilisateur getRole() { return role; }
 
-    public void setVehicules(List<Vehicule> vehicules) {
-        this.vehicules = vehicules;
-    }
+    public void setRole(RoleUtilisateur role) { this.role = role; }
 
-    public List<DemandeExpertise> getDemandesExpertise() {
-        return demandesExpertise;
-    }
+    public String getMotDePasse() { return motDePasse; }
 
-    public void setDemandesExpertise(List<DemandeExpertise> demandesExpertise) {
-        this.demandesExpertise = demandesExpertise;
-    }
-
-    public List<HistoriqueMouvements> getHistoriques() {
-        return historiques;
-    }
-
-    public void setHistoriques(List<HistoriqueMouvements> historiques) {
-        this.historiques = historiques;
-    }
-
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Vente> ventes= new ArrayList<>();
-
-
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Vehicule> vehicules= new ArrayList<>();
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DemandeExpertise> demandesExpertise= new ArrayList<>();
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HistoriqueMouvements> historiques= new ArrayList<>();
+    public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role.name()));
     }
 
+    @Override
+    public String getUsername() { return this.email; }
 
     @Override
-    public String getUsername() {
-        return this.email; // Utiliser l'email comme nom d'utilisateur
-    }
+    public String getPassword() { return this.motDePasse; }
 
     @Override
-    public String getPassword() {
-        return this.motDePasse; // Retourner le mot de passe haché
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 }

@@ -1,0 +1,161 @@
+/* ✅ Conteneur principal centré */
+.import-container {
+  max-width: 480px;
+  width: 90%;
+  margin: auto;
+  padding: 30px;
+  text-align: center;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0px 5px 18px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* ✅ Titre modernisé */
+.import-container h2 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+/* ✅ Style des boutons */
+.import-container button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 14px;
+  width: 100%;
+  max-width: 300px;
+  text-transform: uppercase;
+  border-radius: 10px;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Effet au survol */
+.import-container button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ✅ Affichage du fichier sélectionné */
+.import-container p {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+/* ✅ Barre de progression */
+mat-progress-bar {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 10px;
+}
+
+/* ✅ Messages de statut */
+.status-message {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* ✅ Statut : Succès */
+.success {
+  background: #4CAF50;
+  color: white;
+}
+
+/* ✅ Statut : Erreur */
+.error {
+  background: #FF5722;
+  color: white;
+}
+
+/* ✅ Responsive (Mobile & Tablette) */
+@media (max-width: 768px) {
+  .import-container {
+      padding: 25px;
+      width: 95%;
+  }
+
+  .import-container button {
+      font-size: 15px;
+      padding: 12px;
+      max-width: 280px;
+  }
+
+  .import-container h2 {
+      font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .import-container button {
+      font-size: 14px;
+      padding: 12px;
+  }
+
+  .import-container h2 {
+      font-size: 18px;
+  }
+}
+.import-container.gestionnaire-theme {
+  background: linear-gradient(135deg, #fef8f2, #f5f5f5);
+  border: 2px solid #F4A300;
+
+  h2 {
+    color: #1c1c1c;
+    font-weight: 700;
+  }
+
+  button {
+    background-color: #F4A300;
+    color: #fff;
+
+    mat-icon {
+      color: #fff;
+    }
+
+    &:hover {
+      background-color: #1c1c1c;
+      color: #F4A300;
+
+      mat-icon {
+        color: #F4A300;
+      }
+    }
+  }
+
+  p {
+    color: #333;
+  }
+
+  .status-message.success {
+    background: #1c1c1c;
+    color: #F4A300;
+  }
+
+  .status-message.error {
+    background: #e74c3c;
+    color: #fff;
+  }
+
+  mat-progress-bar {
+    background-color: #dcdcdc;
+
+    .mat-progress-bar-fill::after {
+      background-color: #F4A300;
+    }
+  }
+}

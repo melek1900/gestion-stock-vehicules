@@ -12,9 +12,18 @@ public class Parc {
 
     private String nom;
     private String localisation;
-
+    @Enumerated(EnumType.STRING) // ✅ Stocke le type de parc en texte (ex: STOCK, VENTE)
+    private TypeParc typeParc;
     public List<Vehicule> getVehicules() {
         return vehicules;
+    }
+
+    public TypeParc getTypeParc() {
+        return typeParc;
+    }
+
+    public void setTypeParc(TypeParc typeParc) {
+        this.typeParc = typeParc;
     }
 
     public void setVehicules(List<Vehicule> vehicules) {

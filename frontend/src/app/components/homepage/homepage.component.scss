@@ -1,16 +1,34 @@
-.dashboard-card {
-  padding: 20px;
-  text-align: center;
+/* ✅ Conteneur principal */
+.dashboard-container {
+  max-width: 100%;
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px;
+  background: transparent;
+  color: #333;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
 
-  h1 {
-    margin-bottom: 10px;
-  }
+/* ✅ Sections bien espacées */
+.content-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .button-container {
-    margin-top: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
+/* ✅ Styles généraux du body */
+body {
+  background: #f5f5f5;
+  font-family: 'Arial', sans-serif;
+}
+
+/* ✅ Responsive pour mobile */
+@media (max-width: 768px) {
+  .dashboard-container {
+    width: 95%;
+    padding: 20px;
   }
 }

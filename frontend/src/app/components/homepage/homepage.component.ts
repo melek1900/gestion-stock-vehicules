@@ -1,9 +1,12 @@
 import { NgIf } from '@angular/common';
 import { Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { RouterModule } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { DashboardStatistiquesComponent } from '../dashboard-statistiques/dashboard-statistiques.component';
+import { GestionnaireStockDashboardComponent } from '../gestionnaire-stock-dashboard/gestionnaire-stock-dashboard.component';
+import { VehiculeListComponent } from '../vehicule-list/vehicule-list.component';
+import { ReparationComponent } from '../reparation/reparation.component';
+
 
 @Component({
   selector: 'app-homepage',
@@ -12,30 +15,18 @@ import { JwtHelperService } from '@auth0/angular-jwt';
   standalone: true,
   imports: [
     MatCardModule,
-    RouterModule,
-    MatButtonModule,
     NgIf,
+    DashboardStatistiquesComponent,
+    GestionnaireStockDashboardComponent,
+    VehiculeListComponent,
+    ReparationComponent
+    
   ],
 })
 export class HomepageComponent {
   prenom: string = '';
   nom: string = '';
   role: string = '';
-
-  getRoleLabel(role: string): string {
-    switch (role) {
-      case 'ADMIN':
-        return 'Administrateur';
-      case 'GESTIONNAIRE_STOCK':
-        return 'Gestionnaire de Stock';
-      case 'VENDEUR':
-        return 'Vendeur';
-      case 'EXPERT':
-        return 'Expert';
-      default:
-        return 'Utilisateur';
-    }
-  }
 
   constructor() {
     const token = localStorage.getItem('token');
@@ -45,7 +36,7 @@ export class HomepageComponent {
       this.prenom = decodedToken.prenom;
       this.nom = decodedToken.nom;
       this.role = decodedToken.role.replace('ROLE_', '');
-      console.log('Role décodé :', this.role);
+      console.log('🎯 Role décodé :', this.role);
     }
   }
 }

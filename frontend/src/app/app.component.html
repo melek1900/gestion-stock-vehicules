@@ -1,2 +1,28 @@
-<app-navbar></app-navbar>
-<router-outlet></router-outlet>
+<ng-container *ngIf="showNavbar; else publicContent">
+
+  <!-- Navbar toujours en haut -->
+  <app-navbar (toggleSidebar)="toggleSidebarMobile()"></app-navbar>
+
+  <!-- Layout horizontal avec sidebar + contenu -->
+  <div class="app-layout">
+    <!-- ✅ Masquer la sidebar si l'utilisateur est GESTIONNAIRE_STOCK -->
+    <app-sidebar *ngIf="!isFullWidth" [class.open]="isSidebarOpen"></app-sidebar>
+
+    <!-- Overlay mobile -->
+    <div
+      class="mobile-overlay"
+      *ngIf="isSidebarOpen && !isFullWidth"
+      (click)="toggleSidebarMobile()"
+    ></div>
+
+    <!-- ✅ Correction : Ajoute la classe full-width -->
+    <div class="main-content" [class.full-width]="isFullWidth">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+
+</ng-container>
+
+<ng-template #publicContent>
+  <router-outlet></router-outlet>
+</ng-template>

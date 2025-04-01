@@ -1,0 +1,69 @@
+
+<!-- 📊 Grid des charts -->
+<div class="charts-grid">
+  
+  <!-- 📊 Graphique par parc -->
+  <div class="chart-container" *ngIf="hasParcData()" appScrollAnimate>
+    <apx-chart
+      [series]="chartOptions.series!"
+      [chart]="chartOptions.chart!"
+      [xaxis]="chartOptions.xaxis!"
+      [title]="chartOptions.title!"
+      [dataLabels]="chartOptions.dataLabels!"
+      [colors]="chartOptions.colors!"
+      [plotOptions]="chartOptions.plotOptions!"
+    ></apx-chart>
+  </div>
+
+  <!-- 📊 Graphique par marque -->
+  <div class="chart-container" *ngIf="hasMarqueData()" appScrollAnimate>
+    <apx-chart
+      [series]="marqueChartOptions.series!"
+      [chart]="marqueChartOptions.chart!"
+      [xaxis]="marqueChartOptions.xaxis!"
+      [title]="marqueChartOptions.title!"
+      [dataLabels]="marqueChartOptions.dataLabels!"
+      [colors]="marqueChartOptions.colors!"
+      [plotOptions]="marqueChartOptions.plotOptions!"
+    ></apx-chart>
+  </div>
+
+  <!-- 📊 Graphique stock parc par marque -->
+  <div class="chart-container" *ngIf="stockParcParMarqueChartOptions.series?.length" appScrollAnimate>
+    <apx-chart
+      [series]="stockParcParMarqueChartOptions.series!"
+      [chart]="stockParcParMarqueChartOptions.chart!"
+      [xaxis]="stockParcParMarqueChartOptions.xaxis!"
+      [title]="stockParcParMarqueChartOptions.title!"
+      [dataLabels]="stockParcParMarqueChartOptions.dataLabels!"
+      [colors]="stockParcParMarqueChartOptions.colors!"
+      [plotOptions]="stockParcParMarqueChartOptions.plotOptions!"
+    ></apx-chart>
+  </div>
+
+  <!-- 🚗 Statut des véhicules -->
+  <mat-card class="statut-card" appScrollAnimate>
+    <h3 class="statut-title">🚗 Statut des véhicules</h3>
+    <div class="statut-list">
+      <div *ngFor="let item of statutVehiculeStats" class="statut-item">
+        <span class="statut-dot" [style.backgroundColor]="item.color"></span>
+        <span class="statut-label">{{ item.label }}</span>
+        <span class="statut-count">{{ item.count }}</span>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- 📦 Statuts des Ordres de Mission -->
+  <div class="ordres-mission-status-card" *ngIf="ordreStatuts.length > 0" appScrollAnimate>
+    <h3>📦 Statuts des Ordres de Mission</h3>
+    <div class="statut-list">
+      <div class="statut-item" *ngFor="let s of ordreStatuts">
+        <span class="statut-dot" [ngStyle]="{ 'background-color': s.color }"></span>
+        <span class="statut-label">
+          {{ s.statut === 'EN_COURS' ? 'En cours' : (s.statut === 'CLOTURE' ? 'Clôturé' : 'Partiel') }}
+        </span>
+        <span class="statut-count">{{ s.count }}</span>
+      </div>
+    </div>
+  </div>
+</div>

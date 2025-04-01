@@ -1,24 +1,31 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output, HostListener } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Router, NavigationEnd } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
   standalone: true,
-  imports: [NgIf, MatToolbarModule, MatButtonModule],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule,NgIf],
 })
 export class NavbarComponent {
   nom: string = '';
   prenom: string = '';
   role: string = '';
-  isVisible: boolean = false;
+  isMobile: boolean = false;
+
+  @Output() toggleSidebar = new EventEmitter<void>();
 
   constructor(private router: Router) {
+    this.updateScreenSize();
+    this.checkNavbarVisibility();
+
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.checkNavbarVisibility();
@@ -26,37 +33,38 @@ export class NavbarComponent {
     });
   }
 
-  private checkNavbarVisibility() {
-    const url = this.router.url;
-    const isLoginOrRegister = url === '/login' || url === '/register';
+  @HostListener('window:resize', [])
+  updateScreenSize() {
+    this.isMobile = window.innerWidth <= 768;
+  }
 
-    if (isLoginOrRegister) {
-      this.isVisible = false;
-    } else {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const jwtHelper = new JwtHelperService();
+  private checkNavbarVisibility() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const jwtHelper = new JwtHelperService();
+      if (!jwtHelper.isTokenExpired(token)) {
         const decodedToken = jwtHelper.decodeToken(token);
-        this.nom = decodedToken.nom;
-        this.prenom = decodedToken.prenom;
-        this.role = decodedToken.role.replace('ROLE_', '');
-        this.isVisible = true;
-      } else {
-        this.isVisible = false;
+        this.nom = decodedToken.nom || '';
+        this.prenom = decodedToken.prenom || '';
+        this.role = decodedToken.role?.replace('ROLE_', '') || 'Utilisateur';
       }
     }
   }
 
   getRoleLabel(): string {
     switch (this.role) {
-      case 'ADMIN':
+      case 'ADMINISTRATEUR':
         return 'Administrateur';
       case 'GESTIONNAIRE_STOCK':
         return 'Gestionnaire de Stock';
-      case 'VENDEUR':
-        return 'Vendeur';
+      case 'GESTIONNAIRE_APPLICATION':
+        return 'Gestionnaire Application';
+      case 'MANAGER':
+        return 'Manager';
       case 'EXPERT':
         return 'Expert';
+      case 'COMMERCIAL':
+        return 'Commercial';
       default:
         return 'Utilisateur';
     }
@@ -64,28 +72,10 @@ export class NavbarComponent {
 
   logout() {
     localStorage.removeItem('token');
-    this.isVisible = false;
     this.router.navigate(['/login']);
   }
+
   redirectToHome() {
-    let homeRoute = '/home'; // Page par défaut
-  
-    switch (this.role) {
-      case 'ADMIN':
-        homeRoute = '/admin-dashboard';
-        break;
-      case 'GESTIONNAIRE_STOCK':
-        homeRoute = '/vehicules';
-        break;
-      case 'VENDEUR':
-        homeRoute = '/ventes';
-        break;
-      case 'EXPERT':
-        homeRoute = '/demandes-expertise'; // 🔥 Page dédiée aux experts
-        break;
-    }
-  
-    this.router.navigate([homeRoute]);
+    this.router.navigate(['/home']);
   }
-  
 }

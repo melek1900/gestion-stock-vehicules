@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Component
 public class JwtUtil {
 
@@ -32,27 +34,26 @@ public class JwtUtil {
         if (secretKeyString == null || secretKeyString.isBlank()) {
             throw new IllegalArgumentException("La clé secrète JWT ne peut pas être vide.");
         }
-        this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
+        this.secretKey = Keys.hmacShaKeyFor(java.util.Base64.getDecoder().decode(secretKeyString));
     }
 
-    public String generateToken(Authentication authentication) {
-        Utilisateur utilisateur = (Utilisateur) authentication.getPrincipal();
+    public String generateToken(Authentication authentication, String parcNom, List<String> parcsAcces) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        Claims claims = Jwts.claims().setSubject(utilisateur.getEmail());
-        claims.put("prenom", utilisateur.getPrenom());
-        claims.put("nom", utilisateur.getNom());
-        claims.put("role", utilisateur.getRole().name());
-        claims.put("authorities", authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
-
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration);
+        System.out.println("🛠️ Génération du token...");
+        System.out.println("🔹 Utilisateur : " + userDetails.getUsername());
+        System.out.println("🔹 Parc attribué : " + parcNom);
+        System.out.println("🔹 Parcs accessibles : " + parcsAcces);
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
+                .setSubject(userDetails.getUsername())
+                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority().startsWith("ROLE_") ?
+                        userDetails.getAuthorities().iterator().next().getAuthority() :
+                        "ROLE_" + userDetails.getAuthorities().iterator().next().getAuthority())
+                .claim("parcNom", parcNom)  // ✅ Ajout du parc de travail
+                .claim("parcsAcces", parcsAcces)  // ✅ Ajout des parcs accessibles
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
     }
@@ -68,21 +69,24 @@ public class JwtUtil {
     public List<GrantedAuthority> getAuthorities(String token) {
         try {
             Claims claims = getClaimsFromToken(token);
-            List<?> authoritiesList = claims.get("authorities", List.class);
+            String role = claims.get("role", String.class);
+            System.out.println("🎟️ Rôles extraits depuis le token : " + role);
 
-            if (authoritiesList == null || authoritiesList.isEmpty()) {
+            if (role == null || role.isBlank()) {
                 return List.of();
             }
 
-            return authoritiesList.stream()
-                    .filter(String.class::isInstance)
-                    .map(String.class::cast)
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
+            if (!role.startsWith("ROLE_")) {
+                role = "ROLE_" + role;
+            }
+
+            return List.of(new SimpleGrantedAuthority(role));
         } catch (Exception e) {
             return List.of();
         }
     }
+
+
 
     private Claims getClaimsFromToken(String token) {
         return Jwts.parserBuilder()

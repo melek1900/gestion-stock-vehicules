@@ -12,6 +12,18 @@ public class Stock {
 
     private int nombreTotal;
 
+    @OneToOne
+    @JoinColumn(name = "parc_id", unique = true)  // 🔥 Ajoute cette relation !
+    private Parc parc;
+
+    public Parc getParc() {
+        return parc;
+    }
+
+    public void setParc(Parc parc) {
+        this.parc = parc;
+    }
+
     @OneToMany(mappedBy = "stock")
     private List<Vehicule> vehicules;
 

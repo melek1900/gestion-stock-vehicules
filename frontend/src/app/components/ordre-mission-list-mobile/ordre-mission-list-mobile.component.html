@@ -1,0 +1,58 @@
+<div class="ordre-mission-mobile-container">
+    <h2>📜 Liste des Ordres de Mission</h2>
+  
+    <!-- ✅ Barre sticky -->
+    <div class="sticky-bar">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>🔍 Rechercher N° Mission</mat-label>
+        <input matInput [(ngModel)]="recherche" (input)="filtrerOrdres()">
+      </mat-form-field>
+  
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>📌 Filtrer par statut</mat-label>
+        <mat-select [(ngModel)]="statutFiltre" (selectionChange)="filtrerOrdres()">
+          <mat-option value="">Tous</mat-option>
+          <mat-option value="EN_COURS">En cours</mat-option>
+          <mat-option value="CLOTURE">Clôturé</mat-option>
+          <mat-option value="PARTIELLE">Partielle</mat-option> <!-- ✅ À ajouter -->
+        </mat-select>
+      </mat-form-field>
+    </div>
+  
+    <!-- ✅ Liste des ordres -->
+    <div class="ordre-list">
+      <mat-card *ngFor="let ordre of ordresMissionFiltres" class="ordre-card" [attr.data-statut]="ordre.statut">
+        <mat-card-content>
+          <div class="mission-header">
+            <h3>📌 Mission #{{ ordre.numeroOrdre }}</h3>
+            <button mat-icon-button (click)="afficherOrdreMission('/api/ordres-mission/' + ordre.id + '/pdf')" aria-label="Télécharger PDF">
+              <mat-icon>picture_as_pdf</mat-icon>
+            </button>
+          </div>
+          <p><strong>📅 Date :</strong> {{ ordre.dateCreation | date:'dd/MM/yyyy' }}</p>
+          <p><strong>🚚 Véhicule :</strong> {{ ordre.vehiculeTransport.matricule }} - {{ ordre.vehiculeTransport.type }}</p>
+          <p><strong>🧑‍✈️ Chauffeur :</strong> {{ ordre.chauffeur.nom }} {{ ordre.chauffeur.prenom }}</p>
+          <p><strong>🏁 Parc Départ :</strong> {{ ordre.parcDepart.nom }}</p>
+          <p><strong>🎯 Parc Arrivée :</strong> {{ ordre.parcArrivee.nom }}</p>
+  
+          <mat-chip
+          [color]="
+            ordre.statut === 'EN_COURS'
+              ? 'warn'
+              : ordre.statut === 'PARTIELLE'
+              ? 'accent'
+              : 'primary'
+          ">
+          {{ ordre.statut === 'EN_COURS' ? 'En cours' : ordre.statut === 'PARTIELLE' ? 'Partielle' : 'Clôturé' }}
+        </mat-chip>
+        </mat-card-content>
+  
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="ouvrirDialogDetails(ordre)">
+            📄 Voir Mission
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+  

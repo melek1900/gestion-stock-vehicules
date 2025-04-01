@@ -1,16 +1,28 @@
-<mat-toolbar *ngIf="isVisible" class="custom-navbar">
-  <!-- ✅ Logo qui renvoie vers la page d'accueil -->
+<mat-toolbar class="custom-navbar">
+  <!-- 🔗 Logo SmartFleet (accueil) -->
   <button mat-button class="logo-button" (click)="redirectToHome()">
-    🚗 Gestion Stock Véhicules
+    <img src="assets/logoSmart.jpg" alt="SmartFleet Logo" class="navbar-logo" />
   </button>
-  
+
   <span class="spacer"></span>
 
-  <span class="user-info">
-    👤 {{ prenom }} {{ nom }} - <span class="role">{{ getRoleLabel() }}</span>
+  <!-- 👤 Infos Utilisateur (desktop) -->
+  <span class="user-info" *ngIf="!isMobile">
+    👤 {{ prenom }} {{ nom }} -
+    <span class="role">{{ getRoleLabel() }}</span>
   </span>
 
-  <button mat-button class="logout-button" (click)="logout()">
+  <!-- 📱 Menu utilisateur (mobile) -->
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item (click)="logout()">🚪 Déconnexion</button>
+  </mat-menu>
+
+  <button mat-icon-button class="user-menu-icon" *ngIf="isMobile" [matMenuTriggerFor]="userMenu">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+
+  <!-- 🔓 Déconnexion (desktop) -->
+  <button mat-button class="logout-button" *ngIf="!isMobile" (click)="logout()">
     🚪 Déconnexion
   </button>
 </mat-toolbar>
