@@ -1,0 +1,80 @@
+<h2 mat-dialog-title>
+    {{ isReadOnly ? '👁️ Consulter Chauffeur' : (isEditMode ? '✏️ Modifier Chauffeur' : '➕ Ajouter Chauffeur') }}
+  </h2>
+  
+  <mat-dialog-content [formGroup]="chauffeurForm">
+    <mat-form-field appearance="fill">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="nom" />
+      <mat-error *ngIf="chauffeurForm.get('nom')?.hasError('required')">
+        Nom requis
+      </mat-error>
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill">
+      <mat-label>Prénom</mat-label>
+      <input matInput formControlName="prenom" />
+      <mat-error *ngIf="chauffeurForm.get('prenom')?.hasError('required')">
+        Prénom requis
+      </mat-error>
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill">
+      <mat-label>Qualification</mat-label>
+      <input matInput formControlName="qualification" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill">
+      <mat-label>CIN</mat-label>
+      <input matInput formControlName="cin" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill">
+      <mat-label>Téléphone</mat-label>
+      <input matInput formControlName="telephone" />
+      <mat-error *ngIf="chauffeurForm.get('telephone')?.hasError('required')">
+        Téléphone requis
+      </mat-error>
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill">
+      <mat-label>Date de délivrance</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="dateDelivrance"
+        [readonly]="isReadOnly"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill">
+      <mat-label>Numéro de permis</mat-label>
+      <input matInput type="number" formControlName="numeroPermis" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill">
+      <mat-label>Statut</mat-label>
+      <mat-select formControlName="statut" [disabled]="isReadOnly">
+        <mat-option value="Disponible">Disponible</mat-option>
+        <mat-option value="Non disponible">Non disponible</mat-option>
+      </mat-select>
+      <mat-error *ngIf="chauffeurForm.get('statut')?.hasError('required')">
+        Statut requis
+      </mat-error>
+    </mat-form-field>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onClose()">Annuler</button>
+    <button
+      mat-raised-button
+      color="primary"
+      *ngIf="!isReadOnly"
+      (click)="onSubmit()"
+    >
+      Valider
+    </button>
+  </mat-dialog-actions>
+  

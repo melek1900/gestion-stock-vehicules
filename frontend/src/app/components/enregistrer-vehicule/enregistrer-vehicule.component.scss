@@ -1,194 +1,243 @@
-/* ✅ Styles globaux */
 .vehicule-form {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
 }
+.gestionnaire-theme {
+  background: linear-gradient(to bottom, #f9f3ed, #ffffff);
+  border: 2px solid #ff9800;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
 
-.avarie-container {
-  margin-bottom: 15px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+  h3 {
+    color: #ff9800;
+  }
+
+  .full-width mat-form-field {
+    .mat-form-field-label {
+      color: #ff9800 !important;
+    }
+  }
+
+  .photo-container {
+    background: #fff8f0;
+    border: 1px dashed #ff9800;
+  }
+
+  .submit-container button {
+    background-color: #ff9800 !important;
+    color: #000;
+  }
+
+  .submit-container button:hover {
+    background-color: #e67e00 !important;
+  }
+
+  .camera-buttons button:nth-child(1) {
+    background-color: #ff9800;
+    color: #000;
+  }
+
+  .camera-buttons button:nth-child(3) {
+    background-color: #000;
+    color: #fff;
+  }
+
+  .camera-content {
+    border: 2px solid #ff9800;
+  }
+
+  .image-modal button,
+  .camera-modal button.close-camera {
+    background-color: #ff9800;
+    color: #000;
+  }
 }
-
-/* ✅ Modal centré pour la caméra */
-.camera-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+.vehicule-form h3 {
+  font-size: 22px;
+  color: #444;
+  margin-bottom: 20px;
+  font-weight: 600;
 }
-
-.camera-content {
-  position: relative;
-  width: 90%;
-  max-width: 500px;
-  background: black;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-.camera-content video {
-  width: 100%;
-  border-radius: 10px;
-}
-
-.camera-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.camera-buttons button {
-  background: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
 
 .full-width {
   width: 100%;
-  margin-bottom: 15px; /* ✅ Espacement entre les champs */
+  margin-bottom: 16px;
 }
 
-.section-title {
-  margin-top: 30px;
-  font-weight: bold;
-  text-transform: uppercase;
-  color: #333;
+.avarie-container {
+  padding: 15px;
+  border-radius: 10px;
+  background: #f8f9fa;
+  margin-bottom: 10px;
 }
 
-
-
-/* ✅ Gestion des photos */
 .photo-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 10px;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .photo-preview {
-  max-width: 120px;
-  max-height: 120px;
-  border-radius: 8px;
-  object-fit: cover;
-  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-/* ✅ Alignement des boutons pour les actions sur la photo */
-.photo-actions {
-  margin-top: 10px;
+.photo-preview img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.photo-preview img:hover {
+  transform: scale(1.1);
+}
+
+.submit-container {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  margin-top: 20px;
 }
 
-/* ✅ Amélioration de la mise en page de la caméra */
-.camera-container {
+.submit-container button {
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: #0288D1;
+  color: white;
+  transition: background 0.3s ease;
+}
+
+.submit-container button:hover {
+  background-color: #01579B;
+}
+
+/* ✅ Modals pour affichage d'images et caméra */
+.camera-modal,
+.image-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Fond semi-transparent */
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3000; /* S'assurer que c'est au-dessus de tout */
+  z-index: 1000;
+  flex-direction: column;
 }
 
-/* ✅ Style du cadre vidéo */
-.video-wrapper {
-  position: relative;
-  width: 90%;
-  max-width: 500px;
-  background: black;
-  border-radius: 10px;
-  overflow: hidden;
-  z-index: 3500; /* Toujours au-dessus du modal */
-}
-
-.video-wrapper video {
-  width: 100%;
-  border-radius: 10px;
-  display: block;
-  z-index: 3600;
-}
-
-/* ✅ Style des boutons dans la caméra */
-.camera-buttons {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
+/* ✅ Caméra bien centrée avec bordures */
+.camera-content {
   display: flex;
-  gap: 15px;
-  z-index: 3700; /* Assurer la visibilité */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-.camera-buttons button {
+/* ✅ Vidéo de la caméra */
+.camera-content video {
+  width: 100%;
+  max-width: 400px; /* ✅ Taille ajustable */
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 15px; /* ✅ Espace entre la vidéo et les boutons */
+}
+
+/* ✅ Bouton pour fermer la caméra (fixé en haut à droite) */
+.camera-modal button.close-camera {
+  position: absolute;
+  top: 15px;
+  right: 15px;
   background: white;
   border: none;
-  padding: 12px 18px;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
 }
 
-.camera-buttons button:hover {
+.camera-modal button.close-camera:hover {
   background: #ddd;
 }
 
-/* ✅ Correction du modal noir */
-.mat-dialog-container {
-  background: rgba(255, 255, 255, 0.95) !important;
-  z-index: 2500 !important; /* S'assurer qu'il ne cache pas la caméra */
-}
-
-/* ✅ Corriger le problème de superposition */
-.photo-preview-container {
-  position: relative;
-  z-index: 3000; /* ✅ Toujours au-dessus */
-  text-align: center;
-  margin-top: 20px;
-}
-
-.photo-preview {
-  width: 100%;
-  max-width: 250px;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* ✅ Boutons pour supprimer ou capturer une autre photo */
-.photo-actions {
-  margin-top: 10px;
+/* ✅ Aligner correctement les boutons sous la vidéo */
+.camera-buttons {
   display: flex;
-  justify-content: center;
+  justify-content: space-around; /* ✅ Espacement horizontal correct */
+  align-items: center;
+  width: 100%;
+  padding: 10px;
   gap: 10px;
+  margin-top: 10px;
 }
 
-/* ✅ Espacement du formulaire */
-.submit-container {
+/* ✅ Taille uniforme des boutons */
+.camera-buttons button {
+  flex: 1;
+  max-width: 140px;
+  padding: 10px;
   text-align: center;
-  margin-top: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+/* ✅ Couleurs distinctes pour chaque bouton */
+.camera-buttons button:nth-child(1) { background-color: #4CAF50; color: white; }  /* Capturer */
+.camera-buttons button:nth-child(2) { background-color: #f44336; color: white; }  /* Fermer */
+.camera-buttons button:nth-child(3) { background-color: #FF9800; color: white; }  /* Changer caméra */
+
+/* ✅ Effet au survol */
+.camera-buttons button:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* ✅ Image affichée en plein écran */
+.image-modal img {
+  max-width: 80%;
+  max-height: 80%;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* ✅ Bouton pour fermer les modals d'image */
+.image-modal button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+}
+
+.image-modal button:hover {
+  background: #ddd;
 }

@@ -1,0 +1,201 @@
+/* ✅ Conteneur principal de la popup */
+.popup-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 700px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  /* ✅ Form fields */
+  mat-form-field.full-width {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  /* ✅ Conteneur d'une avarie */
+  .avarie-container {
+    background: #f3f4f6;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* ✅ Grille de photos */
+  .photo-preview h4 {
+    margin-top: 10px;
+    font-weight: 600;
+    color: #444;
+  }
+  
+  .photo-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .photo-item {
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  .photo-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .photo-item:hover {
+    transform: scale(1.05);
+  }
+  
+  /* ✅ Ajout photo boutons */
+  .add-photo-btn {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  /* ✅ Boutons de fin */
+  mat-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  /* ✅ Modal image agrandie */
+  .image-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  
+  .image-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+  }
+  
+  .image-modal button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+  }
+  
+  /* ✅ Modal caméra */
+  .camera-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .camera-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .camera-content video {
+    width: 100%;
+    max-width: 450px;
+    height: auto;
+    border-radius: 10px;
+    background: black;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .camera-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 10px;
+    gap: 10px;
+  }
+  
+  .camera-buttons button {
+    flex: 1;
+    max-width: 140px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background 0.3s, transform 0.2s;
+  }
+  
+  .camera-buttons button:nth-child(1) {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .camera-buttons button:nth-child(2) {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .camera-buttons button:nth-child(3) {
+    background-color: #ffc107;
+    color: black;
+  }
+  
+  .camera-buttons button:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+  .photo-empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    font-size: 14px;
+    color: #888;
+    font-style: italic;
+  }
+  /* ✅ Animation fade-in */
+  .photo-item.loading {
+    background: #e0e0e0;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+  
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  

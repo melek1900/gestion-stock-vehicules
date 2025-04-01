@@ -50,7 +50,7 @@ export class AvarieFormComponent {
         formData.append('photo', this.photo);
       }
 
-      this.http.post(`http://localhost:8080/api/avaries/1`, this.form.value).subscribe({
+      this.http.post(`http://172.20.10.8:8080/api/avaries/1`, this.form.value).subscribe({
         next: () => {
           this.snackBar.open('Avarie enregistrée avec succès', 'Fermer', { duration: 3000 });
           this.form.reset();

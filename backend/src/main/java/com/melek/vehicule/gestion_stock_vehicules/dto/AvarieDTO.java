@@ -9,16 +9,16 @@ public class AvarieDTO {
     private Long id;
     private String type;
     private String commentaire;
-    private List<String> photos; // Ne renvoie que les noms des photos
+    private List<Long> photoIds;
 
 
     public AvarieDTO(Avarie avarie) {
         this.id = avarie.getId();
         this.type = avarie.getType();
         this.commentaire = avarie.getCommentaire();
-        this.photos = avarie.getPhotos().stream()
-                .map(Photo::getFileName)
-                .toList(); // Convertit les photos en liste de noms
+        this.photoIds = avarie.getPhotos().stream()
+                .map(Photo::getId)
+                .toList();
     }
 
     // Getters et Setters
@@ -47,11 +47,11 @@ public class AvarieDTO {
         this.commentaire = commentaire;
     }
 
-    public List<String> getPhotos() {
-        return photos;
+    public List<Long> getPhotoIds() {
+        return photoIds;
     }
 
-    public void setPhotos(List<String> photos) {
-        this.photos = photos;
+    public void setPhotoIds(List<Long> photoIds) {
+        this.photoIds = photoIds;
     }
 }

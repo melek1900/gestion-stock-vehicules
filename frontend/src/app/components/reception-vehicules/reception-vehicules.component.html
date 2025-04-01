@@ -1,0 +1,38 @@
+<mat-card class="reception-container">
+    <h2>📡 Réception des Véhicules</h2>
+  
+    <!-- ✅ Formulaire pour la réception par QR Code -->
+    <form [formGroup]="qrForm" (ngSubmit)="receptionnerVehicule()">
+      <mat-form-field class="full-width">
+        <mat-label>Numéro de Châssis</mat-label>
+        <input matInput formControlName="numeroChassis" required />
+        <button mat-icon-button color="primary" (click)="startScanner()" type="button">
+          <mat-icon>qr_code_scanner</mat-icon>
+        </button>
+      </mat-form-field>
+  
+      <!-- ✅ Scanner QR Code en modal -->
+      <div *ngIf="isScanning" class="scanner-modal">
+        <div class="scanner-content">
+          <zxing-scanner 
+            [formats]="scannerFormats"
+            (scanSuccess)="onCodeResult($event)">
+          </zxing-scanner>
+          <button mat-button color="warn" (click)="isScanning = false">❌ Fermer Scanner</button>
+        </div>
+      </div>
+  
+      <button mat-raised-button color="primary" type="submit" [disabled]="qrForm.invalid">
+        ✅ Réceptionner
+      </button>
+    </form>
+  
+    <hr>
+  
+    <!-- ✅ Bouton pour la réception manuelle -->
+    <h3>🚗 Réception Manuelle</h3>
+    <button mat-raised-button color="accent" (click)="allerVersEnregistrement()">
+      ✍️ Enregistrer un Véhicule Manuellement
+    </button>
+  </mat-card>
+  

@@ -1,6 +1,7 @@
 export enum StatutVehicule {
-    EN_STOCK = 'EN_STOCK',
-    EN_PREPARATION = 'EN_PREPARATION',
-    PRET_A_LA_VENTE = 'PRET_A_LA_VENTE',
-    VENDU = 'VENDU'
+    EN_ETAT = 'EN_ETAT',
+    VENDU = 'VENDU',
+    RESERVE = 'RESERVE',
+    LIVRE = 'LIVREE',
+    AVARIE= 'AVARIE'
   }

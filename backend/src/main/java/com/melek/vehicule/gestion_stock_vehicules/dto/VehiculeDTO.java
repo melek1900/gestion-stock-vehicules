@@ -9,38 +9,111 @@ import java.util.List;
 
 public class VehiculeDTO {
     private Long id;
+    private Date productionDate;
+    private String numeroChassis; // ✅ Ajout du VIN
     private String modele;
-    private String numeroChassis;
+    private String description;
+    private String engine;
+    private String keyCode;
     private String couleur;
-    private Date dateArrivee;
-    private String provenance;
+    private String pegCode;
+    private String shortDescription;
+    private String shortColor;
     private StatutVehicule statut;
-    private Parc parc;
+    private Long parcId; // ✅ Ajout de l'ID du parc
+    private String parcNom;
     private List<AvarieDTO> avaries;
 
-    public Parc getParc() {
-        return parc;
-    }
 
-    public void setParc(Parc parc) {
-        this.parc = parc;
-    }
 
     public VehiculeDTO(Vehicule vehicule) {
         this.id = vehicule.getId();
         this.modele = vehicule.getModele();
         this.numeroChassis = vehicule.getNumeroChassis();
         this.couleur = vehicule.getCouleur();
-        this.dateArrivee = vehicule.getDateArrivee();
-        this.provenance = vehicule.getProvenance();
         this.statut = vehicule.getStatut();
-        this.parc = vehicule.getParc(); // ✅ Ajout de parc
-        this.avaries = vehicule.getAvaries().stream()
-                .map(AvarieDTO::new)
-                .toList(); // Convertit les Avaries en DTOs
+        this.parcNom = vehicule.getParc() != null ? vehicule.getParc().getNom() : "AUPORT";
+        this.parcId = vehicule.getParc() != null ? vehicule.getParc().getId() : null;
+
+        this.productionDate = vehicule.getProductionDate();
+        this.description = vehicule.getDescription();
+        this.engine = vehicule.getEngine();
+        this.keyCode = vehicule.getKeyCode();
+        this.pegCode = vehicule.getPegCode();
+        this.shortColor = vehicule.getShortColor();
+        this.shortDescription = vehicule.getShortDescription();
+
+        this.avaries = vehicule.getAvaries() != null ?
+                vehicule.getAvaries().stream().map(AvarieDTO::new).toList() : List.of();
     }
 
     // Getters et Setters
+
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getEngine() {
+        return engine;
+    }
+
+    public void setEngine(String engine) {
+        this.engine = engine;
+    }
+
+    public String getKeyCode() {
+        return keyCode;
+    }
+
+    public void setKeyCode(String keyCode) {
+        this.keyCode = keyCode;
+    }
+
+    public Long getParcId() {
+        return parcId;
+    }
+
+    public void setParcId(Long parcId) {
+        this.parcId = parcId;
+    }
+
+    public String getPegCode() {
+        return pegCode;
+    }
+
+    public void setPegCode(String pegCode) {
+        this.pegCode = pegCode;
+    }
+
+    public String getShortDescription() {
+        return shortDescription;
+    }
+
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
+    }
+
+    public String getShortColor() {
+        return shortColor;
+    }
+
+    public void setShortColor(String shortColor) {
+        this.shortColor = shortColor;
+    }
+
+    public String getParcNom() {
+        return parcNom;
+    }
+
+    public void setParcNom(String parcNom) {
+        this.parcNom = parcNom;
+    }
 
     public Long getId() {
         return id;
@@ -74,20 +147,13 @@ public class VehiculeDTO {
         this.couleur = couleur;
     }
 
-    public Date getDateArrivee() {
-        return dateArrivee;
+
+    public Date getProductionDate() {
+        return productionDate;
     }
 
-    public void setDateArrivee(Date dateArrivee) {
-        this.dateArrivee = dateArrivee;
-    }
-
-    public String getProvenance() {
-        return provenance;
-    }
-
-    public void setProvenance(String provenance) {
-        this.provenance = provenance;
+    public void setProductionDate(Date productionDate) {
+        this.productionDate = productionDate;
     }
 
     public StatutVehicule getStatut() {

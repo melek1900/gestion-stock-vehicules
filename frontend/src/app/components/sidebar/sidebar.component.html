@@ -1,0 +1,130 @@
+<nav class="sidebar" [class.open]="isSidebarOpen">
+    <ul>
+      <!-- Tableau de bord -->
+      <li>
+        <button class="menu-item">
+          <mat-icon>dashboard</mat-icon>
+          <span>Tableau de bord</span>
+        </button>
+      </li>
+  
+      <!-- Stock véhicule -->
+      <li *ngIf="userRole !== 'ROLE_ADMINISTRATEUR'">
+        <button class="menu-item" (click)="toggleStockMenu()">
+          <mat-icon>directions_car</mat-icon>
+          <span>Stock véhicule</span>
+          <mat-icon class="chevron" [class.rotate]="stockMenuOpen">chevron_right</mat-icon>
+        </button>
+        <ul *ngIf="stockMenuOpen" class="submenu">          
+          <li *ngIf="userRole !== 'ROLE_GESTIONNAIRE_APPLICATION' && userRole !== 'ROLE_COMMERCIAL' " [routerLink]="['/vehicules']" class="submenu-link">
+            <mat-icon>garage</mat-icon>
+            <span>Visualisation</span>
+          </li>
+          <li *ngIf="userRole !== 'ROLE_MANAGER' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION'" [routerLink]="['/vehicules']" class="submenu-link">
+            <mat-icon>event_available</mat-icon>
+            <span>Réservation</span>
+          </li>
+          <li *ngIf="userRole !== 'ROLE_GESTIONNAIRE_APPLICATION'" [routerLink]="['/vehicules']" class="submenu-link">
+            <mat-icon>shopping_cart</mat-icon>
+            <span>Vente</span>
+          </li>
+          <li *ngIf="userRole !== 'ROLE_MANAGER' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION'" [routerLink]="['/vehicules']" class="submenu-link">
+            <mat-icon>local_shipping</mat-icon>
+            <span>Livraison</span>
+          </li>
+          <li *ngIf="userRole !== 'ROLE_COMMERCIAL'" [routerLink]="['/import-vehicules']" class="submenu-link">
+            <mat-icon>file_upload</mat-icon>
+            <span>Import</span>
+          </li>
+        </ul>
+      </li>
+  
+      <!-- Ordres de mission -->
+      <li *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_ADMINISTRATEUR'">
+        <button class="menu-item" (click)="toggleOrdreMissionMenu()">
+          <mat-icon>assignment</mat-icon>
+          <span>Ordres de mission</span>
+          <mat-icon class="chevron" [class.rotate]="ordreMissionMenuOpen">chevron_right</mat-icon>
+        </button>
+        <ul *ngIf="ordreMissionMenuOpen" class="submenu">
+          <li  *ngIf="userRole !== 'ROLE_MANAGER'" [routerLink]="['/transfert-selection']" class="submenu-link">
+            <mat-icon>event_available</mat-icon>
+            <span>Création</span>
+          </li>
+          <li [routerLink]="['/ordre-mission']" class="submenu-link">
+            <mat-icon>shopping_cart</mat-icon>
+            <span>Visualisation</span>
+          </li>
+        </ul>
+      </li>
+  
+      <!-- Constats -->
+      <li *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION' && userRole !== 'ROLE_ADMINISTRATEUR'" >
+        <button class="menu-item" [routerLink]="['/reparation']">
+          <mat-icon>assignment_turned_in</mat-icon>
+          <span>Constats</span>
+        </button>
+      </li>
+  
+      <!-- Administration -->
+   <li>
+    <button   *ngIf="userRole !== 'ROLE_MANAGER' && userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION'" class="menu-item" (click)="toggleAdminMenu()">
+      <mat-icon>settings</mat-icon>
+      <span>Administration</span>
+      <mat-icon class="chevron" [class.rotate]="adminMenuOpen">chevron_right</mat-icon>
+    </button>
+    <ul *ngIf="adminMenuOpen"  class="submenu">
+      <li  [routerLink]="['/addUser']" class="submenu-link">
+        <mat-icon>person_add</mat-icon>
+        <span>Création utilisateurs</span>
+      </li>
+      <li   [routerLink]="['/register']" class="submenu-link">
+        <mat-icon>menu</mat-icon>
+        <span>Accès aux menus</span>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <button   *ngIf="userRole == 'ROLE_ADMINISTRATEUR'" class="menu-item" (click)="toggleCompteurMenu()">
+      <mat-icon>compteur-ordre-mission</mat-icon>
+      <span>Compteurs</span>
+      <mat-icon class="chevron" [class.rotate]="CompteurOpen">chevron_right</mat-icon>
+    </button>
+    <ul *ngIf="CompteurOpen"  class="submenu">
+      <li  [routerLink]="['/compteur-import']" class="submenu-link">
+        <mat-icon>menu</mat-icon>
+        <span>Import</span>
+      </li>
+      <li   [routerLink]="['/compteur-ordre-mission']" class="submenu-link">
+        <mat-icon>assignment</mat-icon>
+        <span>Ordre mission</span>
+      </li>
+    </ul>
+  </li>
+      <!-- Paramètres Application -->
+      <li *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_ADMINISTRATEUR'">
+        <button class="menu-item"  *ngIf="userRole !== 'ROLE_MANAGER'" (click)="toggleParametresMenu()">
+          <mat-icon>tune</mat-icon>
+          <span>Paramètres Application</span>
+          <mat-icon class="chevron" [class.rotate]="parametresMenuOpen">chevron_right</mat-icon>
+        </button>
+        <ul *ngIf="parametresMenuOpen" class="submenu">
+          <li  [routerLink]="['/Chauffeur']" class="submenu-link">
+            <mat-icon>emoji_transportation</mat-icon>
+            <span>Chauffeurs</span>
+          </li>
+          <li  [routerLink]="['/voiture-transport']" class="submenu-link">
+            <mat-icon>airport_shuttle</mat-icon>
+            <span>Porte-voitures</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <!-- ✅ Logos en bas de la sidebar -->
+  <div class="sidebar-logos">
+  <img src="assets/logochevrolet.jpg" alt="Chevrolet">
+  <img src="assets/GM1.jpg" alt="GM">
+  <img src="assets/ISUZU1.png" alt="ISUZU">
+</div>
+  </nav>
+  

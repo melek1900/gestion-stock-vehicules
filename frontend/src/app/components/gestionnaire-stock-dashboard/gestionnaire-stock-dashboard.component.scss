@@ -1,0 +1,84 @@
+/* 🎯 Conteneur principal */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #f9f9f9, #f2f2f2); // gris clair doux
+  }
+  
+  /* 🚀 Boutons stylés */
+  .dashboard-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 420px;
+    padding: 16px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 14px;
+    background-color: #F4A300; // orange vif
+    color: white;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    border: none;
+  
+    mat-icon {
+      font-size: 26px;
+      color: white;
+    }
+  
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.15);
+      background-color: #d98e00; // plus foncé au hover
+    }
+  }
+  
+  /* 🖤 Variante secondaire : bouton foncé */
+  .dashboard-btn.dark {
+    background-color: #1C1C1C;
+    color: #F4A300;
+  
+    mat-icon {
+      color: #F4A300;
+    }
+  
+    &:hover {
+      background-color: #333;
+    }
+  }
+  
+  /* 🌐 Responsive */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 30px 15px;
+    }
+  
+    .dashboard-btn {
+      font-size: 16px;
+      padding: 14px;
+    }
+  
+    .dashboard-btn mat-icon {
+      font-size: 22px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .dashboard-btn {
+      font-size: 15px;
+      padding: 12px;
+    }
+  
+    .dashboard-btn mat-icon {
+      font-size: 20px;
+    }
+  }
+  

@@ -1,76 +1,81 @@
 .custom-navbar {
-  background: linear-gradient(135deg, #2C3E50, #4CA1AF); /* 🎨 Dégradé moderne */
-  color: white;
-  font-weight: bold;
-  padding: 12px 20px;
+  background-color: white; // 🎨 gris clair
+  color: #3D3D3D;
   display: flex;
   align-items: center;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  border-bottom: 3px solid #1ABC9C;
+  height: 64px;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-/* ✅ Logo avec effet */
-.logo {
-  font-size: 20px;
-  color: #ffebe6;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  display: flex;
-  align-items: center;
-}
-/* ✅ Style du bouton logo */
 .logo-button {
-  font-size: 20px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  background: none;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  background: transparent;
   border: none;
-  color: white;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
 
-  &:hover {
-    color: #FFD700; /* 🌟 Jaune doré au survol */
-    transform: scale(1.05);
+  img.navbar-logo {
+    height: 100%;              // ❗ prend la hauteur de la navbar (64px)
+    width: auto;               // auto pour garder le ratio
+    max-width: none;           // ❗ annule les éventuelles limitations héritées
+    display: block;
   }
 }
-/* ✅ Ajoute un espace entre les éléments */
+
 .spacer {
   flex: 1;
 }
 
-/* ✅ Infos utilisateur avec une couleur plus douce */
 .user-info {
-  font-size: 16px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #000000;
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
-/* ✅ Style du rôle */
 .role {
+  margin-left: 4px;
+  margin-right: 5px;
+  color: #000000;
   font-weight: bold;
-  color: #FFD700; /* 🌟 Jaune doré */
 }
 
-/* ✅ Style du bouton Déconnexion */
 .logout-button {
-  background-color: white;
-  color: #e74c3c;
-  font-weight: bold;
-  padding: 8px 12px;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  background-color: #C4C4C4;
+  color: #000000;
+  border-radius: 8px;
+  padding: 8px 15px;
+}
 
-  &:hover {
-    background-color: #ffebe6;
+.logout-button:hover {
+  background-color: #F4A300;
+  color: white;
+}
+
+.user-menu-icon {
+  color: #000000;
+}
+
+/* ✅ Responsive */
+@media (max-width: 768px) {
+  .custom-navbar {
+    padding: 0;
+  }
+
+  .logo-button {
+    margin-right: 12px;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .user-menu-icon {
+    display: block;
   }
 }

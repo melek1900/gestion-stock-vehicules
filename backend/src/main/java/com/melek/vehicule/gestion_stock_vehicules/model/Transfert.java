@@ -1,6 +1,8 @@
 package com.melek.vehicule.gestion_stock_vehicules.model;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +19,18 @@ public class Transfert {
             joinColumns = @JoinColumn(name = "transfert_id"),
             inverseJoinColumns = @JoinColumn(name = "vehicule_id")
     )
-    private List<Vehicule> vehicules;
+    private List<Vehicule> vehicules = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "ordre_mission_id")
+    private OrdreMission ordreMission;
+
+    public OrdreMission getOrdreMission() {
+        return ordreMission;
+    }
+
+    public void setOrdreMission(OrdreMission ordreMission) {
+        this.ordreMission = ordreMission;
+    }
 
     public Date getDateReception() {
         return dateReception;
@@ -92,6 +105,11 @@ public class Transfert {
     public void setParcDestination(Parc parcDestination) {
         this.parcDestination = parcDestination;
     }
-
+    public void addVehicule(Vehicule vehicule) {
+        if (this.vehicules == null) {
+            this.vehicules = new ArrayList<>();
+        }
+        this.vehicules.add(vehicule);
+    }
 
 }

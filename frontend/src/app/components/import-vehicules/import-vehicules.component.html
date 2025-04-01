@@ -1,0 +1,28 @@
+<mat-card class="import-container" [ngClass]="{ 'gestionnaire-theme': isGestionnaire }">
+    <h2>📂 Importer des Véhicules (Parc AUPORT)</h2>
+  
+  <input type="file" #fileInput accept=".xlsx, .xls" (change)="onFileSelected($event)" hidden />
+  
+  <!-- ✅ Bouton de sélection du fichier -->
+  <button mat-raised-button color="primary" (click)="fileInput.click()">
+      <mat-icon>attach_file</mat-icon> Sélectionner un fichier
+  </button>
+  
+  <!-- ✅ Affichage du fichier sélectionné -->
+  <p *ngIf="selectedFileName">
+      📄 Fichier sélectionné : <strong>{{ selectedFileName }}</strong>
+  </p>
+
+  <!-- ✅ Bouton d’importation -->
+  <button mat-raised-button color="accent" (click)="uploadFile()" [disabled]="!selectedFile">
+      <mat-icon>cloud_upload</mat-icon> Importer
+  </button>
+
+  <!-- ✅ Barre de progression -->
+  <mat-progress-bar *ngIf="isUploading" mode="indeterminate"></mat-progress-bar>
+
+  <!-- ✅ Message de statut -->
+  <mat-card *ngIf="importStatus" class="status-message" [ngClass]="{ 'success': isSuccess, 'error': !isSuccess }">
+      <p>{{ importStatus }}</p>
+  </mat-card>
+</mat-card>

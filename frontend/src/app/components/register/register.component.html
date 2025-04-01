@@ -30,6 +30,29 @@
       </mat-select>
     </mat-form-field>
 
+    <!-- Sélection du parc de travail (exclut TRANSFERT et AUPORT) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Parc de Travail</mat-label>
+      <mat-select formControlName="parc" required>
+        <mat-option *ngFor="let parc of parcs" [value]="parc.id">
+          {{ parc.nom }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Sélection des parcs accessibles (exclut uniquement TRANSFERT, mais AUPORT est disponible) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Parcs accessibles</mat-label>
+      <mat-select formControlName="parcsAcces" multiple>
+        <mat-option *ngFor="let parc of parcsAcces" [value]="parc.id">
+          {{ parc.nom }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Indicateur de chargement -->
+    <mat-progress-spinner *ngIf="loadingParcs" mode="indeterminate"></mat-progress-spinner>
+
     <button mat-raised-button color="primary" class="full-width" type="submit" [disabled]="form.invalid">
       S'inscrire
     </button>

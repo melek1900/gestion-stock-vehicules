@@ -1,0 +1,35 @@
+<mat-card class="dialog-container">
+    <h2>📋 Détails de la Mission</h2>
+  
+    <!-- ✅ Section Info principale -->
+    <div class="section mission-info">
+      <p><strong>N° Mission:</strong> {{ data.numeroOrdre }}</p>
+      <p><strong>Date:</strong> {{ data.dateCreation | date: 'dd/MM/yyyy' }}</p>
+      <p>
+        <strong>Statut:</strong>
+        <span class="statut" [ngClass]="data.statut?.toLowerCase()">
+          {{ data.statut === 'EN_COURS' ? 'En cours' : (data.statut === 'CLOTURE' ? 'Clôturé' : data.statut) }}
+        </span>
+      </p>
+    </div>
+  
+    <!-- ✅ Liste des véhicules -->
+    <h3>🚗 Véhicules dans la mission</h3>
+    <div class="vehicule-list">
+      <div *ngFor="let vehicule of data.vehicules" class="vehicule-item" [ngClass]="{'preleve': vehicule.preleve}">
+        <mat-icon>directions_car</mat-icon>
+        <div class="vehicule-details">
+            <p><strong>{{ vehicule.numeroChassis }}</strong> - {{ vehicule.modele }}</p>
+            <mat-chip [color]="vehicule.preleve ? 'primary' : 'warn'">
+                {{ vehicule.preleve ? 'Prélevé' : 'Non Prélevé' }}
+              </mat-chip>
+          </div>
+      </div>
+    </div>
+  
+    <!-- ✅ Bouton de fermeture -->
+    <div class="footer">
+      <button mat-stroked-button color="warn" (click)="fermer()">❌ Fermer</button>
+    </div>
+  </mat-card>
+  

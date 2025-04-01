@@ -1,57 +1,133 @@
-<div class="transfert-container">
-    <h2>📦 Liste des Transferts</h2>
-    <table mat-table [dataSource]="transferts" class="mat-elevation-z8">
-      <!-- ID -->
-      <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef>ID</th>
-        <td mat-cell *matCellDef="let transfert">{{ transfert.id }}</td>
-      </ng-container>
-  
-      <!-- Date -->
-      <ng-container matColumnDef="dateTransfert">
-        <th mat-header-cell *matHeaderCellDef>Date</th>
-        <td mat-cell *matCellDef="let transfert">{{ transfert.dateTransfert | date:'short' }}</td>
-      </ng-container>
-  
-      <!-- Parc Source -->
-      <ng-container matColumnDef="parcSource">
-        <th mat-header-cell *matHeaderCellDef>Parc Source</th>
-        <td mat-cell *matCellDef="let transfert">{{ transfert.parcSource.nom }}</td>
-      </ng-container>
-  
-      <!-- Parc Destination -->
-      <ng-container matColumnDef="parcDestination">
-        <th mat-header-cell *matHeaderCellDef>Parc Destination</th>
-        <td mat-cell *matCellDef="let transfert">{{ transfert.parcDestination.nom }}</td>
-      </ng-container>
-  
-      <!-- Statut -->
-      <ng-container matColumnDef="statut">
-        <th mat-header-cell *matHeaderCellDef>Statut</th>
-        <td mat-cell *matCellDef="let transfert">
-          <span [ngClass]="{ 
-            'en-transit': transfert.statut === StatutTransfert.EN_TRANSIT, 
-            'receptionne': transfert.statut === StatutTransfert.RECEPTIONNE 
-          }">
-            {{ transfert.statut }}
-          </span>
+<!-- transfertList.component.html -->
+<mat-card class="transfert-container">
+  <div>
+    <h2>📌 Sélection des véhicules à transférer</h2>
+
+    <!-- Barre de recherche -->
+    <mat-form-field class="search-field" appearance="fill">
+      <mat-label>Rechercher un véhicule par N° Châssis</mat-label>
+      <input matInput type="text" [(ngModel)]="searchQuery" (input)="rechercherVehicule()" placeholder="Saisir N° Châssis">
+    </mat-form-field>
+
+    <!-- Tableau des véhicules disponibles -->
+    <table mat-table [dataSource]="vehiculesFiltres" class="mat-elevation-z8">
+
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox (change)="toggleAllRows()" [checked]="isAllSelected()"></mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let vehicule">
+          <mat-checkbox (change)="selection.toggle(vehicule)" [checked]="selection.isSelected(vehicule)"></mat-checkbox>
         </td>
       </ng-container>
-  
-      <!-- Actions -->
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let transfert">
-          <button *ngIf="userRole === 'ROLE_ADMIN' || userRole === 'ROLE_GESTIONNAIRE_STOCK'" 
-          mat-button color="primary" (click)="receptionnerTransfert(transfert.id)" 
-          [disabled]="transfert.statut !== 'En transit'">
-        ✅ Réceptionner
-       </button>
-        </td>
+
+      <ng-container matColumnDef="numeroChassis">
+        <th mat-header-cell *matHeaderCellDef>N° Châssis</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.numeroChassis }}</td>
       </ng-container>
-  
-      <tr mat-header-row *matHeaderRowDef="['id', 'dateTransfert', 'parcSource', 'parcDestination', 'statut', 'actions']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['id', 'dateTransfert', 'parcSource', 'parcDestination', 'statut', 'actions'];"></tr>
+
+      <ng-container matColumnDef="modele">
+        <th mat-header-cell *matHeaderCellDef>Modèle</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.modele }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="shortDescription">
+        <th mat-header-cell *matHeaderCellDef>Description</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortDescription }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="shortColor">
+        <th mat-header-cell *matHeaderCellDef>Couleur</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortColor }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="parcNom">
+        <th mat-header-cell *matHeaderCellDef>Parc</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.parcNom }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['select', 'numeroChassis', 'modele', 'shortDescription', 'shortColor', 'parcNom']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['select', 'numeroChassis', 'modele', 'shortDescription', 'shortColor', 'parcNom'];"></tr>
     </table>
+
+    <!-- Bouton ajouter -->
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="ajouterVehiculesSelectionnes()" [disabled]="selection.selected.length === 0">
+        Ajouter à l'Ordre de Mission
+      </button>
+    </div>
   </div>
-  
+
+  <!-- Section Ordre de Mission -->
+  <div *ngIf="vehiculesSelectionnes.length > 0">
+    <h2>📌 Véhicule à transferer</h2>
+
+    <table mat-table [dataSource]="vehiculesSelectionnes" class="mat-elevation-z8">
+      <ng-container matColumnDef="numeroChassis">
+        <th mat-header-cell *matHeaderCellDef>N° Châssis</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.numeroChassis }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="modele">
+        <th mat-header-cell *matHeaderCellDef>Modèle</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.modele }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="shortDescription">
+        <th mat-header-cell *matHeaderCellDef>Description</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortDescription }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="shortColor">
+        <th mat-header-cell *matHeaderCellDef>Couleur</th>
+        <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortColor }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let vehicule">
+          <button mat-icon-button color="warn" (click)="supprimerVehiculeSelectionne(vehicule)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['numeroChassis', 'modele', 'shortDescription', 'shortColor', 'actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['numeroChassis', 'modele', 'shortDescription', 'shortColor', 'actions'];"></tr>
+    </table>
+    <mat-divider class="ligne-separation"></mat-divider>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Choisir un parc de destination</mat-label>
+      <mat-select [(ngModel)]="parcDestination" required>
+        <mat-option *ngFor="let parc of parcs" [value]="parc.id">{{ parc.nom }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Choisir un chauffeur</mat-label>
+      <mat-select [(ngModel)]="chauffeurSelectionne" required>
+        <mat-option *ngFor="let chauffeur of chauffeurs" [value]="chauffeur.id">
+          {{ chauffeur.nom }} {{ chauffeur.prenom }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Choisir un véhicule de transport</mat-label>
+      <mat-select [(ngModel)]="vehiculeTransportSelectionne" required>
+        <mat-option *ngFor="let vehicule of vehiculesTransport" [value]="vehicule.id">
+          {{ vehicule.matricule }} - {{ vehicule.type }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Bouton de validation -->
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="initierTransfert()" 
+        [disabled]="vehiculesSelectionnes.length === 0 || !parcDestination || !chauffeurSelectionne || !vehiculeTransportSelectionne">
+        Générer Ordre Mission
+      </button>
+    </div>
+  </div>
+</mat-card>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef,ViewChild, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { PopupVehiculeComponent } from '../popup-vehicule/popup-vehicule.component';
@@ -9,20 +9,22 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { PopupPreparationComponent } from '../popup-preparation/popup-preparation.component';
 import { StatutVehicule } from '../../models/statut-vehicule.enum';
 import { StatutTransfert } from '../../models/statut-transfert.enum';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
+import { Router } from '@angular/router';
+import { Vehicule } from '../../models/vehicule.model';
+import { MatMenuModule } from '@angular/material/menu';
 
-interface Avarie {
-  id?: number;  // ✅ L'ID peut être absent si c'est une nouvelle avarie
-  type: string;
-  commentaire: string;
-}
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 
+import { MatInputModule } from '@angular/material/input';
 @Component({
   selector: 'app-vehicule-list',
   standalone: true,
@@ -30,6 +32,7 @@ interface Avarie {
   styleUrls: ['./vehicule-list.component.scss'],
   imports: [
     CommonModule,
+    MatInputModule,
     MatTableModule,
     MatButtonModule,
     MatIconModule,
@@ -37,15 +40,29 @@ interface Avarie {
     MatDialogModule,
     MatCheckboxModule,
     MatFormFieldModule,
-    MatSelectModule, 
+    MatSelectModule,
     FormsModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatPaginatorModule,
+    MatMenuModule
+    
   ]
 })
 
 export class VehiculeListComponent implements OnInit {
-  displayedColumns: string[] = ['select', 'modele', 'numeroChassis', 'couleur', 'dateArrivee', 'provenance', 'statut', 'actions'];
-
+  displayedColumns: string[] = [
+    'select',
+    'productionDate',
+    'numeroChassis',
+    'shortDescription',
+    'modele',
+    'shortColor',
+    'statut',
+    'parcNom',
+    'actions'
+  ];
+  dataSource = new MatTableDataSource<any>([]);
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   vehicules: any[] = [];
   vehiculesFiltres: any[] = [];
   selectedParc: string = 'all';
@@ -54,25 +71,125 @@ export class VehiculeListComponent implements OnInit {
   private dialog = inject(MatDialog);
   userRole: string | null = null;
   selection = new SelectionModel<any>(true, []);
-  
   StatutVehicule = StatutVehicule; 
   StatutTransfert = StatutTransfert;
-  constructor(private cdr: ChangeDetectorRef) {}
+  parcId: number | null = null;
+
+  selectedParcs: string[] = [];
+  parcsAccessibles: any[] = [];
+  searchQuery: string = '';
+  searchChassis = '';
+  searchColor = '';
+  searchBrand = '';
+  constructor(private cdr: ChangeDetectorRef, private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
+
 
   vehiculesSelectionnes: any[] = []; // Stocke les véhicules sélectionnés
   ngOnInit(): void {
     this.recupererRoleUtilisateur();
+  this.getParcId();
+  this.chargerParcsAccessibles();
+  setTimeout(() => {
     this.chargerVehicules();
+  }, 300);
+  if (this.selectedParcs.length === 0 && this.parcId) {
+    this.selectedParcs = [this.parcsAccessibles.find(p => p === this.obtenirParcAssocie()) || ''];
   }
-
+  }
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
+  chargerParcsAccessibles() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn("⚠️ Aucun token trouvé, impossible de charger les parcs !");
+      return;
+    }
+  
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log("🔍 Payload du token :", payload);
+  
+      if (payload.parcsAcces && payload.parcsAcces.length > 0) {
+        this.parcsAccessibles = payload.parcsAcces; // ✅ Récupération depuis le token
+        console.log("🌍 Parcs accessibles chargés depuis le token :", this.parcsAccessibles);
+      } else {
+        console.warn("⚠️ Aucun parc trouvé dans le token, récupération via API...");
+        this.recupererParcsDepuisAPI(); // ✅ Si vide, on les récupère via API
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors du décodage du token :", error);
+      this.recupererParcsDepuisAPI(); // ✅ Fallback pour récupérer les parcs via API
+    }
+  }
+  
+  // ✅ Fallback pour récupérer les parcs via une requête API
+  recupererParcsDepuisAPI() {
+    this.http.get<any[]>('http://172.20.10.8:8080/api/utilisateurs/parcs-accessibles')
+      .subscribe({
+        next: (parcs) => {
+          this.parcsAccessibles = parcs.map(p => p.nom); // ✅ Stocke les noms des parcs
+          console.log("✅ Parcs accessibles récupérés via API :", this.parcsAccessibles);
+        },
+        error: (err) => console.error("❌ Erreur lors de la récupération des parcs accessibles :", err)
+      });
+  }
+  
+  naviguerVersTransfert() {
+    if (this.selection.selected.length === 0) {
+      console.warn("⚠️ Aucun véhicule sélectionné pour le transfert !");
+      return;
+    }
+  
+    // Récupération des ID des véhicules sélectionnés
+    const vehiculeIds = this.selection.selected.map(v => v.id);
+  
+    // Navigation vers la page de transfert avec les IDs sélectionnés
+    this.router.navigate(['/transfert-selection'], { queryParams: { vehicules: vehiculeIds.join(',') } });
+  }
+  
   recupererRoleUtilisateur() {
     const token = localStorage.getItem('token');
     if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1])); 
+      const payload = JSON.parse(atob(token.split('.')[1]));
       this.userRole = payload.role;
-      console.log('🔑 Rôle de l’utilisateur connecté:', this.userRole); // ✅ Vérifie bien le rôle ici
+      const parcUtilisateur = payload.parcNom || null;
+  
+      console.log('🔑 Rôle:', this.userRole);
+      console.log('📍 Parc utilisateur:', parcUtilisateur);
+  
+      if (parcUtilisateur) {
+        this.selectedParcs = [parcUtilisateur]; // ✅ Sélectionne automatiquement le parc de l'utilisateur
+      }
     }
   }
+  ouvrirPopupLivraison(vehicule: any) {
+    console.log("📌 Livraison du véhicule :", vehicule);
+    this.ouvrirPopup(vehicule); // 🔥 Pour l’instant, utiliser la même popup
+  }
+  
+  ouvrirPopupVente(vehicule: any) {
+    console.log("📌 Vente du véhicule :", vehicule);
+    this.ouvrirPopup(vehicule); // 🔥 Pour l’instant, utiliser la même popup
+  }
+  
+  ouvrirPopupReservation(vehicule: any) {
+    console.log("📌 Réservation du véhicule :", vehicule);
+    this.ouvrirPopup(vehicule); // 🔥 Pour l’instant, utiliser la même popup
+  }
+  recupererParcsAccessibles() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        this.parcsAccessibles = payload.parcsAcces || [];
+        console.log("🌍 Parcs accessibles:", this.parcsAccessibles);
+      } catch (error) {
+        console.error("❌ Erreur lors du décodage du token:", error);
+      }
+    }
+  }
+
   isReceptionPossible(): boolean {
     console.log("🛠️ Vérification du bouton Réceptionner...");
     console.log("📌 Véhicules sélectionnés :", this.selection.selected);
@@ -91,13 +208,15 @@ export class VehiculeListComponent implements OnInit {
   isAllSelected(): boolean {
     return this.selection.selected.length === this.vehicules.length;
   }
-  /** ✅ Vérifie si le bouton "Transférer au Parc 2" doit être désactivé */
+  /** ✅ Vérifie si le bouton "Transférer" doit être désactivé */
   isTransfertDisabled(): boolean {
-    return this.selection.selected.length === 0 || this.selection.selected.some(v => v.statut === 'TRANSFERT');
+    return this.selection.selected.length === 0 || 
+           this.selection.selected.some(v => v.statut !== 'EN_ETAT');
   }
+  
   toggleAllRows() {
     if (this.isAllSelected()) {
-      this.selection.clear();
+       this.selection.clear();
     } else {
       this.vehicules.forEach(v => this.selection.select(v));
     }
@@ -108,34 +227,130 @@ export class VehiculeListComponent implements OnInit {
 mettreAJourVehiculesSelectionnes() {
   this.vehiculesSelectionnes = this.selection.selected;
 }
+
 chargerVehicules() {
-  this.http.get<any[]>('http://localhost:8080/api/vehicules').subscribe((data) => {
-    console.log("📡 Véhicules reçus :", JSON.stringify(data, null, 2)); // ✅ Affichage détaillé
-    this.vehicules = data;
-    this.filtrerVehicules(); 
-    this.cdr.detectChanges();
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.warn("⚠️ Aucun token trouvé, impossible de charger les véhicules !");
+    return;
+  }
+
+  const mappingParcNom: Record<number, string> = {
+    1: 'MEGRINE',
+    2: 'CHARGUIA',
+    4: 'AUPORT'
+  };
+
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+  });
+
+  const apiUrl = `http://172.20.10.8:8080/api/vehicules`;
+
+  this.http.get<Vehicule[]>(apiUrl, { headers }).subscribe({
+    next: (data) => {
+      console.log("📡 Véhicules reçus :", JSON.stringify(data, null, 2)); // 🔍 Vérification détaillée
+
+      this.vehicules = data.map(v => ({
+        ...v,
+        parcNom: mappingParcNom[v.parcId] || 'Parc Inconnu', // ✅ Utilisation de parcId seulement
+        productionDate: v.productionDate ? new Date(v.productionDate).toISOString().split('T')[0] : '',
+        shortColor: v.shortColor || 'Non défini',
+        shortDescription: v.shortDescription || 'Non défini',
+      }));
+
+      // ✅ Vérifie la pagination après le chargement des véhicules
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+
+      // ✅ Appliquer les filtres immédiatement après le chargement
+      this.filtrerVehicules();
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error("❌ Erreur lors du chargement des véhicules :", err);
+    }
   });
 }
+
+
+
+
+obtenirParcAssocie(): string | null {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log("🔍 Payload du token :", payload);
+      return payload.parcNom || null; // ✅ Retourne null si non défini
+    } catch (error) {
+      console.error("❌ Erreur lors du décodage du token :", error);
+    }
+  }
+  return null;
+}
+
+
+getParcId() {
+  const parcNom = this.obtenirParcAssocie();
+  console.log("🔍 Parc détecté depuis le token :", parcNom);
+
+  const mappingParcId: { [key: string]: number } = {
+    'MEGRINE': 1,
+    'AUPORT': 4
+  };
+
+  if (parcNom && mappingParcId[parcNom]) {
+    this.parcId = mappingParcId[parcNom];
+    console.log("✅ Parc ID attribué dynamiquement :", this.parcId);
+  } else {
+    console.warn("⚠️ Parc non trouvé dans le mapping !");
+    this.parcId = null; // ✅ On met `null` au lieu de `undefined`
+  }
+
+  if (this.parcId === null) {
+    console.error("🚨 ERREUR: Aucun `parcId` valide trouvé !");
+  }
+}
+
+
+
+
 filtrerVehicules() {
-  console.log(`📢 Filtrage appliqué : Parc=${this.selectedParc}, Statut=${this.selectedStatut}`);
+  console.log(`📢 Filtrage appliqué : Parcs=${this.selectedParcs}, Statut=${this.selectedStatut}, Recherche=${this.searchQuery}`);
 
   this.vehiculesFiltres = this.vehicules.filter(vehicule => {
-    let matchParc = false;
+    const matchParc = this.selectedParcs.length === 0 || this.selectedParcs.includes(vehicule.parcNom);
+    const matchStatut = this.selectedStatut === 'all' || vehicule.statut?.toUpperCase() === this.selectedStatut.toUpperCase();
+    
+    const matchSearch =
+    
+      !this.searchQuery || 
+      vehicule.numeroChassis.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+      vehicule.shortColor.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      vehicule.shortDescription.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-    if (this.selectedParc === 'all') {
-      matchParc = true; // ✅ Afficher tous les véhicules
-    } else if (this.selectedParc === 'transit') {
-      matchParc = vehicule.statut === 'TRANSFERT'; // ✅ Afficher uniquement les véhicules en TRANSIT
-    } else {
-      matchParc = vehicule.parc?.id == this.selectedParc && vehicule.statut !== 'TRANSFERT'; 
-    }
-
-    const matchStatut = this.selectedStatut === 'all' || vehicule.statut === this.selectedStatut;
-
-    return matchParc && matchStatut;
+    return matchParc && matchStatut && matchSearch;
   });
 
   console.log("📡 Véhicules après filtrage :", this.vehiculesFiltres);
+
+  // ✅ Mise à jour de la source de données pour appliquer la pagination
+  this.dataSource.data = this.vehiculesFiltres;
+
+  // ✅ Réinitialise la pagination à la première page après filtrage
+  if (this.paginator) {
+    this.paginator.firstPage();
+  }
+}
+toggleParcSelection(parc: string) {
+  if (this.selectedParcs.includes(parc)) {
+    this.selectedParcs = this.selectedParcs.filter(p => p !== parc);
+  } else {
+    this.selectedParcs.push(parc);
+  }
+  this.filtrerVehicules();
 }
   supprimerVehicule(id: number) {
     if (!id) {
@@ -145,7 +360,7 @@ filtrerVehicules() {
 
     console.log('📡 Envoi de la requête DELETE pour ID :', id);
 
-    this.http.delete(`http://localhost:8080/api/vehicules/${id}`).subscribe({
+    this.http.delete(`http://172.20.10.8:8080/api/vehicules/${id}`).subscribe({
         next: () => {
             console.log('✅ Véhicule supprimé avec succès !');
             this.chargerVehicules();
@@ -177,7 +392,7 @@ ouvrirPopup(vehicule: any) {
 }
 
   deleteVehicule(id: number) {
-    this.http.delete(`http://localhost:8080/api/vehicules/${id}`).subscribe(() => {
+    this.http.delete(`http://172.20.10.8:8080/api/vehicules/${id}`).subscribe(() => {
       this.chargerVehicules();
     });
   }
@@ -221,7 +436,7 @@ ouvrirPopup(vehicule: any) {
 
     console.log('📡 Envoi de la requête PUT pour la modif :', vehicule.id);
 
-    this.http.put(`http://localhost:8080/api/vehicules/${vehicule.id}`, formData, { headers }).subscribe({
+    this.http.put(`http://172.20.10.8:8080/api/vehicules/${vehicule.id}`, formData, { headers }).subscribe({
         next: () => {
             console.log('✅ Véhicule mis à jour avec succès !');
             this.chargerVehicules();
@@ -240,14 +455,14 @@ receptionnerTransfert(vehiculeId: number) {
     return;
   }
 
-  this.http.put<{ message: string }>(`http://localhost:8080/api/transferts/receptionner/${vehiculeId}`, {}).subscribe({
+  this.http.put<{ message: string }>(`http://172.20.10.8:8080/api/transferts/receptionner/${vehiculeId}`, {}).subscribe({
     next: (response) => {
       console.log("✅ Réponse API :", response);
 
       // ✅ Met à jour le statut et le parc du véhicule
       let vehicule = this.vehicules.find(v => v.id === vehiculeId);
       if (vehicule) {
-        vehicule.statut = 'EN_PREPARATION';
+        vehicule.statut = 'EN';
         vehicule.parc = { id: 2, nom: 'Parc 2' };
       }
 
@@ -267,7 +482,7 @@ initierTransfert() {
   }
 
   const vehiculeIds = this.selection.selected.map(v => v.id);
-  this.http.post<{ message: string }>('http://localhost:8080/api/transferts/initier', {
+  this.http.post<{ message: string }>('http://172.20.10.8:8080/api/transferts/initier', {
     vehiculeIds,
     parcDestinationId: 2
   }).subscribe(response => {
@@ -281,21 +496,6 @@ initierTransfert() {
     setTimeout(() => { this.chargerVehicules(); }, 500); // ✅ Recharge la liste après l’API
   });
 }
-ouvrirPopupPreparation(vehicule: any) {
-  const dialogRef = this.dialog.open(PopupPreparationComponent, {
-    width: '500px',
-    data: { vehicule }
-  });
-
-  dialogRef.afterClosed().subscribe((result: any) => { // ✅ Correction du type `any`
-    if (!result) return;
-
-    if (result.action === 'update') {
-      console.log('🔧 Mise à jour de la préparation :', result.data);
-      this.mettreAJourPreparation(result.data);
-    }
-  });
-}
 
 mettreAJourPreparation(preparation: any) {
   const payload = {
@@ -305,7 +505,7 @@ mettreAJourPreparation(preparation: any) {
     remarques: preparation.remarques
   };
 
-  this.http.post('http://localhost:8080/api/vehicules/preparation', payload).subscribe({
+  this.http.post('http://172.20.10.8:8080/api/vehicules/preparation', payload).subscribe({
     next: () => {
       console.log('✅ Préparation mise à jour avec succès !');
       this.chargerVehicules(); // ✅ Recharge la liste après mise à jour

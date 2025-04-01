@@ -1,0 +1,41 @@
+<mat-card class="reparation-container">
+  <h2>🔧 Gestion des Véhicules Avariés</h2>
+
+  <div *ngIf="vehiculesAvaries.length === 0" class="empty-message">
+    <p>✅ Aucun véhicule en avarie actuellement.</p>
+  </div>
+
+  <table mat-table [dataSource]="vehiculesAvaries" class="mat-elevation-z8" *ngIf="vehiculesAvaries.length > 0">
+    
+    <!-- Numéro de châssis -->
+    <ng-container matColumnDef="numeroChassis">
+      <th mat-header-cell *matHeaderCellDef> Numéro Châssis </th>
+      <td mat-cell *matCellDef="let vehicule"> {{ vehicule.numeroChassis }} </td>
+    </ng-container>
+
+    <!-- Modèle -->
+    <ng-container matColumnDef="modele">
+      <th mat-header-cell *matHeaderCellDef> Modèle </th>
+      <td mat-cell *matCellDef="let vehicule"> {{ vehicule.modele }} </td>
+    </ng-container>
+
+    <!-- Emplacement (Parc) -->
+    <ng-container matColumnDef="parcNom">
+      <th mat-header-cell *matHeaderCellDef> Emplacement </th>
+      <td mat-cell *matCellDef="let vehicule"> {{ vehicule.parcNom }} </td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let vehicule">
+        <button mat-button color="primary" (click)="ouvrirPopupModification(vehicule)">
+          <mat-icon>build</mat-icon> Réparer
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</mat-card>

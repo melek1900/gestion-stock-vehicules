@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/auth';
+  private apiUrl = 'http://172.20.10.8:8080/auth';
 
   constructor(private http: HttpClient) {}
 
@@ -16,5 +16,9 @@ export class AuthService {
 
   register(data: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/register`, data);
+  }
+   // ✅ Récupérer l'utilisateur connecté
+   getUser(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/user-profile`);
   }
 }

@@ -1,0 +1,56 @@
+<mat-card class="compteur-card">
+    <h2>📋 Gestion du Compteur des Ordres de Mission</h2>
+  
+    <!-- Consultation -->
+    <div class="section">
+      <h3>🔍 Compteur actuel</h3>
+      <mat-form-field appearance="outline">
+        <mat-label>Année</mat-label>
+        <input matInput [(ngModel)]="annee" placeholder="ex: 2025" type="number" />
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="chargerCompteur()">Voir le compteur</button>
+  
+      <div *ngIf="compteur !== null" class="result">
+        <p><strong>Compteur :</strong> {{ compteur }}</p>
+        <p><strong>Numéro complet :</strong> {{ numeroComplet }}</p>
+      </div>
+    </div>
+  
+    <mat-divider class="divider"></mat-divider>
+  
+    <!-- Modification -->
+    <div class="section">
+      <h3>✏️ Modifier le compteur</h3>
+      <mat-form-field appearance="outline">
+        <mat-label>Nouvelle valeur</mat-label>
+        <input matInput [(ngModel)]="nouvelleValeur" type="number" />
+      </mat-form-field>
+      <button mat-raised-button color="accent" (click)="modifierCompteur()" [disabled]="!annee || nouvelleValeur === null">
+        Modifier
+      </button>
+    </div>
+  
+    <mat-divider class="divider"></mat-divider>
+  
+    <!-- Initialisation -->
+    <div class="section">
+      <h3>🆕 Initialiser une nouvelle année</h3>
+      <mat-form-field appearance="outline">
+        <mat-label>Nouvelle année</mat-label>
+        <input matInput [(ngModel)]="nouvelleAnnee" type="number" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Valeur initiale</mat-label>
+        <input matInput [(ngModel)]="valeurInitiale" type="number" />
+      </mat-form-field>
+      <button mat-raised-button color="warn" (click)="initialiserCompteur()" [disabled]="!nouvelleAnnee || valeurInitiale === null">
+        Initialiser
+      </button>
+    </div>
+  
+    <mat-divider class="divider"></mat-divider>
+  
+    <!-- Message -->
+    <div *ngIf="message" class="message">{{ message }}</div>
+  </mat-card>
+  

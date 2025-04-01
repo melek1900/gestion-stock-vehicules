@@ -1,114 +1,154 @@
-<mat-card class="table-container">
-  <!-- ✅ Filtres -->
+<div class="vehicule-list-wrapper">
+<div class="table-container">
+  <!-- 🔍 Filtres -->
   <div class="filters">
-    <!-- ✅ Sélecteur de Parc -->
-    <mat-button-toggle-group [(ngModel)]="selectedParc" (change)="filtrerVehicules()">
-      <mat-button-toggle [value]="'all'">Tous</mat-button-toggle>
-      <mat-button-toggle [value]="1">Parc 1</mat-button-toggle>
-      <mat-button-toggle [value]="'transit'">En Transit</mat-button-toggle>
-      <mat-button-toggle [value]="2">Parc 2</mat-button-toggle>
-    </mat-button-toggle-group>    
-
-    <!-- ✅ Sélecteur de Statut -->
-    <mat-form-field appearance="fill">
-      <mat-label>Statut</mat-label>
-      <mat-select [(ngModel)]="selectedStatut" (selectionChange)="filtrerVehicules()">
-        <mat-option value="all">Tous</mat-option>
-        <mat-option value="EN_STOCK">En Stock</mat-option>
-        <mat-option value="EN_TRANSIT">En Transit</mat-option>
-        <mat-option value="EN_PREPARATION">En Préparation</mat-option>
-        <mat-option value="PRET_A_LA_VENTE">Prêt à la Vente</mat-option>
-      </mat-select>
+    <mat-form-field class="search-field" appearance="fill">
+      <mat-label>Recherche</mat-label>
+      <input
+        matInput
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="filtrerVehicules()"
+        placeholder="Rechercher par N° Châssis, Couleur ou Marque"
+      />
     </mat-form-field>
+
+    <div class="filters-right">
+      <mat-form-field appearance="fill">
+        <mat-label>Parc</mat-label>
+        <mat-select [(ngModel)]="selectedParcs" multiple (selectionChange)="filtrerVehicules()">
+          <mat-option *ngFor="let parc of parcsAccessibles" [value]="parc">{{ parc }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Statut</mat-label>
+        <mat-select [(ngModel)]="selectedStatut" (selectionChange)="filtrerVehicules()">
+          <mat-option value="all">Tous</mat-option>
+          <mat-option value="EN_ETAT">En Stock</mat-option>
+          <mat-option value="AVARIE">Avarie</mat-option>
+          <mat-option value="RESERVE">Reservé</mat-option>
+          <mat-option value="VENDU">Vendu</mat-option>
+          <mat-option value="LIVRE">Livré</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
 
-  <table mat-table [dataSource]="vehiculesFiltres" class="mat-elevation-z8">
-    
-    <!-- ✅ Colonne de sélection -->
+  <!-- 🧰 Actions -->
+  <div class="action-buttons">
+    <button
+      *ngIf="selectedParc === 'transit'"
+      mat-raised-button
+      color="primary"
+      (click)="receptionnerTransfert(selection.selected[0]?.id)"
+      [disabled]="selection.selected.length !== 1 || selection.selected[0]?.statut !== 'TRANSFERT'"
+    >
+      ✅ Réceptionner
+    </button>
+
+    <button
+      mat-raised-button
+      color="accent"
+      (click)="naviguerVersTransfert()"
+      [disabled]="isTransfertDisabled()"
+    >
+      Créer ordre mission
+    </button>
+  </div>
+
+  <!-- 📄 Pagination -->
+  <div class="pagination-container">
+    <mat-paginator
+      [pageSize]="10"
+      [pageSizeOptions]="[10, 20, 50]"
+      showFirstLastButtons
+    ></mat-paginator>
+  </div>
+
+  <!-- 📋 Tableau des véhicules -->
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" style="width: 100%;">
+    <!-- ✅ Sélection -->
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox (change)="toggleAllRows()" [checked]="isAllSelected()"></mat-checkbox>
       </th>
       <td mat-cell *matCellDef="let vehicule">
-        <mat-checkbox (click)="$event.stopPropagation()" (change)="mettreAJourVehiculesSelectionnes()" [checked]="selection.isSelected(vehicule)" (change)="selection.toggle(vehicule)">
-        </mat-checkbox>
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="mettreAJourVehiculesSelectionnes(); selection.toggle(vehicule)"
+          [checked]="selection.isSelected(vehicule)"
+        ></mat-checkbox>
       </td>
     </ng-container>
 
-    <!-- ✅ Colonne Modèle -->
+    <!-- ✅ Colonnes principales -->
+    <ng-container matColumnDef="productionDate">
+      <th mat-header-cell *matHeaderCellDef>Date de production</th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.productionDate | date:'dd/MM/yyyy' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="numeroChassis">
+      <th mat-header-cell *matHeaderCellDef>N° Châssis</th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.numeroChassis }}</td>
+    </ng-container>
+    <ng-container matColumnDef="shortDescription">
+      <th mat-header-cell *matHeaderCellDef>Marque</th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortDescription || 'Non défini' }}</td>
+    </ng-container>
+
     <ng-container matColumnDef="modele">
       <th mat-header-cell *matHeaderCellDef>Modèle</th>
       <td mat-cell *matCellDef="let vehicule">{{ vehicule.modele }}</td>
     </ng-container>
 
-    <!-- ✅ Colonne N° Châssis -->
-    <ng-container matColumnDef="numeroChassis">
-      <th mat-header-cell *matHeaderCellDef>N° Châssis</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.numeroChassis }}</td>
-    </ng-container>
-
-    <!-- ✅ Colonne Couleur -->
-    <ng-container matColumnDef="couleur">
+    <ng-container matColumnDef="shortColor">
       <th mat-header-cell *matHeaderCellDef>Couleur</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.couleur }}</td>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortColor || 'Non défini' }}</td>
     </ng-container>
 
-    <!-- ✅ Colonne Date d'arrivée -->
-    <ng-container matColumnDef="dateArrivee">
-      <th mat-header-cell *matHeaderCellDef>Date d'arrivée</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.dateArrivee | date:'dd/MM/yyyy' }}</td>
-    </ng-container>
-    <!-- ✅ Colonne Provenance -->
-    <ng-container matColumnDef="provenance">
-       <th mat-header-cell *matHeaderCellDef> Provenance </th>
-       <td mat-cell *matCellDef="let vehicule"> {{ vehicule.provenance || 'Non spécifié' }} </td>
-      </ng-container>
-
-    <!-- ✅ Colonne Statut -->
     <ng-container matColumnDef="statut">
       <th mat-header-cell *matHeaderCellDef>Statut</th>
       <td mat-cell *matCellDef="let vehicule">
-        <span class="status" [ngClass]="vehicule.statut.toLowerCase()">
-          {{ vehicule.statut }}
+        <span class="status" [ngClass]="vehicule.statut?.toLowerCase()">
+          {{ vehicule.statut || 'Non défini' }}
         </span>
       </td>
     </ng-container>
 
-    <!-- ✅ Colonne Actions -->
+    <ng-container matColumnDef="parcNom">
+      <th mat-header-cell *matHeaderCellDef>Parc</th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.parcNom }}</td>
+    </ng-container>
+
+    <!-- ✅ Actions -->
     <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
-      <td mat-cell *matCellDef="let vehicule">
-        <button mat-icon-button color="primary" (click)="ouvrirPopup(vehicule)">
-          <mat-icon>visibility</mat-icon>
+      <th mat-header-cell *matHeaderCellDef class="mat-column-actions">Actions</th>
+      <td mat-cell *matCellDef="let vehicule" class="mat-column-actions">
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
         </button>
 
-        <!-- ✅ Bouton de mise à jour de la préparation -->
-        <button *ngIf="vehicule.parc.id === 2 && vehicule.statut === 'EN_PREPARATION'" 
-          mat-button color="accent" (click)="ouvrirPopupPreparation(vehicule)">
-          🔧 Mettre à jour la préparation
-        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="ouvrirPopup(vehicule)">
+            <mat-icon>visibility</mat-icon> Visualiser
+          </button>
+          <button mat-menu-item (click)="ouvrirPopupLivraison(vehicule)">
+            <mat-icon>local_shipping</mat-icon> Livraison
+          </button>
+          <button mat-menu-item (click)="ouvrirPopupVente(vehicule)">
+            <mat-icon>shopping_cart</mat-icon> Vente
+          </button>
+          <button mat-menu-item (click)="ouvrirPopupReservation(vehicule)">
+            <mat-icon>event</mat-icon> Réservation
+          </button>
+        </mat-menu>
       </td>
     </ng-container>
 
+    <!-- ✅ Lignes -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
-
-  <!-- ✅ Container des boutons d'actions alignés à droite -->
-  <div class="action-buttons">
-    <!-- ✅ Bouton pour réceptionner un véhicule en transit -->
-    <button *ngIf="selectedParc === 'transit'" 
-    mat-raised-button color="primary"
-    (click)="receptionnerTransfert(selection.selected[0]?.id)" 
-    [disabled]="selection.selected.length !== 1 || selection.selected[0]?.statut !== 'TRANSFERT'">
-✅ Réceptionner
-</button>
-    <!-- ✅ Bouton pour transférer un véhicule au Parc 2 -->
-    <button *ngIf="selectedParc !== 'transit' && selectedParc !== '2'" 
-    mat-raised-button color="accent" 
-    (click)="initierTransfert()" 
-    [disabled]="isTransfertDisabled()"
->
-🚚 Transférer au Parc 2
-</button>
-  </div>
+</div>
+</div>
