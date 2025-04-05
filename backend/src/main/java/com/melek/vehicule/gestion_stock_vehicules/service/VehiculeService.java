@@ -60,9 +60,16 @@ public class VehiculeService {
         vehiculeRepository.saveAll(vehicules);
     }
 
-    /**
-     * ✅ Récupérer les véhicules d'un parc donné
-     */
+
+    public List<VehiculeDTO> getVehiculesFiltres(List<Long> parcIds, Set<String> marquesAccessibles) {
+        List<Vehicule> tous = vehiculeRepository.findAll();
+
+        return tous.stream()
+                .filter(v -> v.getParc() != null && parcIds.contains(v.getParc().getId()))
+                .filter(v -> marquesAccessibles.contains(v.getShortDescription()))
+                .map(VehiculeDTO::new)
+                .toList();
+    }
 
 
     /**

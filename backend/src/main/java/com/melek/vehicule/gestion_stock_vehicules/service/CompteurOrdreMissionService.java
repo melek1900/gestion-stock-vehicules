@@ -30,7 +30,7 @@ public class CompteurOrdreMissionService {
         repository.save(compteur);
 
         String numeroFormate = String.format("%05d", compteur.getCompteur());
-        return annee + "-OM " + numeroFormate;
+        return "OM-" + annee + "" + numeroFormate; // ✅ Nouveau format
     }
     public Map<String, Object> getCompteur(int annee) {
         CompteurOrdreMission c = repository.findByAnnee(annee)

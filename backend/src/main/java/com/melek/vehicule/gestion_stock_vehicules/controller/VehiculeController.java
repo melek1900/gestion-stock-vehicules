@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.melek.vehicule.gestion_stock_vehicules.dto.*;
 import com.melek.vehicule.gestion_stock_vehicules.model.*;
 import com.melek.vehicule.gestion_stock_vehicules.repository.ParcRepository;
+import com.melek.vehicule.gestion_stock_vehicules.repository.UtilisateurRepository;
 import com.melek.vehicule.gestion_stock_vehicules.service.AvarieService;
 import com.melek.vehicule.gestion_stock_vehicules.service.ExcelService;
 import com.melek.vehicule.gestion_stock_vehicules.service.VehiculeService;
@@ -27,6 +28,7 @@ import com.melek.vehicule.gestion_stock_vehicules.repository.VehiculeRepository;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -42,6 +44,8 @@ public class VehiculeController {
     private VehiculeRepository vehiculeRepository;
     @Autowired
     private ParcRepository parcRepository;
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
 
     @Autowired
     public VehiculeController(VehiculeService vehiculeService, ObjectMapper objectMapper, ExcelService excelService, AvarieService avarieService) {
@@ -105,13 +109,7 @@ public class VehiculeController {
         }
     }
 
-    // ✅ Réception manuelle des véhicules
-    //@PostMapping("/ajouter")
-    //public ResponseEntity<Vehicule> ajouterVehicule(@RequestBody Vehicule vehicule) {
-      //  vehicule.setParcNom("MEGRINE"); // ✅ Affectation automatique du parc A
-        //Vehicule savedVehicule = vehiculeService.createVehicule(vehicule, null, null);
-        //return ResponseEntity.ok(savedVehicule);
-   // }
+
 
     // ✅ Récupérer tous les véhicules du parc "MEGRINE"
     @GetMapping("/megrine")
@@ -259,11 +257,25 @@ public class VehiculeController {
         return ResponseEntity.noContent().build(); // ✅ 204 No Content
     }
 
-    // ✅ Récupérer tous les véhicules
     @GetMapping
-    public ResponseEntity<List<VehiculeDTO>> getAllVehicules() {
-        return ResponseEntity.ok(vehiculeService.getAllVehicules());
+    public ResponseEntity<List<VehiculeDTO>> getVehiculesParUtilisateurConnecte(Authentication authentication) {
+        String email = authentication.getName();
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        List<Long> parcsAccessiblesIds = utilisateur.getParcsAcces().stream()
+                .map(Parc::getId)
+                .toList();
+
+        Set<String> marques = utilisateur.getMarquesAccessibles().stream()
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+
+        List<VehiculeDTO> vehiculesFiltres = vehiculeService.getVehiculesFiltres(parcsAccessiblesIds, marques);
+        return ResponseEntity.ok(vehiculesFiltres);
     }
+
+
 
     // ✅ Récupérer un véhicule par ID
     @GetMapping("/{id}")

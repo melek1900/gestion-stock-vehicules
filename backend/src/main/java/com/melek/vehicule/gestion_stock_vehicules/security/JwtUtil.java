@@ -37,26 +37,29 @@ public class JwtUtil {
         this.secretKey = Keys.hmacShaKeyFor(java.util.Base64.getDecoder().decode(secretKeyString));
     }
 
-    public String generateToken(Authentication authentication, String parcNom, List<String> parcsAcces) {
+    public String generateToken(Authentication authentication, String parcNom, List<String> parcsAcces, List<String> marquesAcces) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         System.out.println("🛠️ Génération du token...");
         System.out.println("🔹 Utilisateur : " + userDetails.getUsername());
         System.out.println("🔹 Parc attribué : " + parcNom);
         System.out.println("🔹 Parcs accessibles : " + parcsAcces);
+        System.out.println("🔹 Marques accessibles : " + marquesAcces);
 
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("role", userDetails.getAuthorities().iterator().next().getAuthority().startsWith("ROLE_") ?
                         userDetails.getAuthorities().iterator().next().getAuthority() :
                         "ROLE_" + userDetails.getAuthorities().iterator().next().getAuthority())
-                .claim("parcNom", parcNom)  // ✅ Ajout du parc de travail
-                .claim("parcsAcces", parcsAcces)  // ✅ Ajout des parcs accessibles
+                .claim("parcNom", parcNom)
+                .claim("parcsAcces", parcsAcces)
+                .claim("marquesAccessibles", marquesAcces)  // ✅ Correction ici
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
     }
+
 
     public String getUsernameFromToken(String token) {
         try {

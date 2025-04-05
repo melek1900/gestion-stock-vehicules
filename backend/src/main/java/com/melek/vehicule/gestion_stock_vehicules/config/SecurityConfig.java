@@ -55,6 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/login", "/auth/register", "/auth/user-profile").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/parcs").permitAll()
+                        .requestMatchers("/api/utilisateurs/marques-accessibles").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
