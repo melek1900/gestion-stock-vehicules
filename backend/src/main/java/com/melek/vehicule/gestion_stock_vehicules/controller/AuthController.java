@@ -2,6 +2,7 @@ package com.melek.vehicule.gestion_stock_vehicules.controller;
 
 import com.melek.vehicule.gestion_stock_vehicules.dto.JwtResponse;
 import com.melek.vehicule.gestion_stock_vehicules.dto.LoginRequest;
+import com.melek.vehicule.gestion_stock_vehicules.model.Marque;
 import com.melek.vehicule.gestion_stock_vehicules.model.Parc;
 import com.melek.vehicule.gestion_stock_vehicules.model.RoleUtilisateur;
 import com.melek.vehicule.gestion_stock_vehicules.model.Utilisateur;
@@ -20,9 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -60,25 +59,26 @@ public class AuthController {
             Utilisateur utilisateur = utilisateurRepository.findByEmail(loginRequest.getEmail())
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-            // ✅ Vérification de la récupération du parc de l'utilisateur
+            // ✅ Récupération du parc de travail
             String parcNom = utilisateur.getParc() != null ? utilisateur.getParc().getNom() : null;
             System.out.println("🔍 Parc récupéré depuis la base : " + parcNom);
 
-            // ✅ Vérification de la récupération des parcs accessibles
-            List<String> parcsAccesNoms = utilisateur.getParcsAcces()
-                    .stream().map(Parc::getNom)
+            // ✅ Récupération des noms des parcs accessibles
+            List<String> parcsAccesNoms = utilisateur.getParcsAcces().stream()
+                    .map(Parc::getNom)
                     .collect(Collectors.toList());
             System.out.println("🔍 Parcs accessibles récupérés : " + parcsAccesNoms);
 
-            // ✅ Vérification avant la génération du token
-            if (parcNom == null) {
-                System.out.println("❌ ERREUR : parcNom est NULL avant de générer le token !");
-            }
+            // ✅ Récupération des marques accessibles dynamiques
+            List<String> marquesAccessibles = utilisateur.getMarquesAccessibles().stream()
+                    .map(Marque::name)
+                    .collect(Collectors.toList());
+            System.out.println("🎯 Marques accessibles depuis la BDD : " + marquesAccessibles);
 
-            // ✅ Génération du token
-            String token = jwtUtil.generateToken(authentication, parcNom, parcsAccesNoms);
+            // ✅ Génération du token avec parc, parcsAcces et marquesAccessibles
+            String token = jwtUtil.generateToken(authentication, parcNom, parcsAccesNoms, marquesAccessibles);
 
-            System.out.println("✅ Token généré avec parcNom : " + parcNom);
+            System.out.println("✅ Token généré avec succès !");
             return ResponseEntity.ok(new JwtResponse(token));
 
         } catch (Exception e) {
@@ -86,6 +86,8 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("message", "⚠️ Identifiants incorrects."));
         }
     }
+
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, Object> request) {
@@ -115,9 +117,15 @@ public class AuthController {
                 parcsAcces = parcRepository.findAllById(parcsAccesIds);
             }
         }
+        List<String> marquesStr = (List<String>) request.get("marquesAccessibles");
+        Set<Marque> marquesAccessibles = marquesStr != null
+                ? marquesStr.stream().map(Marque::valueOf).collect(Collectors.toSet())
+                : new HashSet<>();
+
 
         Utilisateur utilisateur = new Utilisateur(nom, prenom, email, passwordEncoder.encode(motDePasse), RoleUtilisateur.valueOf(roleStr), parc);
         utilisateur.setParcsAcces(parcsAcces);
+        utilisateur.setMarquesAccessibles(marquesAccessibles);
 
         utilisateurRepository.save(utilisateur);
 

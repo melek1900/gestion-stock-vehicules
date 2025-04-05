@@ -39,4 +39,6 @@ public interface VehiculeRepository extends JpaRepository <Vehicule , Long> {
 
     @Query("SELECT v.statut, COUNT(v) FROM Vehicule v GROUP BY v.statut")
     List<Object[]> countVehiculesByStatut();
+    List<Vehicule> findByParcIdInAndShortDescriptionIn(List<Long> parcIds, List<String> marques);
+
 }

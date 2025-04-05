@@ -12,7 +12,7 @@ public class OrdreMission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String numeroOrdre; // ✅ Numéro unique de l'ordre (QR Code)
+    private String numeroOrdre;
     private Date dateCreation;
     @ManyToMany
     @JoinTable(

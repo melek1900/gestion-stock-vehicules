@@ -10,57 +10,17 @@ public class Vente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Date dateVente;
-    private String acheteur;
-    private String conditions;
-    private String numeroCarteGrise;
+    private long TotalVendu;
+    private String marque;
+    private String modele;
 
-    public Vehicule getVehicule() {
-        return vehicule;
+
+    public String getModele() {
+        return modele;
     }
 
-    public void setVehicule(Vehicule vehicule) {
-        this.vehicule = vehicule;
-    }
-
-    public Utilisateur getUtilisateur() {
-        return utilisateur;
-    }
-
-    public void setUtilisateur(Utilisateur utilisateur) {
-        this.utilisateur = utilisateur;
-    }
-
-    public String getNumeroCarteGrise() {
-        return numeroCarteGrise;
-    }
-
-    public void setNumeroCarteGrise(String numeroCarteGrise) {
-        this.numeroCarteGrise = numeroCarteGrise;
-    }
-
-    public String getConditions() {
-        return conditions;
-    }
-
-    public void setConditions(String conditions) {
-        this.conditions = conditions;
-    }
-
-    public String getAcheteur() {
-        return acheteur;
-    }
-
-    public void setAcheteur(String acheteur) {
-        this.acheteur = acheteur;
-    }
-
-    public Date getDateVente() {
-        return dateVente;
-    }
-
-    public void setDateVente(Date dateVente) {
-        this.dateVente = dateVente;
+    public void setModele(String modele) {
+        this.modele = modele;
     }
 
     public Long getId() {
@@ -71,12 +31,21 @@ public class Vente {
         this.id = id;
     }
 
-    @OneToOne
-    @JoinColumn(name = "vehicule_id")
-    private Vehicule vehicule;
+    public long getTotalVendu() {
+        return TotalVendu;
+    }
 
-    @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
-    private Utilisateur utilisateur;
+    public void setTotalVendu(long totalVendu) {
+        TotalVendu = totalVendu;
+    }
+
+    public String getMarque() {
+        return marque;
+    }
+
+    public void setMarque(String marque) {
+        this.marque = marque;
+    }
+
 
 }
