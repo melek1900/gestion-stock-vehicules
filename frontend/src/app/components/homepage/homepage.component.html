@@ -1,10 +1,10 @@
 <mat-card class="dashboard-container">
-
+<!-- 🎯 Dashboard spécifique pour le Gestionnaire de Stock -->
+<app-gestionnaire-stock-dashboard *ngIf="role === 'GESTIONNAIRE_STOCK'"></app-gestionnaire-stock-dashboard>
   <!-- 🎯 Liste des véhicules pour Commercial, Administrateur et Gestionnaire Application -->
   <app-vehicule-list *ngIf="role === 'COMMERCIAL' || role === 'ADMINISTRATEUR' || role === 'GESTIONNAIRE_APPLICATION'"></app-vehicule-list>
 
-  <!-- 🎯 Dashboard spécifique pour le Gestionnaire de Stock -->
-  <app-gestionnaire-stock-dashboard *ngIf="role === 'GESTIONNAIRE_STOCK'"></app-gestionnaire-stock-dashboard>
+  
 
   <!-- 🎯 Liste des avaries pour les Experts -->
   <app-reparation *ngIf="role === 'EXPERT'"></app-reparation>

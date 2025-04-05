@@ -42,7 +42,42 @@
     }
   }
 }
+.scanner-wrapper {
+  margin-bottom: 25px;
+  border: 2px dashed #F4A300;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background-color: #000;
 
+  #reader {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 280px;
+    max-height: 400px;
+    object-fit: cover;
+  }
+
+  .close-scanner {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    background-color: #F4A300;
+    color: #fff;
+    font-weight: bold;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #1c1c1c;
+      color: #F4A300;
+    }
+  }
+}
 .scanner-modal {
   position: fixed;
   inset: 0;
@@ -124,11 +159,35 @@
     }
   }
 }
+.btn-action {
+  background-color: #F4A300;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 14px;
+  text-transform: uppercase;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
+
+  mat-icon {
+    color: #fff;
+  }
+
+  &:hover {
+    background-color: #1c1c1c;
+    color: #F4A300;
+
+    mat-icon {
+      color: #F4A300;
+    }
+  }
+}
 
 .action-buttons {
-  margin-top: 30px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 25px;
 
   button {
     background-color: #ff6f00;

@@ -97,7 +97,7 @@ export class TransfertListComponent implements OnInit {
 
   recupererVehiculesSelectionnes(vehiculesIds: string) {
     const ids = vehiculesIds.split(',').map(id => parseInt(id, 10));
-    this.http.get<any[]>('http://172.20.10.8:8080/api/vehicules')
+    this.http.get<any[]>('http://localhost:8080/api/vehicules')
       .subscribe(data => {
         this.vehiculesSelectionnes = data.filter(v => ids.includes(v.id));
         this.vehicules = data.filter(v => !ids.includes(v.id));
@@ -111,7 +111,7 @@ export class TransfertListComponent implements OnInit {
       return;
     }
 
-    this.http.get<any[]>('http://172.20.10.8:8080/api/vehicules')
+    this.http.get<any[]>('http://localhost:8080/api/vehicules')
       .subscribe(data => {
         this.vehicules = data;
         this.vehiculesFiltres = data.filter(v =>
@@ -161,7 +161,7 @@ export class TransfertListComponent implements OnInit {
   }
 
   chargerParcs() {
-    this.http.get<any[]>('http://172.20.10.8:8080/api/parcs').subscribe(data => {
+    this.http.get<any[]>('http://localhost:8080/api/parcs').subscribe(data => {
       if (this.vehiculesSelectionnes.length > 0) {
         const parcActuel = this.vehiculesSelectionnes[0].parcNom;
         this.parcs = data.filter(parc =>
@@ -178,7 +178,7 @@ export class TransfertListComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>('http://172.20.10.8:8080/api/chauffeurs/disponibles', { headers })
+    this.http.get<any[]>('http://localhost:8080/api/chauffeurs/disponibles', { headers })
       .subscribe(data => {
         this.chauffeurs = data.filter(chauffeur => chauffeur.disponible);
       });
@@ -189,7 +189,7 @@ export class TransfertListComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>('http://172.20.10.8:8080/api/vehicules-transport/disponibles', { headers })
+    this.http.get<any[]>('http://localhost:8080/api/vehicules-transport/disponibles', { headers })
       .subscribe(data => {
         this.vehiculesTransport = data.filter(vehicule => vehicule.disponible);
       });
@@ -221,10 +221,10 @@ export class TransfertListComponent implements OnInit {
       utilisateurId: this.getUtilisateurIdFromToken() ?? 0
     };
 
-    this.http.post<{ ordreMissionId: number, pdfUrl: string }>('http://172.20.10.8:8080/api/ordres-mission/creer', payload, { headers })
+    this.http.post<{ ordreMissionId: number, pdfUrl: string }>('http://localhost:8080/api/ordres-mission/creer', payload, { headers })
       .subscribe(response => {
         const token = localStorage.getItem('token');
-        const pdfUrlComplet = `http://172.20.10.8:8080${response.pdfUrl}`;
+        const pdfUrlComplet = `http://localhost:8080${response.pdfUrl}`;
         this.http.get(pdfUrlComplet, {
           headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }),
           responseType: 'blob'

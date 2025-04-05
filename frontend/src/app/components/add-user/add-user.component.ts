@@ -61,7 +61,7 @@ export class AddUserComponent {
 
   chargerParcs() {
     this.loadingParcs = true;
-    this.http.get<any[]>('http://172.20.10.8:8080/api/parcs')
+    this.http.get<any[]>('http://localhost:8080/api/parcs')
       .subscribe({
         next: (data) => {
           // ✅ Exclure "TRANSFERT" et "AUPORT" du parc de travail
@@ -90,7 +90,7 @@ export class AddUserComponent {
       formData.prenom = formData.prenom.trim();
       formData.email = formData.email.trim();
 
-      this.http.post('http://172.20.10.8:8080/auth/register', formData, { responseType: 'text' })
+      this.http.post('http://localhost:8080/auth/register', formData, { responseType: 'text' })
       .subscribe({
         next: (response) => {
           console.log('✅ Inscription réussie', response);

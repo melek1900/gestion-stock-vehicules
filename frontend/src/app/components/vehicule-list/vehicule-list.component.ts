@@ -52,11 +52,11 @@ import { MatInputModule } from '@angular/material/input';
 export class VehiculeListComponent implements OnInit {
   displayedColumns: string[] = [
     'select',
-    'productionDate',
-    'numeroChassis',
     'shortDescription',
     'modele',
     'shortColor',
+    'numeroChassis',
+    'productionDate',
     'statut',
     'parcNom',
     'actions'
@@ -74,7 +74,10 @@ export class VehiculeListComponent implements OnInit {
   StatutVehicule = StatutVehicule; 
   StatutTransfert = StatutTransfert;
   parcId: number | null = null;
-
+  isOrdreMission:Boolean=false;
+  marquesAccessibles: string[] = [];
+  marquesDisponibles: string[] = [];
+  selectedMarques: string[] = [];
   selectedParcs: string[] = [];
   parcsAccessibles: any[] = [];
   searchQuery: string = '';
@@ -86,54 +89,82 @@ export class VehiculeListComponent implements OnInit {
 
   vehiculesSelectionnes: any[] = []; // Stocke les véhicules sélectionnés
   ngOnInit(): void {
+    // Récupère le rôle, les marques et le parc depuis le token
     this.recupererRoleUtilisateur();
-  this.getParcId();
-  this.chargerParcsAccessibles();
-  setTimeout(() => {
-    this.chargerVehicules();
-  }, 300);
-  if (this.selectedParcs.length === 0 && this.parcId) {
-    this.selectedParcs = [this.parcsAccessibles.find(p => p === this.obtenirParcAssocie()) || ''];
+  
+    // Récupère l'ID du parc associé
+    this.getParcId();
+  
+    // Tente de charger les parcs accessibles depuis le token, sinon fallback API
+    this.chargerParcsAccessibles();
+  
+    // Si aucune marque sélectionnée, on pré-remplit avec celles accessibles
+    if (this.selectedMarques.length === 0 && this.marquesAccessibles.length > 0) {
+      this.selectedMarques = [...this.marquesAccessibles];
+    }
+  
+    // Attend un petit délai pour garantir que les parcs sont chargés avant
+    setTimeout(() => {
+      // Charge les véhicules selon le token (filtrage automatique côté backend)
+      this.chargerVehicules();
+  
+      // Pré-remplit les parcs sélectionnés avec le parc utilisateur
+      const parcNom = this.obtenirParcAssocie();
+      if (this.selectedParcs.length === 0 && parcNom) {
+        this.selectedParcs = [parcNom];
+      }
+    }, 300);
   }
-  }
+  
+  
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
   chargerParcsAccessibles() {
     const token = localStorage.getItem('token');
     if (!token) {
-      console.warn("⚠️ Aucun token trouvé, impossible de charger les parcs !");
+      console.warn("⚠️ Aucun token trouvé, fallback API...");
+      this.recupererParcsDepuisAPI();
       return;
     }
   
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      console.log("🔍 Payload du token :", payload);
   
-      if (payload.parcsAcces && payload.parcsAcces.length > 0) {
-        this.parcsAccessibles = payload.parcsAcces; // ✅ Récupération depuis le token
-        console.log("🌍 Parcs accessibles chargés depuis le token :", this.parcsAccessibles);
-      } else {
-        console.warn("⚠️ Aucun parc trouvé dans le token, récupération via API...");
-        this.recupererParcsDepuisAPI(); // ✅ Si vide, on les récupère via API
+      // ⚠️ Ici il faut bien vérifier si le champ est un tableau d’objets { id, nom }
+      if (Array.isArray(payload.parcsAcces)) {
+        // Si tableau de strings => transformation en [{ nom: '...' }]
+        if (typeof payload.parcsAcces[0] === 'string') {
+          this.parcsAccessibles = payload.parcsAcces.map((nom: string) => ({ nom }));
+        } 
+        // Si déjà un tableau d’objets
+        else if (payload.parcsAcces[0].nom) {
+          this.parcsAccessibles = payload.parcsAcces;
+        }
       }
-    } catch (error) {
-      console.error("❌ Erreur lors du décodage du token :", error);
-      this.recupererParcsDepuisAPI(); // ✅ Fallback pour récupérer les parcs via API
+    } catch (err) {
+      console.error("❌ Erreur décodage token :", err);
+      this.recupererParcsDepuisAPI();
     }
   }
   
-  // ✅ Fallback pour récupérer les parcs via une requête API
+  
+  
+  
+  
   recupererParcsDepuisAPI() {
-    this.http.get<any[]>('http://172.20.10.8:8080/api/utilisateurs/parcs-accessibles')
+    this.http.get<any[]>('http://localhost:8080/api/utilisateurs/parcs-accessibles')
       .subscribe({
         next: (parcs) => {
-          this.parcsAccessibles = parcs.map(p => p.nom); // ✅ Stocke les noms des parcs
-          console.log("✅ Parcs accessibles récupérés via API :", this.parcsAccessibles);
+          this.parcsAccessibles = parcs;
+          console.log("✅ Parcs accessibles via API :", parcs);
         },
-        error: (err) => console.error("❌ Erreur lors de la récupération des parcs accessibles :", err)
+        error: (err) => {
+          console.error("❌ Erreur API parcs accessibles :", err);
+        }
       });
   }
+  
   
   naviguerVersTransfert() {
     if (this.selection.selected.length === 0) {
@@ -155,14 +186,23 @@ export class VehiculeListComponent implements OnInit {
       this.userRole = payload.role;
       const parcUtilisateur = payload.parcNom || null;
   
-      console.log('🔑 Rôle:', this.userRole);
-      console.log('📍 Parc utilisateur:', parcUtilisateur);
+      this.marquesAccessibles = payload.marquesAccessibles || [];
+  
+      if (this.userRole === 'ROLE_GESTIONNAIRE_APPLICATION') {
+        this.isOrdreMission = true;
+      }
   
       if (parcUtilisateur) {
-        this.selectedParcs = [parcUtilisateur]; // ✅ Sélectionne automatiquement le parc de l'utilisateur
+        this.selectedParcs = [parcUtilisateur];
+      }
+  
+      // Ajout automatique des parcs accessibles formatés { nom: '...' }
+      if (Array.isArray(payload.parcsAcces)) {
+        this.parcsAccessibles = payload.parcsAcces.map((nom: string) => ({ nom }));
       }
     }
   }
+  
   ouvrirPopupLivraison(vehicule: any) {
     console.log("📌 Livraison du véhicule :", vehicule);
     this.ouvrirPopup(vehicule); // 🔥 Pour l’instant, utiliser la même popup
@@ -182,14 +222,28 @@ export class VehiculeListComponent implements OnInit {
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        this.parcsAccessibles = payload.parcsAcces || [];
-        console.log("🌍 Parcs accessibles:", this.parcsAccessibles);
+        if (Array.isArray(payload.parcsAcces)) {
+          this.parcsAccessibles = payload.parcsAcces.map((nom: string) => ({ nom }));
+          console.log("🌍 Parcs accessibles depuis token :", this.parcsAccessibles);
+          return;
+        }
       } catch (error) {
         console.error("❌ Erreur lors du décodage du token:", error);
       }
     }
+  
+    // Fallback si erreur
+    this.http.get<any[]>('http://localhost:8080/api/utilisateurs/parcs-accessibles').subscribe({
+      next: (parcs) => {
+        this.parcsAccessibles = parcs;
+        console.log("✅ Parcs accessibles via API :", parcs);
+      },
+      error: (err) => {
+        console.error("❌ Erreur API parcs accessibles :", err);
+      }
+    });
   }
-
+  
   isReceptionPossible(): boolean {
     console.log("🛠️ Vérification du bouton Réceptionner...");
     console.log("📌 Véhicules sélectionnés :", this.selection.selected);
@@ -245,26 +299,33 @@ chargerVehicules() {
     'Authorization': `Bearer ${token}`
   });
 
-  const apiUrl = `http://172.20.10.8:8080/api/vehicules`;
+  const apiUrl = `http://localhost:8080/api/vehicules`;
 
   this.http.get<Vehicule[]>(apiUrl, { headers }).subscribe({
     next: (data) => {
-      console.log("📡 Véhicules reçus :", JSON.stringify(data, null, 2)); // 🔍 Vérification détaillée
+      console.log("📡 Véhicules reçus :", JSON.stringify(data, null, 2));
 
       this.vehicules = data.map(v => ({
         ...v,
-        parcNom: mappingParcNom[v.parcId] || 'Parc Inconnu', // ✅ Utilisation de parcId seulement
-        productionDate: v.productionDate ? new Date(v.productionDate).toISOString().split('T')[0] : '',
+        parcNom: mappingParcNom[v.parcId] || 'Parc Inconnu',
+        productionDate: v.productionDate ? new Date(v.productionDate) : null,
         shortColor: v.shortColor || 'Non défini',
         shortDescription: v.shortDescription || 'Non défini',
       }));
 
-      // ✅ Vérifie la pagination après le chargement des véhicules
+      // ✅ Extraire toutes les marques présentes dans les véhicules
+      this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription))];
+
+      // ✅ Sélectionne par défaut les marques accessibles si rien n’est sélectionné
+      if (this.selectedMarques.length === 0 && this.marquesAccessibles.length > 0) {
+        this.selectedMarques = [...this.marquesAccessibles];
+      }
+
+      // ✅ Appliquer les filtres
       if (this.paginator) {
         this.dataSource.paginator = this.paginator;
       }
 
-      // ✅ Appliquer les filtres immédiatement après le chargement
       this.filtrerVehicules();
       this.cdr.detectChanges();
     },
@@ -273,7 +334,6 @@ chargerVehicules() {
     }
   });
 }
-
 
 
 
@@ -318,32 +378,38 @@ getParcId() {
 
 
 filtrerVehicules() {
-  console.log(`📢 Filtrage appliqué : Parcs=${this.selectedParcs}, Statut=${this.selectedStatut}, Recherche=${this.searchQuery}`);
+  const searchLower = this.searchQuery?.trim().toLowerCase() || '';
 
   this.vehiculesFiltres = this.vehicules.filter(vehicule => {
+    // ✅ Première barrière : marques autorisées (token)
+    const isAccessible = this.marquesAccessibles.length === 0 || this.marquesAccessibles.includes(vehicule.shortDescription);
+    if (!isAccessible) return false;
+
     const matchParc = this.selectedParcs.length === 0 || this.selectedParcs.includes(vehicule.parcNom);
     const matchStatut = this.selectedStatut === 'all' || vehicule.statut?.toUpperCase() === this.selectedStatut.toUpperCase();
-    
-    const matchSearch =
-    
-      !this.searchQuery || 
-      vehicule.numeroChassis.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
-      vehicule.shortColor.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      vehicule.shortDescription.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-    return matchParc && matchStatut && matchSearch;
+    const matchChassis = vehicule.numeroChassis?.toLowerCase().includes(searchLower);
+    const matchMarque = this.selectedMarques.length === 0 || this.selectedMarques.includes(vehicule.shortDescription);
+    const matchModele = vehicule.modele?.toLowerCase().includes(searchLower);
+    const matchCouleur = vehicule.shortColor?.toLowerCase().includes(searchLower);
+
+    let matchDate = false;
+    if (vehicule.productionDate instanceof Date && !isNaN(vehicule.productionDate)) {
+      const formattedDate = new Intl.DateTimeFormat('fr-FR').format(vehicule.productionDate);
+      matchDate = formattedDate.toLowerCase().includes(searchLower);
+    }
+
+    const matchSearch =
+      !searchLower || matchChassis || matchMarque || matchModele || matchCouleur || matchDate;
+
+    return matchParc && matchMarque && matchStatut && matchSearch;
   });
 
-  console.log("📡 Véhicules après filtrage :", this.vehiculesFiltres);
-
-  // ✅ Mise à jour de la source de données pour appliquer la pagination
   this.dataSource.data = this.vehiculesFiltres;
-
-  // ✅ Réinitialise la pagination à la première page après filtrage
-  if (this.paginator) {
-    this.paginator.firstPage();
-  }
+  if (this.paginator) this.paginator.firstPage();
 }
+
+
 toggleParcSelection(parc: string) {
   if (this.selectedParcs.includes(parc)) {
     this.selectedParcs = this.selectedParcs.filter(p => p !== parc);
@@ -360,7 +426,7 @@ toggleParcSelection(parc: string) {
 
     console.log('📡 Envoi de la requête DELETE pour ID :', id);
 
-    this.http.delete(`http://172.20.10.8:8080/api/vehicules/${id}`).subscribe({
+    this.http.delete(`http://localhost:8080/api/vehicules/${id}`).subscribe({
         next: () => {
             console.log('✅ Véhicule supprimé avec succès !');
             this.chargerVehicules();
@@ -392,7 +458,7 @@ ouvrirPopup(vehicule: any) {
 }
 
   deleteVehicule(id: number) {
-    this.http.delete(`http://172.20.10.8:8080/api/vehicules/${id}`).subscribe(() => {
+    this.http.delete(`http://localhost:8080/api/vehicules/${id}`).subscribe(() => {
       this.chargerVehicules();
     });
   }
@@ -436,7 +502,7 @@ ouvrirPopup(vehicule: any) {
 
     console.log('📡 Envoi de la requête PUT pour la modif :', vehicule.id);
 
-    this.http.put(`http://172.20.10.8:8080/api/vehicules/${vehicule.id}`, formData, { headers }).subscribe({
+    this.http.put(`http://localhost:8080/api/vehicules/${vehicule.id}`, formData, { headers }).subscribe({
         next: () => {
             console.log('✅ Véhicule mis à jour avec succès !');
             this.chargerVehicules();
@@ -455,7 +521,7 @@ receptionnerTransfert(vehiculeId: number) {
     return;
   }
 
-  this.http.put<{ message: string }>(`http://172.20.10.8:8080/api/transferts/receptionner/${vehiculeId}`, {}).subscribe({
+  this.http.put<{ message: string }>(`http://localhost:8080/api/transferts/receptionner/${vehiculeId}`, {}).subscribe({
     next: (response) => {
       console.log("✅ Réponse API :", response);
 
@@ -482,7 +548,7 @@ initierTransfert() {
   }
 
   const vehiculeIds = this.selection.selected.map(v => v.id);
-  this.http.post<{ message: string }>('http://172.20.10.8:8080/api/transferts/initier', {
+  this.http.post<{ message: string }>('http://localhost:8080/api/transferts/initier', {
     vehiculeIds,
     parcDestinationId: 2
   }).subscribe(response => {
@@ -505,7 +571,7 @@ mettreAJourPreparation(preparation: any) {
     remarques: preparation.remarques
   };
 
-  this.http.post('http://172.20.10.8:8080/api/vehicules/preparation', payload).subscribe({
+  this.http.post('http://localhost:8080/api/vehicules/preparation', payload).subscribe({
     next: () => {
       console.log('✅ Préparation mise à jour avec succès !');
       this.chargerVehicules(); // ✅ Recharge la liste après mise à jour

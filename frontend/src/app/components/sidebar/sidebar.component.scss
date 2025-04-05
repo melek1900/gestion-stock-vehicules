@@ -1,7 +1,9 @@
 .sidebar {
+  display: flex;
+  flex-direction: column;
   width: 200px;
-  background-color: white;
-  color: #3D3D3D;
+  background-color: #003366; // Nouveau fond bleu foncé
+  color: #FFFFFF; // Texte blanc
   height: 100vh;
   padding: 1rem;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
@@ -34,7 +36,7 @@
         justify-content: space-between;
         gap: 0.5rem;
         background: transparent;
-        color: #3D3D3D;
+        color: #FFFFFF; // texte blanc
         border: none;
         width: 100%;
         padding: 0.7rem 1rem;
@@ -44,10 +46,11 @@
 
         mat-icon {
           font-size: 20px;
+          color: #FFFFFF; // icône blanche
         }
 
         &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: #0073A8; // hover bleu clair
         }
 
         span {
@@ -69,9 +72,11 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 14px;
+            color: #FFFFFF;
 
             mat-icon {
               font-size: 18px;
+              color: #FFFFFF;
             }
           }
         }
@@ -80,6 +85,7 @@
       .chevron {
         font-size: 18px;
         transition: transform 0.3s ease;
+        color: #FFFFFF;
       }
 
       .chevron.rotate {
@@ -88,23 +94,23 @@
     }
   }
 
-  // ✅ LOGOS en bas de la sidebar
   .sidebar-logos {
+    margin-top: auto; 
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    margin-top: auto;
     padding-top: 1rem;
+    padding-bottom: 25px;
 
     img {
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       object-fit: contain;
       background-color: white;
       padding: 4px;
       border-radius: 6px;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1); // Optionnel pour plus de style
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
     }
   }
 }
@@ -115,26 +121,16 @@
   gap: 8px;
   padding: 8px 16px;
   cursor: pointer;
-  color: inherit;
+  color: #FFFFFF;
   text-decoration: none;
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.06);
+    background-color: #0073A8;
   }
 
   mat-icon {
     font-size: 20px;
-  }
-}
-
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+    color: #FFFFFF;
   }
 }

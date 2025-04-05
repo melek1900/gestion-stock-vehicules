@@ -32,6 +32,7 @@ export class RegisterComponent implements OnInit {
   parcs: any[] = [];
   parcsAcces: any[] = [];
   loadingParcs: boolean = false;
+  marquesDisponibles: string[] = [];
 
   roles = [
     { label: 'Administrateur', value: 'ROLE_ADMINISTRATEUR' },
@@ -54,17 +55,32 @@ export class RegisterComponent implements OnInit {
       motDePasse: ['', [Validators.required, Validators.minLength(6)]],
       role: ['', Validators.required],
       parc: ['', Validators.required],
-      parcsAcces: [[]]
+      parcsAcces: [[]],
+      marquesAccessibles: [[]]
     });
   }
 
   ngOnInit(): void {
     this.chargerParcs();
-  }
+    this.chargerMarques();
 
+  }
+  chargerMarques() {
+    this.http.get<string[]>('http://localhost:8080/api/utilisateurs/marques-accessibles')
+      .subscribe({
+        next: (data) => {
+          this.marquesDisponibles = data;
+          console.log("✅ Marques chargées :", data);
+        },
+        error: (err) => {
+          console.error("❌ Erreur chargement marques:", err);
+        }
+      });
+  }
+  
   chargerParcs() {
     this.loadingParcs = true;
-    this.http.get<any[]>('http://172.20.10.8:8080/api/parcs')
+    this.http.get<any[]>('http://localhost:8080/api/parcs')
       .subscribe({
         next: (data) => {
           // ✅ Exclure "TRANSFERT" et "AUPORT" du parc de travail
@@ -94,7 +110,7 @@ export class RegisterComponent implements OnInit {
       formData.prenom = formData.prenom.trim();
       formData.email = formData.email.trim();
 
-      this.http.post('http://172.20.10.8:8080/auth/register', formData, { responseType: 'text' })
+      this.http.post('http://localhost:8080/auth/register', formData, { responseType: 'text' })
       .subscribe({
         next: (response) => {
           console.log('✅ Inscription réussie', response);

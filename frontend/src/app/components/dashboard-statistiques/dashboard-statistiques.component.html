@@ -1,7 +1,74 @@
 
 <!-- 📊 Grid des charts -->
 <div class="charts-grid">
+  <div class="chart-container" appScrollAnimate>
+    <div class="marque-filter-inline">
+      <select id="marqueSelect" [(ngModel)]="selectedMarque" (change)="onMarqueChange()">
+        <option *ngFor="let marque of marquesDisponibles" [value]="marque">{{ marque }}</option>
+      </select>
+    </div>
   
+    <apx-chart
+      *ngIf="venteParModelePieChartOptions?.series?.length"
+      [series]="venteParModelePieChartOptions.series!"
+      [chart]="venteParModelePieChartOptions.chart!"
+      [labels]="venteParModelePieChartOptions.labels!"
+      [title]="venteParModelePieChartOptions.title!"
+      [dataLabels]="venteParModelePieChartOptions.dataLabels!"
+      [legend]="venteParModelePieChartOptions.legend!"
+      [colors]="venteParModelePieChartOptions.colors!"
+    ></apx-chart>
+  </div>
+<!-- 📊 Ventes par genre - Nos marques avec filtre -->
+<div class="chart-container" appScrollAnimate>
+  <div class="marque-filter-inline">
+    <mat-form-field appearance="outline" class="marque-filter-multi">
+      <mat-label>Marques</mat-label>
+      <mat-select [(ngModel)]="selectedMarques" multiple (selectionChange)="onNosMarquesChange()">
+        <mat-option *ngFor="let marque of marquesDisponibles" [value]="marque">
+          {{ marque }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <apx-chart
+    *ngIf="genreNosChartOptions?.series?.length"
+    [series]="genreNosChartOptions.series!"
+    [chart]="genreNosChartOptions.chart!"
+    [xaxis]="genreNosChartOptions.xaxis!"
+    [title]="genreNosChartOptions.title!"
+    [dataLabels]="genreNosChartOptions.dataLabels!"
+    [colors]="genreNosChartOptions.colors!"
+    [plotOptions]="genreNosChartOptions.plotOptions!"
+    [legend]="genreNosChartOptions.legend!"
+  ></apx-chart>
+</div>
+
+<!-- 📊 Ventes par genre - Concurrence -->
+<div class="chart-container" *ngIf="genreConcurChartOptions.series?.length" appScrollAnimate>
+  <div class="marque-filter-inline">
+    <mat-form-field appearance="outline" class="marque-filter-multi">
+      <mat-label>Filtrer concurrence</mat-label>
+      <mat-select [(ngModel)]="selectedMarquesConcur" multiple (selectionChange)="onConcurMarquesChange()">
+        <mat-option *ngFor="let marque of marquesConcurDisponibles" [value]="marque">
+          {{ marque }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <apx-chart
+    [series]="genreConcurChartOptions.series!"
+    [chart]="genreConcurChartOptions.chart!"
+    [xaxis]="genreConcurChartOptions.xaxis!"
+    [title]="genreConcurChartOptions.title!"
+    [dataLabels]="genreConcurChartOptions.dataLabels!"
+    [colors]="genreConcurChartOptions.colors!"
+    [plotOptions]="genreConcurChartOptions.plotOptions!"
+  ></apx-chart>
+</div>
+
+
   <!-- 📊 Graphique par parc -->
   <div class="chart-container" *ngIf="hasParcData()" appScrollAnimate>
     <apx-chart
@@ -14,7 +81,9 @@
       [plotOptions]="chartOptions.plotOptions!"
     ></apx-chart>
   </div>
-
+  
+  
+  
   <!-- 📊 Graphique par marque -->
   <div class="chart-container" *ngIf="hasMarqueData()" appScrollAnimate>
     <apx-chart

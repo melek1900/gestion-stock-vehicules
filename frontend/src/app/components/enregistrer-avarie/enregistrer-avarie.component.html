@@ -1,128 +1,126 @@
-<mat-card class="vehicule-form">
-    <form [formGroup]="form" (ngSubmit)="enregistrerVehicule()" enctype="multipart/form-data">
-      
-      <!-- ✅ Scanner QR Code -->
-      <mat-form-field class="full-width">
-        <mat-label>Numéro de Châssis</mat-label>
-        <input matInput formControlName="numeroChassis" required />
+<mat-card class="vehicule-form" [ngClass]="{ 'gestionnaire-theme': isGestionnaire }">
+  <form [formGroup]="form" (ngSubmit)="enregistrerVehicule()" enctype="multipart/form-data">
+
+    <!-- ✅ Numéro de châssis (prérenseigné avec qrResult) -->
+    <mat-form-field class="full-width">
+      <mat-label>Numéro de Châssis</mat-label>
+      <input matInput formControlName="numeroChassis" [value]="qrResult" required />
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Modèle</mat-label>
+      <input matInput formControlName="modele" required />
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Couleur</mat-label>
+      <input matInput formControlName="couleur" required />
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Description</mat-label>
+      <input matInput formControlName="description" required />
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Moteur (Engine)</mat-label>
+      <input matInput formControlName="engine" required />
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Code Clé (Key Code)</mat-label>
+      <input matInput formControlName="keyCode" required />
+    </mat-form-field>
+
+    <!-- ✅ Section Avaries -->
+    <h3>Avaries détectées</h3>
+
+    <div formArrayName="avaries">
+      <div *ngFor="let avarie of avaries.controls; let i = index" [formGroupName]="i" class="avarie-container">
+
+        <mat-form-field class="full-width">
+          <mat-label>Type d'avarie</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let type of typesAvaries" [value]="type">{{ type }}</mat-option>
+          </mat-select>
         </mat-form-field>
-  
-      <mat-form-field class="full-width">
-        <mat-label>Modèle</mat-label>
-        <input matInput formControlName="modele" required />
-      </mat-form-field>
-  
-      <mat-form-field class="full-width">
-        <mat-label>Couleur</mat-label>
-        <input matInput formControlName="couleur" required />
-      </mat-form-field>
-  
-     
-      <mat-form-field class="full-width">
-        <mat-label>Description</mat-label>
-        <input matInput formControlName="description" required />
-      </mat-form-field>
-      
-  
-      
-      <h3>Avaries détectées</h3>
-  
-      <!-- ✅ Liste des avaries ajoutées (avant confirmation) -->
-      <div formArrayName="avaries">
-        <div *ngFor="let avarie of avaries.controls; let i = index" [formGroupName]="i" class="avarie-container">
-          
-          <mat-form-field class="full-width">
-            <mat-label>Type d'avarie</mat-label>
-            <mat-select formControlName="type">
-              <mat-option *ngFor="let type of typesAvaries" [value]="type">{{ type }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-  
-          <mat-form-field class="full-width">
-            <mat-label>Commentaire</mat-label>
-            <input matInput formControlName="commentaire" />
-          </mat-form-field>
-  
-          <!-- ✅ Photos de l'avarie -->
-          <div class="photo-container">
-            <h4>Photos</h4>
-  
-            <input type="file" #fileInput (change)="onFileChange($event, i)" accept="image/*" multiple hidden />
-            <button mat-button color="primary" (click)="fileInput.click()" type="button">
-              📸 Ajouter une Photo
-            </button>
-  
-            <div *ngIf="photoPreviews[i]?.length" class="photo-preview">
-              <div *ngFor="let photo of photoPreviews[i]; let j = index" class="photo-preview-item">
-                <img [src]="photo" alt="Photo avarie" (click)="ouvrirImage(photo)" />
-                <button mat-icon-button color="warn" (click)="removePhoto(i, j)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
+
+        <mat-form-field class="full-width">
+          <mat-label>Commentaire</mat-label>
+          <input matInput formControlName="commentaire" />
+        </mat-form-field>
+
+        <!-- ✅ Photos de l'avarie -->
+        <div class="photo-container">
+          <h4>Photos</h4>
+
+          <input type="file" #fileInput (change)="onFileChange($event, i)" accept="image/*" multiple hidden />
+          <button mat-button color="primary" (click)="fileInput.click()" type="button">
+            📸 Ajouter une Photo
+          </button>
+
+          <div *ngIf="photoPreviews[i]?.length" class="photo-preview">
+            <div *ngFor="let photo of photoPreviews[i]; let j = index" class="photo-preview-item">
+              <img [src]="photo" alt="Photo avarie" (click)="ouvrirImage(photo)" />
+              <button mat-icon-button color="warn" (click)="removePhoto(i, j)">
+                <mat-icon>delete</mat-icon>
+              </button>
             </div>
-  
-            <button mat-button color="primary" (click)="openCamera(i)" type="button">
-              📷 Ouvrir la Caméra
-            </button>
           </div>
-  
-          <!-- ✅ Actions sur l'avarie -->
-          <div class="actions">
-            <button mat-button color="warn" (click)="supprimerAvarie(i)" type="button">
-              ❌ Supprimer
-            </button>
-            <button mat-button color="accent" (click)="confirmerAvarie(i)" type="button">
-              ✅ Confirmer
-            </button>
-          </div>
-  
+
+          <button mat-button color="primary" (click)="openCamera(i)" type="button">
+            📷 Ouvrir la Caméra
+          </button>
         </div>
-      </div>
-  
-      <button mat-raised-button color="accent" (click)="ajouterAvarie()" type="button">
-        ➕ Ajouter une Avarie
-      </button>
-  
-      <!-- ✅ Liste des avaries confirmées -->
-      <h3>Avaries confirmées</h3>
-      <div *ngFor="let avarie of avariesConfirmees; let i = index" class="confirmed-avarie">
-        <p>🛠️ <b>{{ avarie.type }}</b> - {{ avarie.commentaire }}</p>
-      
-        <!-- ✅ Affichage des photos associées -->
-        <div *ngIf="avarie.photos?.length" class="photo-preview">
-          <div *ngFor="let photo of avarie.photos; let j = index" class="photo-preview-item">
-            <img [src]="photo" alt="Photo avarie" (click)="ouvrirImage(photo)" />
-          </div>
+
+        <!-- ✅ Actions sur avarie -->
+        <div class="actions">
+          <button mat-button color="warn" (click)="supprimerAvarie(i)" type="button">❌ Supprimer</button>
+          <button mat-button color="accent" (click)="confirmerAvarie(i)" type="button">✅ Confirmer</button>
         </div>
-      
-        <button mat-button color="warn" (click)="supprimerAvarieConfirmee(i)" type="button">
-          ❌ Supprimer
-        </button>
-      </div>
-  
-      <div class="submit-container">
-        <button mat-raised-button color="primary" type="submit">
-          ✅ Valider Avarie
-        </button>
-      </div>
-    </form>
-  </mat-card>
-  
-  <!-- ✅ Caméra Modal -->
-  <div *ngIf="isCameraOpen" class="camera-modal">
-    <div class="camera-content">
-      <video #videoElement autoplay></video>
-      <div class="camera-buttons">
-        <button mat-button (click)="capturePhoto(activeIndex || 0)">📸 Capturer</button>
-        <button mat-button color="warn" (click)="closeCamera()">❌ Fermer</button>
-        <button mat-button color="primary" (click)="toggleCamera(activeIndex || 0)">🔄 Changer Caméra</button>
+
       </div>
     </div>
+
+    <button mat-raised-button color="accent" (click)="ajouterAvarie()" type="button">
+      ➕ Ajouter une Avarie
+    </button>
+
+    <!-- ✅ Avaries confirmées -->
+    <h3>Avaries confirmées</h3>
+    <div *ngFor="let avarie of avariesConfirmees; let i = index" class="confirmed-avarie">
+      <p>🛠️ <b>{{ avarie.type }}</b> - {{ avarie.commentaire }}</p>
+
+      <div *ngIf="avarie.photos?.length" class="photo-preview">
+        <div *ngFor="let photo of avarie.photos; let j = index" class="photo-preview-item">
+          <img [src]="photo" alt="Photo avarie" (click)="ouvrirImage(photo)" />
+        </div>
+      </div>
+
+      <button mat-button color="warn" (click)="supprimerAvarieConfirmee(i)" type="button">
+        ❌ Supprimer
+      </button>
+    </div>
+
+    <div class="submit-container">
+      <button mat-raised-button color="primary" type="submit">✅ Valider Avarie</button>
+    </div>
+  </form>
+</mat-card>
+
+<div *ngIf="isCameraOpen" class="camera-modal">
+  <div class="camera-content">
+    <video #videoElement autoplay></video>
+    <div class="camera-buttons">
+      <button mat-button (click)="capturePhoto(activeIndex || 0)">📸 Capturer</button>
+      <button mat-button color="warn" (click)="closeCamera()">❌ Fermer</button>
+      <button mat-button color="primary" (click)="toggleCamera(activeIndex || 0)">🔄 Changer Caméra</button>
+    </div>
   </div>
-  
-  <!-- ✅ Modal pour afficher l'image en plein écran -->
-  <div *ngIf="imageAgrandie" class="image-modal" (click)="fermerImage()">
-    <img [src]="imageAgrandie" alt="Image agrandie">
-    <button (click)="fermerImage()">✖</button>
-  </div>
-  
+</div>
+
+<!-- ✅ Modal pour afficher l'image en plein écran -->
+<div *ngIf="imageAgrandie" class="image-modal" (click)="fermerImage()">
+  <img [src]="imageAgrandie" alt="Image agrandie">
+  <button (click)="fermerImage()">✖</button>
+</div>

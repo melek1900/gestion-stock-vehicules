@@ -3,10 +3,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 24px;
     padding: 40px 20px;
-    min-height: 100vh;
+    min-height: auto;
+    margin-top: 40px;
     background: linear-gradient(to bottom right, #f9f9f9, #f2f2f2); // gris clair doux
   }
   

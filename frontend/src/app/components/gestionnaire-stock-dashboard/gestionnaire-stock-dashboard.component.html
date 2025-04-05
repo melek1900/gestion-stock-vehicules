@@ -1,8 +1,8 @@
 <div class="dashboard-container">
-    <button mat-raised-button color="accent" class="dashboard-btn" (click)="naviguerVersImport()">
+    <!-- <button mat-raised-button color="accent" class="dashboard-btn" (click)="naviguerVersImport()">
         <mat-icon>file_upload</mat-icon>
         Importer des Véhicules
-    </button>
+    </button> -->
    
     <button mat-raised-button color="primary" class="dashboard-btn" (click)="naviguerVersReception()">
         <mat-icon>directions_car</mat-icon>
@@ -13,10 +13,7 @@
         Créer Avarie
     </button>
     
-    <button mat-raised-button color="warn" class="dashboard-btn" (click)="naviguerVersOrdresMissions()">
-        <mat-icon>inventory_2</mat-icon>
-        Liste Ordre Missions 
-    </button>
+   
     <button mat-raised-button color="warn" class="dashboard-btn" (click)="naviguerVersPrelevementLivraison()">
         <mat-icon>inventory_2</mat-icon>
         Prélèvement
@@ -25,5 +22,9 @@
     <button mat-raised-button color="warn" class="dashboard-btn" (click)="naviguerVersPrelevementLivraison()">
         <mat-icon>local_shipping</mat-icon>
          Livraison
+    </button>
+    <button mat-raised-button color="warn" class="dashboard-btn" (click)="naviguerVersOrdresMissions()">
+        <mat-icon>inventory_2</mat-icon>
+        Liste Ordre Missions 
     </button>
 </div>

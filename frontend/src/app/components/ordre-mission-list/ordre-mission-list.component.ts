@@ -35,12 +35,33 @@ export class OrdreMissionListComponent implements OnInit {
   ordresMissionFiltres: any[] = []; // ✅ Liste filtrée
   recherche: string = '';  // ✅ Stocke la valeur de la recherche
   filtrerOrdres() {
+    const rechercheLower = this.recherche.trim().toLowerCase();
+  
     this.ordresMissionFiltres = this.ordresMission.filter(ordre => {
       const statutMatch = this.statutFiltre ? ordre.statut === this.statutFiltre : true;
-      const rechercheMatch = this.recherche.trim() ? ordre.numeroOrdre.toLowerCase().includes(this.recherche.toLowerCase()) : true;
+  
+      const numeroMatch = ordre.numeroOrdre?.toLowerCase().includes(rechercheLower);
+  
+      const chauffeurMatch =
+        ordre.chauffeur?.nom?.toLowerCase().includes(rechercheLower) ||
+        ordre.chauffeur?.prenom?.toLowerCase().includes(rechercheLower);
+  
+      const vehiculeMatch =
+        ordre.vehiculeTransport?.matricule?.toLowerCase().includes(rechercheLower) ||
+        ordre.vehiculeTransport?.type?.toLowerCase().includes(rechercheLower);
+  
+      let dateMatch = false;
+      if (ordre.dateCreation instanceof Date && !isNaN(ordre.dateCreation)) {
+        const formattedDate = new Intl.DateTimeFormat('fr-FR').format(ordre.dateCreation); // ex: 04/04/2025
+        dateMatch = formattedDate.toLowerCase().includes(rechercheLower);
+      }
+  
+      const rechercheMatch = !rechercheLower || numeroMatch || chauffeurMatch || vehiculeMatch || dateMatch;
+  
       return statutMatch && rechercheMatch;
     });
   }
+  
   ngOnInit() {
     this.chargerOrdresMission();
   }
@@ -51,7 +72,7 @@ export class OrdreMissionListComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.get<any[]>('http://172.20.10.8:8080/api/ordres-mission', { headers }).subscribe({
+    this.http.get<any[]>('http://localhost:8080/api/ordres-mission', { headers }).subscribe({
       next: (data) => {
         this.ordresMission = data.map(ordre => ({
           ...ordre,

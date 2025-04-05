@@ -1,10 +1,10 @@
-$title-color: #2c2c2c;
-$subtitle-color: #6e6e6e;
-$bg-light: #f5f5f5;
-$primary-color: #F4A300;
-$secondary-color: #C4C4C4;
+$title-color: #003366;
+$subtitle-color: #0073A8;
+$bg-light: #f5f9fc;
+$primary-color: #0073A8;
+$secondary-color: #E0E0E0;
 $danger-color: #e74c3c;
-$dark-color: #1c1c1c;
+$dark-color: #003366;
 
 .title {
   margin-bottom: 1rem;
@@ -34,7 +34,7 @@ $dark-color: #1c1c1c;
   flex-wrap: wrap;
 
   .kpi-card {
-    background: linear-gradient(to right, #1c1c1c, #2c3e50);
+    background: linear-gradient(to right, #003366, #005792);
     color: white;
     padding: 1rem 2rem;
     border-radius: 16px;
@@ -51,12 +51,13 @@ $dark-color: #1c1c1c;
       margin: 0;
       font-size: 32px;
       font-weight: bold;
+      color: white;
     }
 
     p {
       margin: 0.5rem 0 0;
       font-size: 16px;
-      color: #f5f5f5;
+      color: #f0f8ff;
     }
   }
 }
@@ -90,11 +91,12 @@ $dark-color: #1c1c1c;
 .statut-card,
 .ordres-mission-status-card {
   max-width: 100%;
-  background-color: #fff;
+  background-color: #ffffff;
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   margin-bottom: 2rem;
+  border-left: 6px solid $primary-color;
   transition: all 0.3s ease-in-out;
   animation: fadeInZoom 0.6s ease forwards;
   opacity: 0;
@@ -140,12 +142,12 @@ $dark-color: #1c1c1c;
     justify-content: space-between;
     padding: 6px 10px;
     border-radius: 8px;
-    background-color: $bg-light;
+    background-color: #f0f4fa;
     transition: transform 0.3s ease;
 
     &:hover {
       transform: scale(1.02);
-      background-color: lighten($bg-light, 4%);
+      background-color: lighten(#f0f4fa, 5%);
     }
 
     .statut-dot {
@@ -159,7 +161,7 @@ $dark-color: #1c1c1c;
     .statut-label {
       flex-grow: 1;
       font-size: 15px;
-      color: #333;
+      color: $dark-color;
     }
 
     .statut-count {
@@ -187,7 +189,7 @@ $dark-color: #1c1c1c;
       align-items: center;
       justify-content: space-between;
       padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid $secondary-color;
       transition: transform 0.3s ease;
 
       &:hover {
@@ -207,7 +209,7 @@ $dark-color: #1c1c1c;
         flex-grow: 1;
         margin-left: 0.5rem;
         font-size: 15px;
-        color: #333;
+        color: $dark-color;
       }
 
       .statut-count {
@@ -216,6 +218,15 @@ $dark-color: #1c1c1c;
         color: $dark-color;
       }
     }
+  }
+}
+.marque-filter-multi {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 16px;
+
+  ::ng-deep .mat-select-panel {
+    max-height: 250px;
   }
 }
 .scroll-animate {
@@ -228,6 +239,7 @@ $dark-color: #1c1c1c;
     transform: translateY(0);
   }
 }
+
 @keyframes fadeInZoom {
   from {
     opacity: 0;
@@ -257,6 +269,64 @@ $dark-color: #1c1c1c;
     padding: 1rem;
   }
 }
+.marque-filter-inline {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
 
+  label {
+    font-weight: 600;
+    font-size: 15px;
+    color: $dark-color;
+  }
 
+  select {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid $primary-color;
+    border-radius: 8px;
+    font-size: 14px;
+    color: $dark-color;
+    background-color: white;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 
+    &:focus {
+      border-color: $subtitle-color;
+      box-shadow: 0 0 5px rgba($primary-color, 0.4);
+      outline: none;
+    }
+  }
+}
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  h3 {
+    font-size: 20px;
+    color: $primary-color;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .marque-filter-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 500;
+      color: $dark-color;
+    }
+
+    select {
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid $secondary-color;
+      background-color: #fff;
+      color: $dark-color;
+      font-size: 14px;
+    }
+  }
+}

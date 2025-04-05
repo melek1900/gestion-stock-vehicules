@@ -53,7 +53,7 @@ export class CompteurImportComponent implements OnInit {
   }
 
   chargerCompteur() {
-    this.http.get<any>(`http://172.20.10.8:8080/api/compteur-import/${this.annee}`).subscribe({
+    this.http.get<any>(`http://localhost:8080/api/compteur-import/${this.annee}`).subscribe({
       next: (data) => {
         this.compteur = data.compteur;
         this.form.patchValue({ compteur: this.compteur });
@@ -70,7 +70,7 @@ export class CompteurImportComponent implements OnInit {
     if (!this.annee || this.nouvelleValeur === null) return;
 
     const params = new HttpParams().set('nouveauCompteur', this.nouvelleValeur.toString());
-    this.http.put<any>(`http://172.20.10.8:8080/api/compteur-import/${this.annee}`, null, { params }).subscribe({
+    this.http.put<any>(`http://localhost:8080/api/compteur-import/${this.annee}`, null, { params }).subscribe({
       next: (data) => {
         this.message = `✅ Compteur mis à jour : ${data.numeroComplet}`;
         this.compteur = data.compteur;
@@ -94,7 +94,7 @@ export class CompteurImportComponent implements OnInit {
       .set('annee', this.nouvelleAnnee.toString())
       .set('compteur', this.valeurInitiale.toString());
 
-    this.http.post<any>(`http://172.20.10.8:8080/api/compteur-import/initialiser`, null, { params }).subscribe({
+    this.http.post<any>(`http://localhost:8080/api/compteur-import/initialiser`, null, { params }).subscribe({
       next: (data) => {
         this.message = `✅ Compteur initialisé : ${data.numeroComplet}`;
         this.nouvelleAnnee = null;

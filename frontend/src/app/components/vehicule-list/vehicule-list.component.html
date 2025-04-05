@@ -9,7 +9,7 @@
         type="text"
         [(ngModel)]="searchQuery"
         (input)="filtrerVehicules()"
-        placeholder="Rechercher par N° Châssis, Couleur ou Marque"
+        placeholder="Rechercher par N° Châssis, modele , marque ou date de production"
       />
     </mat-form-field>
 
@@ -17,7 +17,17 @@
       <mat-form-field appearance="fill">
         <mat-label>Parc</mat-label>
         <mat-select [(ngModel)]="selectedParcs" multiple (selectionChange)="filtrerVehicules()">
-          <mat-option *ngFor="let parc of parcsAccessibles" [value]="parc">{{ parc }}</mat-option>
+          <mat-option *ngFor="let parc of parcsAccessibles" [value]="parc.nom">
+            {{ parc.nom }}
+          </mat-option>       
+         </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Marque</mat-label>
+        <mat-select [(ngModel)]="selectedMarques" multiple (selectionChange)="filtrerVehicules()">
+          <mat-option *ngFor="let marque of marquesDisponibles" [value]="marque">
+            {{ marque }}
+          </mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -51,8 +61,8 @@
       mat-raised-button
       color="accent"
       (click)="naviguerVersTransfert()"
-      [disabled]="isTransfertDisabled()"
-    >
+      [disabled]="isTransfertDisabled() || !isOrdreMission"
+      >
       Créer ordre mission
     </button>
   </div>
@@ -83,29 +93,27 @@
     </ng-container>
 
     <!-- ✅ Colonnes principales -->
+    <ng-container matColumnDef="shortDescription">
+      <th mat-header-cell *matHeaderCellDef>Marque</th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortDescription || 'Non défini' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="modele">
+      <th mat-header-cell *matHeaderCellDef>Modèle</th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.modele }}</td>
+    </ng-container>
+    <ng-container matColumnDef="shortColor">
+      <th mat-header-cell *matHeaderCellDef>Couleur</th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortColor || 'Non défini' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="numeroChassis">
+      <th mat-header-cell *matHeaderCellDef>N° Châssis</th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.numeroChassis }}</td>
+    </ng-container>
     <ng-container matColumnDef="productionDate">
       <th mat-header-cell *matHeaderCellDef>Date de production</th>
       <td mat-cell *matCellDef="let vehicule">{{ vehicule.productionDate | date:'dd/MM/yyyy' }}</td>
     </ng-container>
 
-    <ng-container matColumnDef="numeroChassis">
-      <th mat-header-cell *matHeaderCellDef>N° Châssis</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.numeroChassis }}</td>
-    </ng-container>
-    <ng-container matColumnDef="shortDescription">
-      <th mat-header-cell *matHeaderCellDef>Marque</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortDescription || 'Non défini' }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="modele">
-      <th mat-header-cell *matHeaderCellDef>Modèle</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.modele }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="shortColor">
-      <th mat-header-cell *matHeaderCellDef>Couleur</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortColor || 'Non défini' }}</td>
-    </ng-container>
 
     <ng-container matColumnDef="statut">
       <th mat-header-cell *matHeaderCellDef>Statut</th>
