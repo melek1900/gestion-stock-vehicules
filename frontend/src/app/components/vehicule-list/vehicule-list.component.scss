@@ -35,10 +35,10 @@ table.mat-mdc-table {
   text-align: left;
   padding: 8px;
   border-bottom: 1px solid #ddd;
-  white-space: normal; // ✅ Permet le retour à la ligne au lieu du débordement
+  white-space: normal; 
   overflow: hidden;
   text-overflow: ellipsis;
-  word-wrap: break-word; // ✅ Coupe proprement les mots longs
+  word-wrap: break-word; 
   font-size: 14px;
 }
 
@@ -47,8 +47,8 @@ table.mat-mdc-table {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #E0E0E0 !important;
-  color: #3D3D3D !important;
+  background: #003366 !important;
+  color: white !important;
   font-weight: bold;
   text-transform: uppercase;
   border-bottom: 2px solid #ddd;
@@ -57,21 +57,23 @@ table.mat-mdc-table {
 /* ✅ Ajustement des statuts pour un affichage clair */
 .status {
   display: inline-block;
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-weight: bold;
+  padding: 6px 12px; // ⬅️ réduit le padding
+  border-radius: 8px;
+  font-weight: 500;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: 10px; // ⬅️ réduit la taille de la police
   color: white;
-  min-width: 90px;
+  min-width: auto; // ⬅️ évite que ça soit trop large
   text-align: center;
-  white-space: nowrap; // ✅ Garde les statuts lisibles sans retour à la ligne
+  white-space: nowrap;
+  line-height: 1.2;
+  width: 50px;
 }
 
-.status.en_etat { background: #4CAF50; }
+.status.en_etat { background: #4CAF50;}
 .status.reserve { background: #FF9800; }
 .status.vendu { background: #3F51B5; }
-.status.livree { background: #009688; }
+.status.livre { background: #009688; }
 .status.avarie { background: #D32F2F; }
 
 /* ✅ Boutons d’action */
@@ -119,7 +121,7 @@ button:hover {
 
 .filters .search-field {
   flex-grow: 1;
-  max-width: 300px;
+  max-width: 600px;
 }
 
 mat-form-field {
@@ -177,6 +179,10 @@ mat-form-field:focus-within {
   }
 }
 
+.mat-column-statut .mat-mdc-cell {
+  width: 10px;
+  justify-content: center;
+}
 /* ✅ Ajustement global pour la mise en page */
 .dashboard-container {
   width: 100vw;

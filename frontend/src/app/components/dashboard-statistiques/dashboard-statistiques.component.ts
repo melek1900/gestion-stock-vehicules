@@ -4,15 +4,11 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import {
   NgApexchartsModule,
-  ApexAxisChartSeries,
-  ApexChart,
-  ApexXAxis,
-  ApexTitleSubtitle,
-  ApexDataLabels,
-  ApexPlotOptions,
   ApexOptions
 } from 'ng-apexcharts';
 import { ScrollAnimateDirective } from './scroll-animate.directive';
+import { FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
 
 interface StockParcParMarque {
   marque: string;
@@ -27,7 +23,9 @@ interface StockParcParMarque {
     CommonModule,
     MatCardModule,
     NgApexchartsModule,
-    ScrollAnimateDirective
+    ScrollAnimateDirective,
+    FormsModule,
+    MatSelectModule
   ],
   templateUrl: './dashboard-statistiques.component.html',
   styleUrls: ['./dashboard-statistiques.component.scss']
@@ -37,26 +35,248 @@ export class DashboardStatistiquesComponent implements OnInit {
   totalVehicules: number = 0;
   statutVehiculeStats: { statut: string, label: string, color: string, count: number }[] = [];
   ordreStatuts: { statut: string, count: number, color: string }[] = [];
-
+  selectedMarque: string = 'ISUZU'; 
+  marquesDisponibles: string[] = ['GM', 'ISUZU', 'CHEVROLET'];
+  selectedMarques: string[] = ['GM', 'ISUZU','CHEVROLET']; 
+  marquesConcurDisponibles: string[] = ['ASTRA', 'BMW', 'CHANA', 'FORD', 'MERCEDES', 'TOYOTA']; // à adapter
+  selectedMarquesConcur: string[] = [...this.marquesConcurDisponibles];
+  readonly parcColors = ['#0073A8', '#003366', '#F4A300', '#e74c3c', '#8e44ad', '#A4B0BE'];
+  readonly chartColors = ['#0073A8', '#003366', '#F4A300', '#e74c3c', '#8e44ad', '#A4B0BE', '#00b894', '#6c5ce7'];
+  readonly concurColorMap: Record<string, string> = {
+    'ASTRA': '#FF5733',
+    'BMW': '#2980B9',
+    'CHANA': '#D35400',
+    'FORD': '#2ECC71',
+    'MERCEDES': '#8E44AD',
+    'TOYOTA': '#AAB7B8'
+  };
+  genreNosChartOptions: ApexOptions = {
+    series: [],
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: false
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '60%'
+      }
+    },
+    xaxis: {
+      categories: []
+    },
+    title: {
+      text: 'Ventes par genre - Nos marques',
+      align: 'center'
+    },
+    dataLabels: {
+      enabled: true
+    },
+    legend: {
+      position: 'bottom',
+      labels: {
+        colors: [] 
+      }
+    },
+    colors: []
+  };
+  onConcurMarquesChange(): void {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
   
-  readonly COLORS = ['#1c1c1c', '#6e6e6e', '#F4A300', '#e74c3c', '#8e44ad', '#2c3e50'];
-  readonly chartColors = ['#1c1c1c', '#6e6e6e', '#F4A300', '#e74c3c', '#8e44ad', '#2c3e50'];
+    const colorMap: Record<string, string> = {
+      'ASTRA': '#8e44ad',
+      'BMW': '#2980b9',
+      'CHANA': '#f39c12',
+      'FORD': '#d35400',
+      'MERCEDES': '#2c3e50',
+      'TOYOTA': '#16a085'
+    };
+  
+    const selected = this.selectedMarquesConcur;
+    const colors = selected.map(marque => colorMap[marque] || '#A4B0BE');
+  
+    // Si rien n’est sélectionné, on affiche une carte vide
+    if (selected.length === 0) {
+      this.genreConcurChartOptions = {
+        ...this.genreConcurChartOptions,
+        series: [],
+        xaxis: { categories: [] },
+        colors,
+        title: {
+          text: 'Ventes par genre - Concurrence',
+          align: 'center'
+        }
+      };
+      return;
+    }
+  
+    this.http.get<any[]>(`http://localhost:8080/api/ventes-general/par-genre-par-marque?marques=${selected.join(',')}`, { headers })
+      .subscribe(data => {
+        const filtered = data.filter(d => selected.includes(d.marque));
+        const genres = [...new Set(filtered.map(d => d.genre))];
+        const categories = [...genres, 'Total Résultat'];
+  
+        const series = selected.map(marque => {
+          const dataByGenre = genres.map(genre => {
+            const match = filtered.find(d => d.marque === marque && d.genre === genre);
+            return match ? match.total : 0;
+          });
+          const total = dataByGenre.reduce((acc, val) => acc + val, 0);
+          return {
+            name: marque,
+            data: [...dataByGenre, total]
+          };
+        });
+  
+        this.genreConcurChartOptions = {
+          ...this.genreConcurChartOptions,
+          series,
+          xaxis: { categories },
+          colors,
+          title: {
+            text: 'Ventes par genre - Concurrence',
+            align: 'center'
+          },
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              columnWidth: '70%'
+            }
+          },
+          legend: {
+            position: 'bottom',
+            labels: {
+              colors
+            }
+          }
+        };
+      });
+  }
+  
+  onNosMarquesChange(): void {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+  
+    const colorMap: Record<string, string> = {
+      'CHEVROLET': '#9E9E9E',
+      'ISUZU': '#0073A8',  
+      'GM': '#000000'     
+    };
+    const colors = this.selectedMarques.map(marque => colorMap[marque] || '#A4B0BE');
+  
+    this.http.get<any[]>('http://localhost:8080/api/ventes-general/par-genre-par-marque?marques=' + this.selectedMarques.join(','), { headers })
+      .subscribe(data => {
+        const filtered = data.filter(d => this.selectedMarques.includes(d.marque));
+        const genres = [...new Set(filtered.map(d => d.genre))];
+        const categories = [...genres, 'Total Résultat'];
+  
+        const series = this.selectedMarques.map(marque => {
+          const dataByGenre = genres.map(genre => {
+            const match = filtered.find(d => d.marque === marque && d.genre === genre);
+            return match ? match.total : 0;
+          });
+          const total = dataByGenre.reduce((acc, val) => acc + val, 0);
+          return {
+            name: marque,
+            data: [...dataByGenre, total]
+          };
+        });
+  
+        this.genreNosChartOptions = {
+          ...this.genreNosChartOptions,
+          series,
+          xaxis: { categories },
+          colors,
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              columnWidth: '70%'
+            }
+          },
+          legend: {
+            ...this.genreNosChartOptions.legend,
+            labels: {
+              colors
+            }
+          }
+        };
+      });
+  }
+  
+  
+  genreConcurChartOptions: ApexOptions = {
+    series: [],
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: false
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '100%'
+      }
+    },
+    xaxis: {
+      categories: []
+    },
+    title: {
+      text: 'Ventes par genre - Concurrence',
+      align: 'center'
+    },
+    dataLabels: {
+      enabled: true
+    },
+    legend: {
+      position: 'bottom',
+      labels: {
+        colors: []
+      }
+    },
+    colors: []
+  };
+    baseGenreChartOptions: ApexOptions = {
+    chart: { type: 'bar', height: 350 },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        borderRadius: 6,
+        columnWidth: '40%'
+      }
+    },
+    dataLabels: { enabled: true },
+    xaxis: { categories: [] },
+    colors: ['#0073A8', '#F4A300', '#e74c3c', '#2ecc71', '#8e44ad']
+  };
 
+  venteParModelePieChartOptions: ApexOptions = {
+    series: [],
+    chart: {
+      type: 'pie',
+      width: 400
+    },
+    labels: [],
+    title: {
+      text: 'Répartition des ventes par modèle',
+      align: 'center'
+    },
+    dataLabels: {
+      enabled: true
+    },
+    legend: {
+      position: 'bottom'
+    },
+    colors: ['#0073A8', '#F4A300', '#e74c3c', '#2ecc71', '#8e44ad']
+  };
   chartOptions: ApexOptions = {
     series: [],
     chart: {
       type: 'bar',
       height: 350,
       toolbar: {
-        show: true,
-        tools: {
-          download: true,
-          zoom: true,
-          zoomin: true,
-          zoomout: true,
-          pan: true,
-          reset: true
-        }
+        show: true
       },
       animations: {
         enabled: true,
@@ -64,12 +284,7 @@ export class DashboardStatistiquesComponent implements OnInit {
         dynamicAnimation: { enabled: true, speed: 350 }
       },
       zoom: {
-        enabled: true,
-        type: 'xy',
-        zoomedArea: {
-          fill: { color: '#90CAF9', opacity: 0.4 },
-          stroke: { color: '#0D47A1', opacity: 0.4, width: 1 }
-        }
+        enabled: true
       },
       foreColor: '#333'
     },
@@ -82,11 +297,7 @@ export class DashboardStatistiquesComponent implements OnInit {
       bar: {
         horizontal: true,
         borderRadius: 6,
-        barHeight: '30%',
-        colors: {
-          backgroundBarColors: ['#f0f0f0'],
-          backgroundBarOpacity: 0.2
-        }
+        barHeight: '30%'
       }
     },
     xaxis: {
@@ -109,12 +320,10 @@ export class DashboardStatistiquesComponent implements OnInit {
         colors: ['#FFF']
       }
     },
-    colors: ['#1c1c1c', '#F4A300', '#e74c3c', '#6e6e6e'],
+    colors: [],
     legend: {
       show: true,
       position: 'bottom',
-      horizontalAlign: 'center',
-      onItemClick: { toggleDataSeries: true },
       labels: { colors: '#333' }
     }
   };
@@ -143,7 +352,7 @@ export class DashboardStatistiquesComponent implements OnInit {
     dataLabels: {
       enabled: true
     },
-    colors: this.chartColors
+    colors: []
   };
 
   stockParcParMarqueChartOptions: ApexOptions = {
@@ -173,46 +382,87 @@ export class DashboardStatistiquesComponent implements OnInit {
       text: 'Stock parc par marque',
       align: 'center'
     },
-    colors: this.chartColors
+    colors: [],
+    legend: {
+      show: true,
+      position: 'bottom',
+      labels: { colors: '#003366' }
+    }
   };
 
   constructor(private http: HttpClient) {}
-
+  onMarqueChange(): void {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+  
+    this.http.get<any[]>(`http://localhost:8080/api/ventes/statistiques/par-modele?marque=${this.selectedMarque}`, { headers })
+      .subscribe(data => {
+        if (data.length > 0) {
+          this.venteParModelePieChartOptions = {
+            ...this.venteParModelePieChartOptions,
+            series: data.map(item => item.total),
+            labels: data.map(item => item.modele)
+          };
+        } else {
+          // 🎯 Affiche une carte vide avec un seul label "Aucune vente"
+          this.venteParModelePieChartOptions = {
+            ...this.venteParModelePieChartOptions,
+            series: [0],
+            labels: ['Aucune vente']
+          };
+        }
+      });
+  }
   ngOnInit(): void {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
- 
+
+    this.onMarqueChange();
     this.loadStatutVehiculeStats(headers);
     this.loadOrdreMissionStatuts(headers);
     this.loadStockParcParMarque(headers);
-  
+    this.onNosMarquesChange();
+    this.onConcurMarquesChange();
 
 
-    this.http.get<any[]>('http://172.20.10.8:8080/api/vehicules/statistiques/par-parc', { headers })
+    this.http.get<any[]>('http://localhost:8080/api/vehicules/statistiques/par-parc', { headers })
       .subscribe(data => {
         this.stats = data;
         this.totalVehicules = data.reduce((sum, parc) => sum + parc.count, 0);
+
+        const colorsPerBar = data.map((_, i) => this.parcColors[i % this.parcColors.length]);
+
         this.chartOptions = {
           ...this.chartOptions,
-          series: [{ name: 'Véhicules', data: data.map(p => p.count) }],
-          xaxis: { categories: data.map(p => p.parc) }
+          series: [{
+            name: 'Véhicules',
+            data: data.map(p => p.count)
+          }],
+          xaxis: { categories: data.map(p => p.parc) },
+          colors: colorsPerBar
         };
       });
 
-    this.http.get<any[]>('http://172.20.10.8:8080/api/vehicules/statistiques/par-marque', { headers })
+    this.http.get<any[]>('http://localhost:8080/api/vehicules/statistiques/par-marque', { headers })
       .subscribe(data => {
+        const colorsPerBar = data.map((_, i) => this.parcColors[i % this.parcColors.length]);
+
         this.marqueChartOptions = {
           ...this.marqueChartOptions,
-          series: [{ name: 'Véhicules par marque', data: data.map(p => p.count) }],
-          xaxis: { categories: data.map(p => p.marque) }
+          series: [{
+            name: 'Véhicules par marque',
+            data: data.map(p => p.count)
+          }],
+          xaxis: { categories: data.map(p => p.marque) },
+          colors: colorsPerBar
         };
       });
 
-    this.loadStockParcParMarque(headers);
+      
   }
 
   loadStatutVehiculeStats(headers: any) {
-    this.http.get<{ [key: string]: number }>('http://172.20.10.8:8080/api/vehicules/statistiques/par-statut', { headers })
+    this.http.get<{ [key: string]: number }>('http://localhost:8080/api/vehicules/statistiques/par-statut', { headers })
       .subscribe(data => {
         const mapping: Record<string, { label: string; color: string }> = {
           EN_ETAT: { label: 'En état', color: '#4CAF50' },
@@ -232,12 +482,12 @@ export class DashboardStatistiquesComponent implements OnInit {
   }
 
   loadOrdreMissionStatuts(headers: any) {
-    this.http.get<{ [key: string]: number }>('http://172.20.10.8:8080/api/ordres-mission/statistiques/statut', { headers })
+    this.http.get<{ [key: string]: number }>('http://localhost:8080/api/ordres-mission/statistiques/statut', { headers })
       .subscribe(data => {
         const couleurs: Record<string, string> = {
-          EN_COURS: '#F4A300',
-          CLOTURE: '#4CAF50',
-          PARTIELLE: '#e74c3c'
+          EN_COURS: '#0073A8',
+          CLOTURE: '#A4B0BE',
+          PARTIELLE: '#9E9E9E'
         };
 
         this.ordreStatuts = Object.entries(data).map(([statut, count]) => ({
@@ -249,7 +499,7 @@ export class DashboardStatistiquesComponent implements OnInit {
   }
 
   loadStockParcParMarque(headers: any) {
-    this.http.get<StockParcParMarque[]>('http://172.20.10.8:8080/api/vehicules/statistiques/stock-parc-par-marque', { headers })
+    this.http.get<StockParcParMarque[]>('http://localhost:8080/api/vehicules/statistiques/stock-parc-par-marque', { headers })
       .subscribe(data => {
         const marques = [...new Set(data.map(d => d.marque))];
         const parcs = [...new Set(data.map(d => d.parc))];
@@ -262,10 +512,18 @@ export class DashboardStatistiquesComponent implements OnInit {
           })
         }));
 
+        const colorsByParc = parcs.map((_, index) => this.parcColors[index % this.parcColors.length]);
+
         this.stockParcParMarqueChartOptions = {
           ...this.stockParcParMarqueChartOptions,
           xaxis: { categories: marques },
-          series: series
+          series: series,
+          colors: colorsByParc,
+          legend: {
+            show: true,
+            position: 'bottom',
+            labels: { colors: '#003366' }
+          }
         };
       });
   }
@@ -285,4 +543,4 @@ export class DashboardStatistiquesComponent implements OnInit {
       'data' in this.marqueChartOptions.series[0] &&
       Array.isArray((this.marqueChartOptions.series[0] as any).data);
   }
-} 
+}

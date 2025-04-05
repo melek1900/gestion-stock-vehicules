@@ -1,33 +1,32 @@
 <div class="reception-wrapper">
     <mat-card class="reception-mobile-container">
-        <h2>📡 Création Avarie</h2>
-
-        <div class="action-buttons">
-            <button mat-raised-button color="accent" class="btn-action" (click)="allerVersEnregistrement()">
-                <mat-icon>edit</mat-icon> Creation manuelle
-            </button>
-            <button mat-raised-button color="primary" class="btn-action" (click)="startScanner()">
-                <mat-icon>qr_code_scanner</mat-icon> Scanner QR Code
-            </button>
-        </div>
-
-        <!-- ✅ Scanner QR Code en modal -->
-        <div *ngIf="isScanning" class="scanner-modal">
-            <div class="scanner-content">
-                <zxing-scanner [formats]="scannerFormats" (scanSuccess)="onCodeResult($event)"></zxing-scanner>
-                <button mat-button color="warn" (click)="isScanning = false">❌ Fermer Scanner</button>
-            </div>
-        </div>
-
-        <form [formGroup]="qrForm" (ngSubmit)="receptionnerVehicule()" class="reception-form">
-            <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Numéro de Châssis</mat-label>
-                <input matInput formControlName="numeroChassis" required />
-            </mat-form-field>
-
-            <button mat-raised-button color="primary" type="submit" class="btn-submit" [disabled]="qrForm.invalid">
-                Créer
-            </button>
-        </form>
+      <h2>📡 Création Avarie</h2>
+  
+      <div class="action-buttons">
+        <button mat-raised-button color="accent" class="btn-action" (click)="allerVersEnregistrement()">
+          <mat-icon>edit</mat-icon> Création manuelle
+        </button>
+        <button mat-raised-button color="primary" class="btn-action" (click)="startScanner()">
+          <mat-icon>qr_code_scanner</mat-icon> Scanner
+        </button>
+      </div>
+  
+      <!-- ✅ Zone de scan -->
+      <div class="scanner-wrapper" *ngIf="scannerStarted">
+        <div id="reader"></div>
+        <button class="close-scanner" (click)="stopScanner()">❌ Fermer Scanner</button>
+      </div>
+  
+      <form [formGroup]="qrForm" (ngSubmit)="receptionnerVehicule()" class="reception-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Numéro de Châssis</mat-label>
+          <input matInput formControlName="numeroChassis" required />
+        </mat-form-field>
+  
+        <button mat-raised-button color="primary" type="submit" class="btn-submit" [disabled]="qrForm.invalid">
+          Créer
+        </button>
+      </form>
     </mat-card>
-</div>
+  </div>
+  

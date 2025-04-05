@@ -21,7 +21,7 @@ export interface Vehicule {
 
 @Injectable({ providedIn: 'root' })
 export class VehiculeService {
-  private apiUrl = 'http://172.20.10.8:8080/api/vehicules';
+  private apiUrl = 'http://localhost:8080/api/vehicules';
 
   constructor(private http: HttpClient) {}
 

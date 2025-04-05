@@ -4,8 +4,9 @@
         <!-- 🔍 Recherche à gauche -->
         <div class="recherche-container">
             <mat-form-field appearance="fill">
-                <mat-label>Rechercher par N° Mission</mat-label>
-                <input matInput [(ngModel)]="recherche" (input)="filtrerOrdres()">
+              <mat-label>Rechercher</mat-label>
+              <input matInput [(ngModel)]="recherche" (input)="filtrerOrdres()" placeholder="N° Mission, Chauffeur, Véhicule, Date...">
+              
             </mat-form-field>
         </div>
     
@@ -16,6 +17,7 @@
                 <mat-select [(ngModel)]="statutFiltre" (selectionChange)="filtrerOrdres()">
                     <mat-option value="">Tous</mat-option>
                     <mat-option value="EN_COURS">En cours</mat-option>
+                    <mat-option value="PARTIELLE">Partielle</mat-option>
                     <mat-option value="CLOTURE">Clôturé</mat-option>
                 </mat-select>
             </mat-form-field>

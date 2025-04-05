@@ -24,7 +24,9 @@
 
 // 🌟 CHAMPS DE FILTRAGE (Recherche à gauche, Statut à droite)
 .recherche-container {
-    flex: 2; // 🔥 Barre de recherche plus large
+    flex: 2;
+    max-width: 600px;
+    // 🔥 Barre de recherche plus large
 }
 
 .statut-container {
@@ -47,7 +49,7 @@ table {
 
 // 🌟 EN-TÊTES - STYLE ÉLÉGANT
 th {
-    background: #003366;
+    background: #003366 !important;
     color: white;
     text-transform: uppercase;
     font-weight: bold;

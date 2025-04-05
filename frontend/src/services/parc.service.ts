@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ParcService {
-  private apiUrl = 'http://172.20.10.8:8080/api/parcs'; // ✅ API maintenant disponible
+  private apiUrl = 'http://localhost:8080/api/parcs'; // ✅ API maintenant disponible
 
   constructor(private http: HttpClient) {}
 

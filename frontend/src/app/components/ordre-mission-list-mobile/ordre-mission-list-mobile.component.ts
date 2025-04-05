@@ -50,7 +50,7 @@ export class OrdreMissionListMobileComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.get<any[]>(`http://172.20.10.8:8080/api/ordres-mission/${ordre.numeroOrdre}/vehicules`, { headers }).subscribe({
+    this.http.get<any[]>(`http://localhost:8080/api/ordres-mission/${ordre.numeroOrdre}/vehicules`, { headers }).subscribe({
       next: (vehicules) => {
         // 🧠 Injecter les véhicules récupérés dans la popup
         this.dialog.open(OrdreMissionDetailsDialogComponent, {
@@ -72,7 +72,7 @@ export class OrdreMissionListMobileComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>('http://172.20.10.8:8080/api/ordres-mission', { headers }).subscribe({
+    this.http.get<any[]>('http://localhost:8080/api/ordres-mission', { headers }).subscribe({
       next: (data) => {
         this.ordresMission = data.map(ordre => ({
           ...ordre,
@@ -88,12 +88,44 @@ export class OrdreMissionListMobileComponent implements OnInit {
 
   /** 🔎 Filtrer la liste */
   filtrerOrdres() {
-    this.ordresMissionFiltres = this.ordresMission.filter(ordre => {
-      const statutMatch = this.statutFiltre ? ordre.statut === this.statutFiltre : true;
-      const rechercheMatch = this.recherche.trim() ? ordre.numeroOrdre.toLowerCase().includes(this.recherche.toLowerCase()) : true;
-      return statutMatch && rechercheMatch;
-    });
+    if (this.statutFiltre === 'CLOTURE') {
+      // 🔹 Filtre uniquement les clôturés si demandé
+      this.ordresMissionFiltres = this.ordresMission
+        .filter(ordre => ordre.statut === 'CLOTURE')
+        .sort(this.ordreStatutSort);
+    } else if (this.statutFiltre) {
+      // 🔹 Si autre statut sélectionné (EN_COURS, PARTIELLE)
+      this.ordresMissionFiltres = this.ordresMission
+        .filter(ordre => ordre.statut === this.statutFiltre)
+        .sort(this.ordreStatutSort);
+    } else {
+      // 🔹 Par défaut : afficher uniquement EN_COURS et PARTIELLE
+      this.ordresMissionFiltres = this.ordresMission
+        .filter(ordre => ordre.statut !== 'CLOTURE')
+        .sort(this.ordreStatutSort);
+    }
+  
+    // 🔎 Si une recherche est en cours, l’appliquer aussi
+    if (this.recherche.trim()) {
+      const rechercheLower = this.recherche.toLowerCase();
+      this.ordresMissionFiltres = this.ordresMissionFiltres.filter(ordre =>
+        ordre.numeroOrdre.toLowerCase().includes(rechercheLower)
+      );
+    }
   }
+  
+  /** 🔄 Tri personnalisé : EN_COURS > PARTIELLE > CLOTURE */
+  ordreStatutSort(a: any, b: any): number {
+    const priorité: Record<'EN_COURS' | 'PARTIELLE' | 'CLOTURE', number> = {
+      EN_COURS: 1,
+      PARTIELLE: 2,
+      CLOTURE: 3,
+    };
+  
+    return priorité[a.statut as 'EN_COURS' | 'PARTIELLE' | 'CLOTURE'] - priorité[b.statut as 'EN_COURS' | 'PARTIELLE' | 'CLOTURE'];
+  }
+  
+  
 
   /** ✅ Télécharger ou afficher l’ordre de mission */
   afficherOrdreMission(pdfUrl: string) {

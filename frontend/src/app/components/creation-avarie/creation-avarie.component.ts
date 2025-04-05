@@ -11,10 +11,14 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { BarcodeFormat } from '@zxing/browser';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { Html5Qrcode } from 'html5-qrcode';
 
 @Component({
   selector: 'app-creation-avarie',
-  imports: [ CommonModule,
+  standalone: true,
+  imports: [
+    CommonModule,
     ReactiveFormsModule,
     MatSnackBarModule,
     MatFormFieldModule,
@@ -22,15 +26,15 @@ import { ZXingScannerModule } from '@zxing/ngx-scanner';
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    ZXingScannerModule,],
+    ZXingScannerModule
+  ],
   templateUrl: './creation-avarie.component.html',
   styleUrl: './creation-avarie.component.scss'
 })
 export class CreationAvarieComponent {
   qrForm: FormGroup;
-  isScanning = false;
-  scannerFormats = [BarcodeFormat.QR_CODE, BarcodeFormat.CODE_128];
-  qrResult: string = '';
+  scannerStarted = false;
+  html5QrCode!: Html5Qrcode;
 
   constructor(
     private http: HttpClient,
@@ -43,39 +47,84 @@ export class CreationAvarieComponent {
     });
   }
 
-  /** ✅ Démarrer le scanner QR Code */
   startScanner() {
-    this.isScanning = true;
+    this.scannerStarted = true;
+
+    setTimeout(() => {
+      const readerElement = document.getElementById("reader");
+
+      if (!readerElement) {
+        console.error("❌ Élément #reader introuvable");
+        return;
+      }
+
+      this.html5QrCode = new Html5Qrcode("reader");
+
+      this.html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText: string) => {
+          console.log("QR détecté:", decodedText);
+          this.qrForm.controls['numeroChassis'].setValue(decodedText);
+          this.snackBar.open("✅ Code détecté", "Fermer", { duration: 2000 });
+          this.stopScanner();
+        },
+        (err) => { }
+      ).catch(err => {
+        console.error("❌ Erreur démarrage scanner:", err);
+        this.snackBar.open("Erreur lors du démarrage du scanner", "Fermer", { duration: 3000 });
+      });
+    }, 300);
   }
 
-  /** ✅ Capture du QR Code */
-  onCodeResult(resultString: string) {
-    console.log('📸 QR Code détecté:', resultString);
-    this.qrResult = resultString;
-    this.qrForm.controls['numeroChassis'].setValue(resultString);
-    this.isScanning = false;
+  stopScanner() {
+    if (this.scannerStarted && this.html5QrCode) {
+      this.html5QrCode.stop().then(() => {
+        this.scannerStarted = false;
+      }).catch((err) => {
+        console.error("❌ Erreur arrêt scanner:", err);
+      });
+    }
   }
 
-  /** ✅ Réceptionner un véhicule */
   receptionnerVehicule() {
     const numeroChassis = this.qrForm.value.numeroChassis;
-  
     if (!numeroChassis) {
       this.snackBar.open("🚨 Numéro de châssis requis", "Fermer", { duration: 3000 });
       return;
     }
-  
-    // 🔁 Redirection vers la page d'enregistrement avec numéro de châssis
+
+    const parc = this.getParcDepuisToken();
+
     this.router.navigate(['/enregistrer-avarie'], {
-      queryParams: {
-        parc: 'MEGRINE',             // tu le passes déjà
-        numeroChassis: numeroChassis // ✅ ici on passe le numéro scanné
-      }
+      queryParams: { parc, numeroChassis }
     });
   }
 
-  /** ✅ Aller vers l'enregistrement manuel */
   allerVersEnregistrement() {
-    this.router.navigate(['/enregistrer-avarie'], { queryParams: { parc: 'MEGRINE' } });
+    const parc = this.getParcDepuisToken();
+    this.router.navigate(['/enregistrer-avarie'], {
+      queryParams: { parc }
+    });
+  }
+
+  getParcDepuisToken(): string {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+      const mappingParcId: Record<number, string> = {
+        1: 'MEGRINE',
+        2: 'CHARGUIA',
+        4: 'AUPORT'
+      };
+      if (decoded?.parcNom) return decoded.parcNom;
+      if (decoded?.parcId) return mappingParcId[decoded.parcId] || 'MEGRINE';
+    }
+    return 'MEGRINE';
+  }
+
+  ngOnDestroy() {
+    this.stopScanner();
   }
 }
+

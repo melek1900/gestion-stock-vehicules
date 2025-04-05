@@ -8,6 +8,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { PopupAvarieComponent } from '../popup-avarie/popup-avarie.component';
 import { MatIconModule } from '@angular/material/icon';
+import {jwtDecode} from 'jwt-decode';
 
 @Component({
   selector: 'app-reparation',
@@ -24,28 +25,36 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ReparationComponent implements OnInit {
   vehiculesAvaries: any[] = [];
-  displayedColumns: string[] = ['numeroChassis', 'modele', 'parcNom', 'actions'];
+  displayedColumns: string[] = ['numeroChassis','marque', 'modele', 'couleur', 'parcNom', 'actions'];
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+  isExpert: boolean = false;
 
   ngOnInit() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedToken: any = jwtDecode(token);
+      console.log(decodedToken.role)
+
+      this.isExpert = decodedToken.role === 'ROLE_EXPERT';
+    }
     this.chargerVehiculesAvaries();
   }
 
   /** 🔄 Charger tous les véhicules en statut AVARIE */
   chargerVehiculesAvaries() {
     const token = localStorage.getItem('token');
-if (!token) {
-  console.error("🚨 Aucun token trouvé !");
-} else {
+    if (!token) {
+    console.error("🚨 Aucun token trouvé !");
+  } else {
   console.log("📌 Token envoyé :", token);
 }
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>('http://172.20.10.8:8080/api/vehicules/by-statut?statut=AVARIE', { headers }).subscribe({
+    this.http.get<any[]>('http://localhost:8080/api/vehicules/by-statut?statut=AVARIE', { headers }).subscribe({
       next: (data) => {
         this.vehiculesAvaries = data;
       },
@@ -77,7 +86,7 @@ if (!token) {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.patch(`http://172.20.10.8:8080/api/vehicules/${numeroChassis}/reparer`, {}, { headers }).subscribe({
+    this.http.patch(`http://localhost:8080/api/vehicules/${numeroChassis}/reparer`, {}, { headers }).subscribe({
       next: () => {
         this.snackBar.open('✅ Véhicule réparé et remis en stock !', 'Fermer', { duration: 3000 });
   

@@ -13,6 +13,7 @@ import { MatTableModule } from '@angular/material/table';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/browser';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { Html5Qrcode } from 'html5-qrcode';
 
 @Component({
   selector: 'app-prelevement-vehicule-mobile',
@@ -40,7 +41,8 @@ export class PrelevementVehiculeMobileComponent {
   vehiculesManquants: any[] = [];
   isScannerActif = false;
   isLoading: boolean = false;
-
+  scannerStarted = false;
+  html5QrCode!: Html5Qrcode;
   formatsScanner = [
     BarcodeFormat.QR_CODE, 
     BarcodeFormat.EAN_13, 
@@ -50,13 +52,56 @@ export class PrelevementVehiculeMobileComponent {
   constructor(private http: HttpClient, private snackBar: MatSnackBar) {
     console.log("📸 Formats de codes supportés :", Object.values(BarcodeFormat));
   }
-  activerScanner() {
-    this.isScannerActif = true;
+  ngOnDestroy() {
+    this.stopScanner();
+  }
+  
+  startScanner() {
+    this.scannerStarted = true;
+  
+    setTimeout(() => {
+      const readerElement = document.getElementById("reader");
+  
+      if (!readerElement) {
+        console.error("Erreur: L'élément avec l'id 'reader' est introuvable");
+        return;
+      }
+  
+      this.html5QrCode = new Html5Qrcode("reader");
+  
+      this.html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText: string) => {
+          console.log("QR code détecté:", decodedText);
+          this.scannerVehicule(decodedText); // utilise ton traitement existant
+          this.stopScanner();
+        },
+        (errorMessage: string) => {
+          // silent fail
+        }
+      ).catch((err) => {
+        console.error("Erreur scanner:", err);
+      });
+  
+    }, 300);
+  }
+  stopScanner() {
+    if (this.scannerStarted && this.html5QrCode) {
+      this.html5QrCode.stop().then(() => {
+        this.scannerStarted = false;
+      }).catch((err) => {
+        console.error("Erreur arrêt scanner:", err);
+      });
+    }
+  }
+  trierVehicules() {
+    this.vehicules = this.vehicules
+      .slice() // clone pour ne pas modifier la référence d’origine
+      .sort((a, b) => Number(a.preleve) - Number(b.preleve)); // false (non prélevé) avant true
   }
 
-  desactiverScanner() {
-    this.isScannerActif = false;
-  }
+ 
 
   aDesVehiculesNonPreleves(): boolean {
     return this.vehicules.some(v => !v.preleve);
@@ -69,7 +114,7 @@ export class PrelevementVehiculeMobileComponent {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.get<any[]>(`http://172.20.10.8:8080/api/ordres-mission/${this.ordreMission}/vehicules`, { headers })
+    this.http.get<any[]>(`http://localhost:8080/api/ordres-mission/${this.ordreMission}/vehicules`, { headers })
       .subscribe({
         next: (data) => {
           console.log("📦 Véhicules reçus :", data);
@@ -78,6 +123,7 @@ export class PrelevementVehiculeMobileComponent {
             ...v,
             preleve: v.parcId === 3 || v.parcNom === 'TRANSFERT'
           }));
+          this.trierVehicules();
           this.vehiculesManquants = [];
         },
         error: () => {
@@ -95,7 +141,6 @@ export class PrelevementVehiculeMobileComponent {
     }
   }
   
-
   scannerVehicule(numeroChassis: string) {
     console.log('📷 Scanner détecté:', numeroChassis);
   
@@ -116,7 +161,7 @@ export class PrelevementVehiculeMobileComponent {
     }
   
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    const url = `http://172.20.10.8:8080/api/ordres-mission/${encodeURIComponent(this.ordreMission)}/prelever/${encodeURIComponent(numeroChassis)}`;
+    const url = `http://localhost:8080/api/ordres-mission/${encodeURIComponent(this.ordreMission)}/prelever/${encodeURIComponent(numeroChassis)}`;
   
     this.isLoading = true;
   
@@ -126,9 +171,12 @@ export class PrelevementVehiculeMobileComponent {
         if (vehicule) {
           vehicule.preleve = true;
           vehicule.parc = "TRANSFERT";
-          this.snackBar.open(`✅ Véhicule ${numeroChassis} prélevé`, 'Fermer', { duration: 3000 });
-          this.vibrate(150); // ✅ vibration douce
+          vehicule.justScanned = true; // ✅ Pour affichage temporaire "🚀 Nouveau"
         }
+  
+        this.trierVehicules(); // ✅ Tri dynamique après modification
+        this.snackBar.open(`✅ Véhicule ${numeroChassis} prélevé`, 'Fermer', { duration: 3000 });
+        this.vibrate(150);
   
         if (this.peutValiderPrelevement()) {
           this.snackBar.open('⚡ Prélèvement partiel possible.', 'Fermer', { duration: 4000 });
@@ -146,7 +194,9 @@ export class PrelevementVehiculeMobileComponent {
       }
     });
   }
-  
+  desactiverScanner() {
+    this.isScannerActif = false;
+  }
   
   peutValiderPrelevement(): boolean {
     return this.vehicules.some(v => v.preleve);
@@ -178,7 +228,7 @@ export class PrelevementVehiculeMobileComponent {
       'Authorization': `Bearer ${token}`
     });
   
-    const url = `http://172.20.10.8:8080/api/ordres-mission/${encodeURIComponent(this.ordreMission)}/valider-prelevement`;
+    const url = `http://localhost:8080/api/ordres-mission/${encodeURIComponent(this.ordreMission)}/valider-prelevement`;
   
     this.http.patch(url, {}, { headers })
       .subscribe({

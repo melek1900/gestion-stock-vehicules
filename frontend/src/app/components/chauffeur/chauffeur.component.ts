@@ -47,7 +47,7 @@ export class ChauffeurComponent {
   }
 
   loadChauffeurs() {
-    this.http.get<any[]>('http://172.20.10.8:8080/api/chauffeurs').subscribe({
+    this.http.get<any[]>('http://localhost:8080/api/chauffeurs').subscribe({
       next: (data) => {
         this.chauffeurs = data;
         this.dataSource.data = data;
@@ -66,7 +66,7 @@ export class ChauffeurComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.post('http://172.20.10.8:8080/api/chauffeurs', result).subscribe({
+        this.http.post('http://localhost:8080/api/chauffeurs', result).subscribe({
           next: () => {
             this.snackBar.open('✅ Chauffeur ajouté', 'Fermer', { duration: 3000 });
             this.loadChauffeurs();
@@ -98,7 +98,7 @@ export class ChauffeurComponent {
         };
         delete updatedChauffeur.statut; // 👈 On supprime le champ inutile pour l'API
   
-        this.http.put(`http://172.20.10.8:8080/api/chauffeurs/${chauffeur.id}`, updatedChauffeur).subscribe({
+        this.http.put(`http://localhost:8080/api/chauffeurs/${chauffeur.id}`, updatedChauffeur).subscribe({
           next: () => {
             this.snackBar.open('✅ Chauffeur modifié', 'Fermer', { duration: 3000 });
             this.loadChauffeurs();
@@ -118,7 +118,7 @@ export class ChauffeurComponent {
 
   deleteChauffeur(id: number) {
     if (confirm('Voulez-vous vraiment supprimer ce chauffeur ?')) {
-      this.http.delete(`http://172.20.10.8:8080/api/chauffeurs/${id}`).subscribe({
+      this.http.delete(`http://localhost:8080/api/chauffeurs/${id}`).subscribe({
         next: () => {
           this.snackBar.open('🗑️ Chauffeur supprimé', 'Fermer', { duration: 3000 });
           this.loadChauffeurs();

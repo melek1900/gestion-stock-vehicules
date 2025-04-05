@@ -19,12 +19,17 @@ export class OrdreMissionDetailsDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     console.log("📦 Données véhicules reçues :", this.data.vehicules);
-
+  
     // ✅ Marquer les véhicules comme prélevés si parc.id === 3 (TRANSFERT)
     this.data.vehicules = this.data.vehicules.map((v: any) => ({
       ...v,
       preleve: v.parcId === 3
     }));
+  
+    // ✅ Trier : Non prélevés en premier
+    this.data.vehicules = this.data.vehicules.sort((a: any, b: any) => {
+      return Number(a.preleve) - Number(b.preleve); // false (0) avant true (1)
+    });
   }
 
   fermer() {

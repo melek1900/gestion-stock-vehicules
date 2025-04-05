@@ -79,49 +79,27 @@ export class ReceptionVehiculesMobileComponent implements OnDestroy {
 
   receptionnerVehicule() {
     const numeroChassis = this.qrForm.value.numeroChassis;
-
+  
     if (!numeroChassis) {
       this.snackBar.open("🚨 Numéro de châssis requis", "Fermer", { duration: 3000 });
       return;
     }
-
-    const formData = new FormData();
-    formData.append('numeroChassis', numeroChassis);
-
+  
     const token = localStorage.getItem('token');
-    const decoded = token ? JSON.parse(atob(token.split('.')[1])) : null;
-    const parcNom = decoded?.parcNom;
-
-    const mappingParcNomToId: Record<string, number> = {
-      'MEGRINE': 1,
-      'CHARGUIA': 2,
-      'AUPORT': 4,
-    };
-
-    const parcId = mappingParcNomToId[parcNom?.toUpperCase()];
-
-    if (!parcId) {
-      console.error("🚨 Parc ID inconnu :", parcNom);
-      this.snackBar.open("❌ Parc ID inconnu", "Fermer", { duration: 3000 });
+    if (!token) {
+      this.snackBar.open("❌ Token manquant", "Fermer", { duration: 3000 });
       return;
     }
-
-    formData.append('parcId', parcId.toString());
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+  
+    const decoded = JSON.parse(atob(token.split('.')[1]));
+    const parcNom = decoded?.parcNom;
+  
+    this.router.navigate(['/enregistrer-vehicule'], {
+      queryParams: {
+        numeroChassis: numeroChassis,
+        parc: parcNom
+      }
     });
-
-    this.http.post('http://172.20.10.8:8080/api/vehicules/reception', formData, { headers })
-      .subscribe({
-        next: () => {
-          this.snackBar.open('✅ Véhicule réceptionné avec succès !', 'Fermer', { duration: 3000 });
-          this.qrForm.reset();
-        },
-        error: () => {
-          this.snackBar.open('❌ Erreur lors de la réception', 'Fermer', { duration: 3000 });
-        }
-      });
   }
 
   allerVersEnregistrement() {

@@ -68,7 +68,7 @@ export class ReceptionVehiculesComponent {
       return;
     }
 
-    this.http.post(`http://172.20.10.8:8080/api/vehicules/reception`, { numeroChassis })
+    this.http.post(`http://localhost:8080/api/vehicules/reception`, { numeroChassis })
       .subscribe({
         next: () => {
           this.snackBar.open('✅ Véhicule réceptionné avec succès !', 'Fermer', { duration: 3000 });
