@@ -40,11 +40,22 @@
   }
   
   .photo-item {
-    cursor: pointer;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.2s;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    position: relative;
+  
+    .delete-button {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      background-color: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-radius: 50%;
+      padding: 4px;
+      z-index: 2;
+    }
+  
+    .delete-button:hover {
+      background-color: rgba(255, 255, 255, 1);
+    }
   }
   
   .photo-item img {

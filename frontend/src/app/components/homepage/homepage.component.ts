@@ -6,6 +6,7 @@ import { DashboardStatistiquesComponent } from '../dashboard-statistiques/dashbo
 import { GestionnaireStockDashboardComponent } from '../gestionnaire-stock-dashboard/gestionnaire-stock-dashboard.component';
 import { VehiculeListComponent } from '../vehicule-list/vehicule-list.component';
 import { ReparationComponent } from '../reparation/reparation.component';
+import { UtilisateurListComponent } from "../utilisateur-list/utilisateur-list.component";
 
 
 @Component({
@@ -19,9 +20,10 @@ import { ReparationComponent } from '../reparation/reparation.component';
     DashboardStatistiquesComponent,
     GestionnaireStockDashboardComponent,
     VehiculeListComponent,
-    ReparationComponent
-    
-  ],
+    ReparationComponent,
+    UtilisateurListComponent,
+    UtilisateurListComponent
+],
 })
 export class HomepageComponent {
   prenom: string = '';

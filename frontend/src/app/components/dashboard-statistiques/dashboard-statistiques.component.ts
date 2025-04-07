@@ -50,6 +50,8 @@ export class DashboardStatistiquesComponent implements OnInit {
     'MERCEDES': '#8E44AD',
     'TOYOTA': '#AAB7B8'
   };
+  readonly ALL_MARK = 'ALL';
+
   genreNosChartOptions: ApexOptions = {
     series: [],
     chart: {
@@ -81,33 +83,53 @@ export class DashboardStatistiquesComponent implements OnInit {
     },
     colors: []
   };
+  isAllConcurSelected(): boolean {
+    return this.marquesConcurDisponibles.every(m =>
+      this.selectedMarquesConcur.includes(m)
+    );
+  }
+  
+  toggleAllConcur(): void {
+    const allSelected = this.isAllConcurSelected();
+  
+    if (allSelected) {
+      this.selectedMarquesConcur = [];
+    } else {
+      this.selectedMarquesConcur = [this.ALL_MARK, ...this.marquesConcurDisponibles];
+    }
+  
+    this.onConcurMarquesChange();
+  }
+  
+  compareMarques = (a: string, b: string): boolean => a === b;
+
+displaySelectedMarques = (): string => {
+  return this.selectedMarquesConcur.includes(this.ALL_MARK) ? 'Toutes les marques' : '';
+};
   onConcurMarquesChange(): void {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
   
-    const colorMap: Record<string, string> = {
-      'ASTRA': '#8e44ad',
-      'BMW': '#2980b9',
-      'CHANA': '#f39c12',
-      'FORD': '#d35400',
-      'MERCEDES': '#2c3e50',
-      'TOYOTA': '#16a085'
-    };
+    let selected = this.selectedMarquesConcur.includes(this.ALL_MARK)
+    ? [...this.marquesConcurDisponibles]
+    : this.selectedMarquesConcur.filter(m => m !== this.ALL_MARK);
   
-    const selected = this.selectedMarquesConcur;
-    const colors = selected.map(marque => colorMap[marque] || '#A4B0BE');
+    const colors = selected.map(marque => this.concurColorMap[marque] || '#A4B0BE');
   
-    // Si rien n’est sélectionné, on affiche une carte vide
     if (selected.length === 0) {
       this.genreConcurChartOptions = {
         ...this.genreConcurChartOptions,
-        series: [],
-        xaxis: { categories: [] },
+        series: [{
+          name: 'Aucune marque',
+          data: []
+        }],
+        xaxis: { categories: ['Aucune donnée'] },
         colors,
         title: {
           text: 'Ventes par genre - Concurrence',
           align: 'center'
-        }
+        },
+        dataLabels: { enabled: false }
       };
       return;
     }
@@ -423,7 +445,7 @@ export class DashboardStatistiquesComponent implements OnInit {
     this.loadStockParcParMarque(headers);
     this.onNosMarquesChange();
     this.onConcurMarquesChange();
-
+    this.selectedMarquesConcur = [this.ALL_MARK, ...this.marquesConcurDisponibles];
 
     this.http.get<any[]>('http://localhost:8080/api/vehicules/statistiques/par-parc', { headers })
       .subscribe(data => {

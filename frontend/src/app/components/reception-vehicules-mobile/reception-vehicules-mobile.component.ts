@@ -94,10 +94,23 @@ export class ReceptionVehiculesMobileComponent implements OnDestroy {
     const decoded = JSON.parse(atob(token.split('.')[1]));
     const parcNom = decoded?.parcNom;
   
-    this.router.navigate(['/enregistrer-vehicule'], {
-      queryParams: {
-        numeroChassis: numeroChassis,
-        parc: parcNom
+    // ✅ Vérification d'existence du véhicule
+    this.http.get(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}`).subscribe({
+      next: () => {
+        // ✅ Véhicule trouvé → on redirige
+        this.router.navigate(['/enregistrer-vehicule'], {
+          queryParams: {
+            numeroChassis: numeroChassis,
+            parc: parcNom
+          }
+        });
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.snackBar.open("🚫 Numéro de châssis introuvable !", "Fermer", { duration: 3000 });
+        } else {
+          this.snackBar.open("❌ Erreur lors de la vérification du véhicule", "Fermer", { duration: 3000 });
+        }
       }
     });
   }

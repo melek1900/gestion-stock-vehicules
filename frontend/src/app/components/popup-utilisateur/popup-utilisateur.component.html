@@ -1,0 +1,61 @@
+<mat-dialog-content class="popup-container">
+    <h2 mat-dialog-title>
+      {{ isModification ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur' }}
+    </h2>
+  
+    <form [formGroup]="form">
+      <mat-form-field>
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="nom" required />
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Prénom</mat-label>
+        <input matInput formControlName="prenom" required />
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" required type="email" />
+      </mat-form-field>
+  
+      <mat-form-field *ngIf="!isModification">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput formControlName="motDePasse" required type="password" />
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Rôle</mat-label>
+        <mat-select formControlName="role">
+          <mat-option *ngFor="let role of roles" [value]="role">
+            {{ formatRole(role) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Parcs accessibles</mat-label>
+        <mat-select formControlName="parcsAccessibles" multiple>
+          <mat-option *ngFor="let parc of parcsDisponibles" [value]="parc.nom">
+            {{ parc.nom }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+  
+      <mat-form-field>
+        <mat-label>Marques accessibles</mat-label>
+        <mat-select formControlName="marquesAccessibles" multiple>
+          <mat-option *ngFor="let marque of marquesDisponibles" [value]="marque">
+            {{ marque }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions>
+    <button mat-button color="warn" (click)="dialogRef.close()">❌ Annuler</button>
+    <button *ngIf="isModification" mat-button color="warn" (click)="supprimer()">🗑️ Supprimer</button>
+    <button mat-raised-button color="primary" (click)="enregistrer()">✅ {{ isModification ? 'Modifier' : 'Ajouter' }}</button>
+  </mat-dialog-actions>
+  

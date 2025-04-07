@@ -1,0 +1,91 @@
+<div class="vehicule-list-wrapper">
+    <div class="table-container">
+      <!-- 🔍 Recherche + Bouton Ajouter -->
+      <div class="filters">
+        <mat-form-field class="search-field" appearance="fill">
+          <mat-label>Recherche</mat-label>
+          <input
+            matInput
+            type="text"
+            [(ngModel)]="searchQuery"
+            (input)="filtrerUtilisateurs()"
+            placeholder="Rechercher par nom, prénom, email ou rôle"
+          />
+        </mat-form-field>
+      </div>
+  
+      <!-- 📄 Pagination -->
+      <div class="pagination-container">
+        <mat-paginator
+          [pageSize]="10"
+          [pageSizeOptions]="[10, 20, 50]"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+  
+      <!-- 📋 Tableau -->
+      <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" aria-label="Tableau des utilisateurs">
+  
+        <ng-container matColumnDef="nom">
+          <th mat-header-cell *matHeaderCellDef>Nom</th>
+          <td mat-cell *matCellDef="let user">{{ user.nom }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="prenom">
+          <th mat-header-cell *matHeaderCellDef>Prénom</th>
+          <td mat-cell *matCellDef="let user">{{ user.prenom }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Rôle</th>
+          <td mat-cell *matCellDef="let user">{{ formatRole(user.role) }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="parcsAccessibles">
+          <th mat-header-cell *matHeaderCellDef>Parcs</th>
+          <td mat-cell *matCellDef="let user">{{ user.parcsAccessibles.join(', ') }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="marquesAccessibles">
+          <th mat-header-cell *matHeaderCellDef>Marques</th>
+          <td mat-cell *matCellDef="let user">{{ user.marquesAccessibles.join(', ') }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="mat-column-actions">Actions</th>
+          <td mat-cell *matCellDef="let user" class="mat-column-actions">
+            <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="Actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+  
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="ouvrirPopup(user)">
+                <mat-icon>visibility</mat-icon> Visualiser
+              </button>
+              <button mat-menu-item (click)="supprimerUtilisateur(user.id)">
+                <mat-icon>delete</mat-icon> Supprimer
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+  
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+  
+      <!-- ❌ Message si aucun résultat -->
+      <div *ngIf="utilisateursFiltres.length === 0 && searchQuery">
+        <p style="text-align:center; color: #999;">❌ Aucun utilisateur trouvé pour cette recherche.</p>
+      </div>
+  
+      <div *ngIf="utilisateurs.length === 0 && !searchQuery">
+        <p style="text-align:center; color: #777;">ℹ️ Aucun utilisateur enregistré pour le moment.</p>
+      </div>
+    </div>
+  </div>
+  

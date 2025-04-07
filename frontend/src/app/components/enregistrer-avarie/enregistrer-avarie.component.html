@@ -1,5 +1,5 @@
 <mat-card class="vehicule-form" [ngClass]="{ 'gestionnaire-theme': isGestionnaire }">
-  <form [formGroup]="form" (ngSubmit)="enregistrerVehicule()" enctype="multipart/form-data">
+  <form [formGroup]="form" (ngSubmit)="enregistrerAvaries()" enctype="multipart/form-data">
 
     <!-- ✅ Numéro de châssis (prérenseigné avec qrResult) -->
     <mat-form-field class="full-width">
@@ -103,7 +103,7 @@
     </div>
 
     <div class="submit-container">
-      <button mat-raised-button color="primary" type="submit">✅ Valider Avarie</button>
+      <button mat-raised-button color="primary" type="submit">Valider</button>
     </div>
   </form>
 </mat-card>

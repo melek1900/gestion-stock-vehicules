@@ -1,0 +1,51 @@
+:host ::ng-deep .mat-dialog-container {
+    width: 600px !important;
+    max-width: 90vw;
+    overflow-y: auto;
+    border-radius: 10px;
+  }
+  
+  /* ✅ Conteneur principal */
+  .popup-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  /* ✅ Formulaire */
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  /* ✅ Boutons d’action en bas */
+  mat-dialog-actions {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  mat-dialog-actions button {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+  
+  /* ✅ Chips affichage des listes */
+  .selected-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 5px;
+  }
+  
+  .selected-items span {
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+  

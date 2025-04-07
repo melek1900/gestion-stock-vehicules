@@ -39,13 +39,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .headers(headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(
-                        "default-src 'self'; font-src 'self' https://fonts.gstatic.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline';"
-                )))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                        "font-src 'self' https://fonts.gstatic.com; " +
+                                        "style-src 'self' https://fonts.googleapis.com 'unsafe-inline';"
+                        ))
+                )
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfig = new CorsConfiguration();
-                    corsConfig.setAllowedOriginPatterns(List.of("*")); // ✅ accepte tous les origin patterns
-                    corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfig.setAllowedOrigins(List.of("http://localhost:4200"));
+                    corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
                     corsConfig.setAllowCredentials(true);
                     return corsConfig;
@@ -56,7 +60,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/parcs").permitAll()
                         .requestMatchers("/api/utilisateurs/marques-accessibles").permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -77,6 +80,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
 
     @Bean

@@ -87,39 +87,34 @@ export class VehiculeListComponent implements OnInit {
   constructor(private cdr: ChangeDetectorRef, private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
 
 
-  vehiculesSelectionnes: any[] = []; // Stocke les véhicules sélectionnés
+  vehiculesSelectionnes: any[] = []; 
   ngOnInit(): void {
-    // Récupère le rôle, les marques et le parc depuis le token
     this.recupererRoleUtilisateur();
   
-    // Récupère l'ID du parc associé
     this.getParcId();
   
-    // Tente de charger les parcs accessibles depuis le token, sinon fallback API
     this.chargerParcsAccessibles();
   
-    // Si aucune marque sélectionnée, on pré-remplit avec celles accessibles
     if (this.selectedMarques.length === 0 && this.marquesAccessibles.length > 0) {
       this.selectedMarques = [...this.marquesAccessibles];
     }
-  
-    // Attend un petit délai pour garantir que les parcs sont chargés avant
+    this.dataSource = new MatTableDataSource(this.vehicules);
+
     setTimeout(() => {
-      // Charge les véhicules selon le token (filtrage automatique côté backend)
       this.chargerVehicules();
   
-      // Pré-remplit les parcs sélectionnés avec le parc utilisateur
       const parcNom = this.obtenirParcAssocie();
       if (this.selectedParcs.length === 0 && parcNom) {
         this.selectedParcs = [parcNom];
       }
+      this.filtrerVehicules();
     }, 300);
   }
-  
-  
+   
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
+ 
   chargerParcsAccessibles() {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -378,31 +373,30 @@ getParcId() {
 
 
 filtrerVehicules() {
-  const searchLower = this.searchQuery?.trim().toLowerCase() || '';
+  const searchLower = this.searchQuery?.trim().toLowerCase();
 
   this.vehiculesFiltres = this.vehicules.filter(vehicule => {
-    // ✅ Première barrière : marques autorisées (token)
     const isAccessible = this.marquesAccessibles.length === 0 || this.marquesAccessibles.includes(vehicule.shortDescription);
     if (!isAccessible) return false;
 
     const matchParc = this.selectedParcs.length === 0 || this.selectedParcs.includes(vehicule.parcNom);
     const matchStatut = this.selectedStatut === 'all' || vehicule.statut?.toUpperCase() === this.selectedStatut.toUpperCase();
-
-    const matchChassis = vehicule.numeroChassis?.toLowerCase().includes(searchLower);
     const matchMarque = this.selectedMarques.length === 0 || this.selectedMarques.includes(vehicule.shortDescription);
-    const matchModele = vehicule.modele?.toLowerCase().includes(searchLower);
-    const matchCouleur = vehicule.shortColor?.toLowerCase().includes(searchLower);
 
-    let matchDate = false;
-    if (vehicule.productionDate instanceof Date && !isNaN(vehicule.productionDate)) {
-      const formattedDate = new Intl.DateTimeFormat('fr-FR').format(vehicule.productionDate);
-      matchDate = formattedDate.toLowerCase().includes(searchLower);
+    let matchSearch = true;
+    if (searchLower) {
+      const matchChassis = vehicule.numeroChassis?.toLowerCase().includes(searchLower);
+      const matchModele = vehicule.modele?.toLowerCase().includes(searchLower);
+      const matchCouleur = vehicule.shortColor?.toLowerCase().includes(searchLower);
+      const matchDate = vehicule.productionDate instanceof Date && !isNaN(vehicule.productionDate)
+        ? new Intl.DateTimeFormat('fr-FR').format(vehicule.productionDate).toLowerCase().includes(searchLower)
+        : false;
+      const matchShortDesc = vehicule.shortDescription?.toLowerCase().includes(searchLower);
+
+      matchSearch = matchChassis || matchModele || matchCouleur || matchShortDesc || matchDate;
     }
 
-    const matchSearch =
-      !searchLower || matchChassis || matchMarque || matchModele || matchCouleur || matchDate;
-
-    return matchParc && matchMarque && matchStatut && matchSearch;
+    return matchParc && matchStatut && matchMarque && matchSearch;
   });
 
   this.dataSource.data = this.vehiculesFiltres;
