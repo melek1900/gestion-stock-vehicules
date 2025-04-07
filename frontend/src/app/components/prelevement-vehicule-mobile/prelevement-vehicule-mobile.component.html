@@ -6,16 +6,34 @@
       <input matInput [(ngModel)]="ordreMission" placeholder="Saisir ou scanner" (change)="chargerOrdreMission()">
     </mat-form-field>
   
-  
-  
+    <div class="action-buttons">
+      <button mat-raised-button color="accent" class="btn-action" (click)="startOrdreMissionScanner()">
+        <mat-icon>qr_code_scanner</mat-icon> Scanner l’Ordre de Mission
+      </button>
+    </div>
+    <div class="scanner-wrapper" *ngIf="scannerOrdreActive">
+      <div id="reader-ordre"></div>
+      <button class="close-scanner" (click)="stopOrdreMissionScanner()">❌ Fermer Scanner</button>
+    </div>
     <mat-progress-bar *ngIf="isLoading" mode="indeterminate" color="accent"></mat-progress-bar>
         
         <!-- Bouton -->
-        <div class="action-buttons">
-          <button mat-raised-button color="primary" [disabled]="scannerStarted" class="btn-action" (click)="startScanner()">
-            <mat-icon>qr_code_scanner</mat-icon> Scanner un véhicule
-          </button>
-        </div>
+        <div *ngIf="ordreMission && ordreMission.trim() !== ''">
+          <!-- Bouton scanner caméra -->
+          <div class="action-buttons">
+            <button mat-raised-button color="primary" [disabled]="scannerStarted" class="btn-action" (click)="startScanner()">
+              <mat-icon>qr_code_scanner</mat-icon> Scanner un véhicule
+            </button>
+          </div>
+        
+          <!-- Saisie manuelle -->
+          <mat-form-field class="full-width">
+            <mat-label>Numéro de Châssis</mat-label>
+            <input matInput
+                   placeholder="Saisir manuellement"
+                   [(ngModel)]="numeroChassisSaisi"
+                   (ngModelChange)="onNumeroChassisChange($event)">
+          </mat-form-field>
 
         <!-- ✅ Zone de scan -->
         <div class="scanner-wrapper" *ngIf="scannerStarted">
