@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-ordre-mission-list',
@@ -23,10 +24,14 @@ import { MatInputModule } from '@angular/material/input';
     MatFormFieldModule,
     MatSelectModule,
     FormsModule,
-    MatInputModule
+    MatInputModule,
+    MatPaginatorModule
   ]
 })
 export class OrdreMissionListComponent implements OnInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+dataSource = new MatTableDataSource<any>([]);
   ordresMission: any[] = [];
   displayedColumns: string[] = ['numeroMission', 'date', 'chauffeur', 'vehicule', 'parcDepart', 'parcArrivee', 'statut'];
   private http = inject(HttpClient);
@@ -34,6 +39,9 @@ export class OrdreMissionListComponent implements OnInit {
   statutFiltre: string = '';  // ✅ Stocke le statut sélectionné
   ordresMissionFiltres: any[] = []; // ✅ Liste filtrée
   recherche: string = '';  // ✅ Stocke la valeur de la recherche
+  
+  
+  
   filtrerOrdres() {
     const rechercheLower = this.recherche.trim().toLowerCase();
   
@@ -60,6 +68,9 @@ export class OrdreMissionListComponent implements OnInit {
   
       return statutMatch && rechercheMatch;
     });
+    this.dataSource.data = this.ordresMissionFiltres;
+
+    this.paginator.firstPage?.();
   }
   
   ngOnInit() {
@@ -78,14 +89,18 @@ export class OrdreMissionListComponent implements OnInit {
           ...ordre,
           dateCreation: new Date(ordre.dateCreation)
         }));
-        this.ordresMissionFiltres = [...this.ordresMission]; // ✅ Initialisation de la liste filtrée
+        this.dataSource.data = this.ordresMission;
+        this.ordresMissionFiltres = this.ordresMission;
       },
       error: () => {
         this.snackBar.open('❌ Erreur lors du chargement des ordres de mission', 'Fermer', { duration: 3000 });
       },
     });
   }
-
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
+  
   /** ✅ Télécharger ou afficher l’ordre de mission */
   afficherOrdreMission(pdfUrl: string) {
     const headers = new HttpHeaders({

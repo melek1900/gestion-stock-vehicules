@@ -12,7 +12,7 @@
         
         <!-- Bouton -->
         <div class="action-buttons">
-          <button mat-raised-button color="primary" class="btn-action" (click)="startScanner()">
+          <button mat-raised-button color="primary" [disabled]="scannerStarted" class="btn-action" (click)="startScanner()">
             <mat-icon>qr_code_scanner</mat-icon> Scanner un véhicule
           </button>
         </div>

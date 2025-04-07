@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DomSanitizer } from '@angular/platform-browser';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-popup-avarie',
@@ -38,6 +39,7 @@ export class PopupAvarieComponent {
   photoPreviews: string[][] = [];
   photos: File[][] = [];
   isLoadingPhotos = false;
+  isExpert: boolean = false;
 
   @ViewChild('videoElement') videoElement!: ElementRef;
   @ViewChildren('fileInput') fileInputs!: QueryList<ElementRef>;
@@ -49,6 +51,11 @@ export class PopupAvarieComponent {
     private snackBar: MatSnackBar,
     private sanitizer: DomSanitizer
   ) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded: any = jwtDecode(token);
+      this.isExpert = decoded.role === 'ROLE_EXPERT';
+    }
     this.avaries = data.vehicule.avaries || [];
     this.photos = this.avaries.map(() => []);
     this.photoPreviews = this.avaries.map(() => []);

@@ -1,14 +1,18 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { PopupAvarieComponent } from '../popup-avarie/popup-avarie.component';
 import { MatIconModule } from '@angular/material/icon';
 import {jwtDecode} from 'jwt-decode';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-reparation',
@@ -20,7 +24,11 @@ import {jwtDecode} from 'jwt-decode';
     MatCardModule,
     MatTableModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatFormFieldModule,
+    FormsModule,
+    MatInputModule,
+    MatPaginatorModule
   ],
 })
 export class ReparationComponent implements OnInit {
@@ -29,19 +37,34 @@ export class ReparationComponent implements OnInit {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
-  isExpert: boolean = false;
+  recherche: string = '';
+  vehiculesAvariesFiltres: any[] = [];
+  vehiculesFiltres: any[] = [];
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  dataSource = new MatTableDataSource<any>([]);
 
-  ngOnInit() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const decodedToken: any = jwtDecode(token);
-      console.log(decodedToken.role)
 
-      this.isExpert = decodedToken.role === 'ROLE_EXPERT';
+  filtrerVehicules() {
+    const query = this.recherche.toLowerCase().trim();
+  
+    if (!query) {
+      this.vehiculesFiltres = [...this.vehiculesAvaries];
+    } else {
+      this.vehiculesFiltres = this.vehiculesAvaries.filter(v =>
+        v.numeroChassis?.toLowerCase().includes(query) ||
+        v.shortDescription?.toLowerCase().includes(query) ||
+        v.modele?.toLowerCase().includes(query)
+      );
     }
-    this.chargerVehiculesAvaries();
   }
-
+  ngOnInit() {
+  
+    this.chargerVehiculesAvaries();
+  
+  }
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
   /** 🔄 Charger tous les véhicules en statut AVARIE */
   chargerVehiculesAvaries() {
     const token = localStorage.getItem('token');
@@ -57,11 +80,15 @@ export class ReparationComponent implements OnInit {
     this.http.get<any[]>('http://localhost:8080/api/vehicules/by-statut?statut=AVARIE', { headers }).subscribe({
       next: (data) => {
         this.vehiculesAvaries = data;
+        this.dataSource.data = data; 
+        this.vehiculesFiltres = [...data];
       },
       error: () => {
         this.snackBar.open('❌ Erreur lors du chargement des véhicules avariés', 'Fermer', { duration: 3000 });
       },
     });
+    this.vehiculesAvariesFiltres = [...this.vehiculesAvaries];
+
   }
 
   /** ✅ Ouvrir une pop-up pour modifier l'avarie */
@@ -99,3 +126,7 @@ export class ReparationComponent implements OnInit {
     });
   }
 }
+function ngAfterViewInit() {
+  throw new Error('Function not implemented.');
+}
+

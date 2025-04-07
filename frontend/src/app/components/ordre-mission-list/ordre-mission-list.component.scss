@@ -46,7 +46,11 @@ table {
     border-radius: 10px;
     overflow: hidden;
 }
-
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
 // 🌟 EN-TÊTES - STYLE ÉLÉGANT
 th {
     background: #003366 !important;

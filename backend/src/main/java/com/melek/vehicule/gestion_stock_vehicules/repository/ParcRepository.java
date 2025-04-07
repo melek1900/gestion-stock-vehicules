@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface ParcRepository extends JpaRepository<Parc, Long> {
     Optional<Parc> findByNom(String nom); // ✅ Ajout de la recherche par nom
     List<Parc> findByTypeParc(TypeParc typeParc);  // ✅ Récupérer tous les parcs d'un type donné
+    List<Parc> findByNomIn(List<String> noms);
+
 
 
 }

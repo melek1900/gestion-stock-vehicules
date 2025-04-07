@@ -243,11 +243,27 @@ export class EnregistrerVehiculeComponent {
             parc: vehicule.parc?.id || this.getParcIdDepuisUrl(),
           });
   
-          this.form.updateValueAndValidity();  // ✅ Force la réévaluation
+          this.form.updateValueAndValidity();
   
           console.log("✅ Formulaire après remplissage:", this.form.valid, this.form.value);
         },
-        error: () => this.isExistingVehicle = false
+        error: (err) => {
+          this.isExistingVehicle = false;
+          console.warn("❌ Numéro de châssis non trouvé :", numeroChassis);
+          this.snackBar.open("🚨 Numéro de châssis introuvable !", "Fermer", { duration: 4000 });
+        
+          // Réinitialiser les champs du formulaire s’ils contiennent encore des données
+          this.form.patchValue({
+            modele: '',
+            couleur: '',
+            description: '',
+            engine: '',
+            keyCode: '',
+            production: '',
+            statut: '',
+            parc: this.getParcIdDepuisUrl()
+          });
+        }
       });
   }
   confirmerAvarie(index: number) {
@@ -464,7 +480,16 @@ export class EnregistrerVehiculeComponent {
       })
     };
   
-    this.http.post(`http://localhost:8080/api/vehicules/reception`, formData, httpOptions).subscribe({
+    this.http.post(
+      `http://localhost:8080/api/vehicules/reception`,
+      formData,
+      {
+        headers: new HttpHeaders({
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }),
+        responseType: 'text' as 'json'
+      }
+    ).subscribe({
       next: () => {
         this.snackBar.open("🚗 Véhicule réceptionné avec succès !", "Fermer", { duration: 3000 });
         const token = localStorage.getItem('token');
@@ -487,7 +512,12 @@ export class EnregistrerVehiculeComponent {
       },
       error: (err) => {
         console.error("❌ Erreur réception véhicule:", err);
-        this.snackBar.open("❌ Échec de la réception du véhicule", "Fermer", { duration: 3000 });
+    
+        if (err.status === 409 && typeof err.error === 'string' && err.error.includes("déjà dans le parc")) {
+          this.snackBar.open("🚫 Ce véhicule est déjà réceptionné dans ce parc !", "Fermer", { duration: 4000 });
+        } else {
+          this.snackBar.open("❌ Échec de la réception du véhicule", "Fermer", { duration: 3000 });
+        }
       }
     });
     if (this.form.invalid) {

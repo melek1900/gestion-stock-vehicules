@@ -158,5 +158,8 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
+  <div *ngIf="vehiculesFiltres.length === 0 && searchQuery">
+    <p style="text-align:center; color: #999;">❌ Aucun véhicule trouvé pour cette recherche.</p>
+  </div>
 </div>
 </div>

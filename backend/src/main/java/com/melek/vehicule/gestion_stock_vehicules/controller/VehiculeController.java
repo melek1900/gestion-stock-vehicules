@@ -176,7 +176,6 @@ public class VehiculeController {
         Photo nouvellePhoto = vehiculeService.ajouterPhotos(id, file);
         return ResponseEntity.ok(nouvellePhoto);
     }
-    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_STOCK')")
     @PostMapping(value = "/reception", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<?> receptionnerVehicule(
             @RequestPart("numeroChassis") String numeroChassis,
@@ -192,8 +191,27 @@ public class VehiculeController {
             return ResponseEntity.badRequest().body("🚨 parcId est requis !");
         }
 
-        Vehicule vehicule = vehiculeService.receptionnerVehicule(numeroChassis, parcId, avarieJson, photos);
-        return ResponseEntity.ok(vehicule);
+        try {
+            Vehicule vehicule = vehiculeService.receptionnerVehicule(numeroChassis, parcId, avarieJson, photos);
+            return ResponseEntity.ok(vehicule);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+    @PostMapping(value = "/{numeroChassis}/avarie", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> creerAvariePourVehicule(
+            @PathVariable String numeroChassis,
+            @RequestPart("avarie") String avarieJson,
+            @RequestPart(value = "photos", required = false) List<MultipartFile> photos) {
+
+        try {
+            Vehicule vehicule = vehiculeService.creerAvarie(numeroChassis, avarieJson, photos);
+            return ResponseEntity.ok(vehicule);
+        } catch (EntityNotFoundException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Erreur lors de la création de l'avarie.");
+        }
     }
 
     @PostMapping(value = "/{numeroChassis}/avaries", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
@@ -284,15 +302,7 @@ public class VehiculeController {
         return ResponseEntity.ok(new VehiculeDTO(vehicule));
     }
     // ✅ Réception manuelle des véhicules
-    @PostMapping("/reception-manuelle")
-    public ResponseEntity<Map<String, String>> receptionManuelle(@RequestBody VehiculeDTO vehiculeDTO) {
-        try {
-            vehiculeService.receptionManuelle(vehiculeDTO);
-            return ResponseEntity.ok(Map.of("message", "✅ Véhicule ajouté avec succès", "status", "success"));
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("message", "❌ Erreur lors de la réception", "status", "error"));
-        }
-    }
+
     @GetMapping("/by-statut")
     public ResponseEntity<List<VehiculeDTO>> getVehiculesByStatut(@RequestParam(required = false) StatutVehicule statut) {
         List<Vehicule> vehicules;

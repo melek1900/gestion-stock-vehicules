@@ -1,8 +1,11 @@
 package com.melek.vehicule.gestion_stock_vehicules.service;
 
+import com.melek.vehicule.gestion_stock_vehicules.dto.UtilisateurDTO;
 import com.melek.vehicule.gestion_stock_vehicules.model.RoleUtilisateur;
 import com.melek.vehicule.gestion_stock_vehicules.model.Utilisateur;
+import com.melek.vehicule.gestion_stock_vehicules.repository.ParcRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.UtilisateurRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import com.melek.vehicule.gestion_stock_vehicules.model.Parc;
 
 import java.util.List;
 
@@ -19,11 +23,18 @@ import java.util.List;
 public class UtilisateurService implements UserDetailsService {
 
     private final UtilisateurRepository utilisateurRepository;
-
+    @Autowired
+    private ParcRepository parcRepository;
     public UtilisateurService(UtilisateurRepository utilisateurRepository) {
         this.utilisateurRepository = utilisateurRepository;
     }
+    public Utilisateur enregistrer(Utilisateur utilisateur) {
+        return utilisateurRepository.save(utilisateur);
+    }
 
+    public void supprimer(Long id) {
+        utilisateurRepository.deleteById(id);
+    }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(username)
@@ -31,4 +42,22 @@ public class UtilisateurService implements UserDetailsService {
 
         return utilisateur;
     }
+    public List<Parc> getParcsByNoms(List<String> noms) {
+        return parcRepository.findByNomIn(noms);
+    }
+    public List<UtilisateurDTO> getAllUtilisateurs() {
+        return utilisateurRepository.findAll().stream().map(utilisateur -> {
+            UtilisateurDTO dto = new UtilisateurDTO();
+            dto.setId(utilisateur.getId());
+            dto.setNom(utilisateur.getNom());
+            dto.setPrenom(utilisateur.getPrenom());
+            dto.setEmail(utilisateur.getEmail());
+            dto.setRole(utilisateur.getRole());
+            dto.setParcNom(utilisateur.getParc() != null ? utilisateur.getParc().getNom() : null);
+            dto.setParcsAccessibles(utilisateur.getParcsAcces().stream().map(Parc::getNom).toList());
+            dto.setMarquesAccessibles(utilisateur.getMarquesAccessibles());
+            return dto;
+        }).toList();
+    }
+
 }

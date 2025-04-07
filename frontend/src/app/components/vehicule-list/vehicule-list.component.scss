@@ -169,7 +169,7 @@ mat-form-field:focus-within {
 
   table.mat-mdc-table {
     width: 100%;
-    table-layout: fixed; // ✅ Garde une structure cohérente sans overflow
+    table-layout: fixed; 
   }
 
   .mat-mdc-table td,

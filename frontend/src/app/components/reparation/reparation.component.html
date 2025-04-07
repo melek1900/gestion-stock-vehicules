@@ -1,11 +1,21 @@
 <mat-card class="reparation-container">
-  <h2>🔧 Gestion des Véhicules Avariés</h2>
+  <h2>🔧 Consultation des Véhicules Avariés</h2>
 
   <div *ngIf="vehiculesAvaries.length === 0" class="empty-message">
     <p>✅ Aucun véhicule en avarie actuellement.</p>
   </div>
-
-  <table mat-table [dataSource]="vehiculesAvaries" class="mat-elevation-z8" *ngIf="vehiculesAvaries.length > 0">
+  <mat-form-field appearance="fill" class="search-field">
+    <mat-label>🔍 Rechercher</mat-label>
+    <input matInput placeholder="Rechercher par N° Châssis, modele , marque" [(ngModel)]="recherche" (ngModelChange)="filtrerVehicules()" />
+  </mat-form-field>
+  <div class="pagination-container">
+    <mat-paginator
+      [pageSize]="10"
+      [pageSizeOptions]="[10, 20, 50]"
+      showFirstLastButtons>
+    </mat-paginator>
+  </div>
+  <table  mat-table [dataSource]="dataSource" class="mat-elevation-z8" *ngIf="vehiculesFiltres.length > 0">
     
     <!-- Numéro de châssis -->
     <ng-container matColumnDef="numeroChassis">
@@ -36,10 +46,9 @@
       <th mat-header-cell *matHeaderCellDef> Actions </th>
       <td mat-cell *matCellDef="let vehicule">
         <button mat-button color="primary"
-        (click)="ouvrirPopupModification(vehicule)"
-        [disabled]="!isExpert">
-        <mat-icon>build</mat-icon> Réparer
-        </button>
+        (click)="ouvrirPopupModification(vehicule)">
+        <mat-icon>visibility</mat-icon> Visualiser
+      </button>
       </td>
     </ng-container>
 

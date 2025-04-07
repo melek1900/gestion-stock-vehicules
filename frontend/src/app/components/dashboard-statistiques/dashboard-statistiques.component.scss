@@ -297,6 +297,58 @@ $dark-color: #003366;
     }
   }
 }
+
+::ng-deep .mat-select-trigger {
+  border: 1px solid $primary-color;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-size: 14px;
+  color: $dark-color;
+  background-color: white;
+  width: 240px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  border: 1px solid $primary-color;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  height: 40px;
+  width: 180px !important;
+  box-sizing: border-box;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+::ng-deep .mat-mdc-select {
+  width: 240px;
+}
+
+::ng-deep .mat-mdc-select:hover .mat-mdc-select-trigger,
+::ng-deep .mat-mdc-select.mat-focused .mat-mdc-select-trigger {
+  border-color: $subtitle-color;
+  box-shadow: 0 0 5px rgba($primary-color, 0.4);
+  
+}
+
+::ng-deep .mat-mdc-select-arrow {
+  color: $primary-color;
+  font-size: 20px;
+}
+
+::ng-deep .mat-mdc-select-value {
+  color: $dark-color;
+  font-size: 14px;
+}
+
+::ng-deep .mat-mdc-select-panel {
+  max-height: 250px !important;
+}
 .chart-header {
   display: flex;
   justify-content: space-between;

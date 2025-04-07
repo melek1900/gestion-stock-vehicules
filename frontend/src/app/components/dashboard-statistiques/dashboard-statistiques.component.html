@@ -22,14 +22,18 @@
 <!-- 📊 Ventes par genre - Nos marques avec filtre -->
 <div class="chart-container" appScrollAnimate>
   <div class="marque-filter-inline">
-    <mat-form-field appearance="outline" class="marque-filter-multi">
-      <mat-label>Marques</mat-label>
-      <mat-select [(ngModel)]="selectedMarques" multiple (selectionChange)="onNosMarquesChange()">
-        <mat-option *ngFor="let marque of marquesDisponibles" [value]="marque">
-          {{ marque }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <mat-select
+      id="marquesNos"
+      [(ngModel)]="selectedMarques"
+      multiple
+      disableRipple
+      (selectionChange)="onNosMarquesChange()"
+      panelClass="custom-select-panel"
+    >
+      <mat-option *ngFor="let marque of marquesDisponibles" [value]="marque">
+        {{ marque }}
+      </mat-option>
+    </mat-select>
   </div>
 
   <apx-chart
@@ -48,14 +52,32 @@
 <!-- 📊 Ventes par genre - Concurrence -->
 <div class="chart-container" *ngIf="genreConcurChartOptions.series?.length" appScrollAnimate>
   <div class="marque-filter-inline">
-    <mat-form-field appearance="outline" class="marque-filter-multi">
-      <mat-label>Filtrer concurrence</mat-label>
-      <mat-select [(ngModel)]="selectedMarquesConcur" multiple (selectionChange)="onConcurMarquesChange()">
-        <mat-option *ngFor="let marque of marquesConcurDisponibles" [value]="marque">
-          {{ marque }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <mat-select
+    [(ngModel)]="selectedMarquesConcur"
+    multiple
+    (ngModelChange)="onConcurMarquesChange()"
+    [compareWith]="compareMarques"
+  >
+    <!-- ✅ Personnalisation de l'affichage -->
+    <mat-select-trigger>
+      {{
+        isAllConcurSelected() ? 'Toutes les marques' :
+        selectedMarquesConcur.length > 0 ? selectedMarquesConcur.join(', ') : 'Aucune'
+      }}
+    </mat-select-trigger>
+  
+    <!-- Option ALL -->
+    <mat-option [value]="ALL_MARK" (click)="toggleAllConcur()">
+      {{ isAllConcurSelected() ? '✅ Toutes les marques' : '➕ Tout sélectionner' }}
+    </mat-option>
+  
+    <!-- Marques -->
+    <mat-option *ngFor="let marque of marquesConcurDisponibles" [value]="marque">
+      {{ marque }}
+    </mat-option>
+  </mat-select>
+  
+  
   </div>
   <apx-chart
     [series]="genreConcurChartOptions.series!"

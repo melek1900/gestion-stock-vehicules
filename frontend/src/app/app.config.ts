@@ -32,6 +32,7 @@ import { CompteurImportComponent } from './components/compteur-import/compteur-i
 import { CompteurOrdreMissionComponent } from './components/compteur-ordre-mission/compteur-ordre-mission.component';
 import { CreationAvarieComponent } from './components/creation-avarie/creation-avarie.component';
 import { EnregistrerAvarieComponent } from './components/enregistrer-avarie/enregistrer-avarie.component';
+import { UtilisateurListComponent } from './components/utilisateur-list/utilisateur-list.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -59,6 +60,7 @@ const appRoutes: Routes = [
   { path: 'voiture-transport', component: VeiculeTransportComponent},
   { path: 'creer-avarie', component: CreationAvarieComponent},
   { path: 'enregistrer-avarie', component: EnregistrerAvarieComponent},
+  { path: 'utilisateur-list', component: UtilisateurListComponent},
 
   { path: '**', redirectTo: 'login', pathMatch: 'full' },
 ];

@@ -15,6 +15,27 @@ table {
   border-radius: 10px;
   overflow: hidden;
 }
+ .search-field {
+  flex-grow: 1;
+  max-width: 400px;
+}
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+::ng-deep .mat-mdc-header-row {
+  background-color: #003366 !important; // Fond bleu
+}
+
+::ng-deep .mat-mdc-header-cell {
+  color: white !important;
+  font-weight: bold;
+  font-size: 14px;
+}
+::ng-deep .mat-mdc-row:hover {
+  background-color: #f1f9ff;
+}
 
 th, td {
   padding: 14px;
