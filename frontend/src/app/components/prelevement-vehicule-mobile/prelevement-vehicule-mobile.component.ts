@@ -49,13 +49,73 @@ export class PrelevementVehiculeMobileComponent {
     BarcodeFormat.CODE_128, 
     BarcodeFormat.CODE_39
   ];
+  numeroChassisSaisi: string = '';
+  scannerOrdreActive = false;
+  html5QrCodeOrdre!: Html5Qrcode;
+
   constructor(private http: HttpClient, private snackBar: MatSnackBar) {
     console.log("📸 Formats de codes supportés :", Object.values(BarcodeFormat));
   }
   ngOnDestroy() {
     this.stopScanner();
   }
+  startOrdreMissionScanner() {
+    this.scannerOrdreActive = true;
   
+    setTimeout(() => {
+      const element = document.getElementById("reader-ordre");
+      if (!element) return;
+  
+      this.html5QrCodeOrdre = new Html5Qrcode("reader-ordre");
+  
+      this.html5QrCodeOrdre.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText: string) => {
+          console.log("✅ Ordre de mission détecté :", decodedText);
+          this.ordreMission = decodedText;
+          this.chargerOrdreMission();  // recharge les véhicules
+          this.stopOrdreMissionScanner();
+        },
+        (errorMessage: string) => {
+          console.log("🔁 Lecture en cours (ordre) :", errorMessage);
+        }
+      ).catch((err) => {
+        console.error("❌ Erreur démarrage scanner ordre :", err);
+      });
+    }, 300);
+  }
+  
+  stopOrdreMissionScanner() {
+    if (this.html5QrCodeOrdre) {
+      this.html5QrCodeOrdre.stop().then(() => {
+        this.scannerOrdreActive = false;
+      }).catch((err) => {
+        console.error("❌ Erreur arrêt scanner ordre :", err);
+      });
+    }
+  }
+  onNumeroChassisChange(value: string) {
+    const numero = value?.trim();
+    
+    // ✅ Déclenche dès que la longueur minimale est atteinte
+    if (numero.length >= 10) {
+      console.log("🚀 Numéro détecté automatiquement :", numero);
+      this.scannerVehicule(numero);
+      this.numeroChassisSaisi = ''; // Réinitialise après scan
+    }
+  }
+  soumettreNumeroChassis() {
+    const numero = this.numeroChassisSaisi?.trim();
+  
+    if (!numero) {
+      this.snackBar.open("⚠️ Veuillez saisir un numéro de châssis", "Fermer", { duration: 3000 });
+      return;
+    }
+  
+    this.scannerVehicule(numero); // 🔄 Réutilise exactement la même logique que le scanner
+    this.numeroChassisSaisi = ''; // Reset après scan
+  }
   startScanner() {
     console.log("▶️ Démarrage du scanner demandé...");
     this.scannerStarted = true;
