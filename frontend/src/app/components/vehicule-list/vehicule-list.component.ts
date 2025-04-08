@@ -431,25 +431,25 @@ toggleParcSelection(parc: string) {
     });
 }
 ouvrirPopup(vehicule: any) {
-  console.log('🛠️ Ouverture du popup avec les données :', vehicule);
-
   const dialogRef = this.dialog.open(PopupVehiculeComponent, {
-      width: '500px',
-      data: { vehicule },
+    width: '500px',
+    data: {
+      vehicule,
+      isReadonly: true // ✅ mode lecture seule
+    }
   });
 
   dialogRef.afterClosed().subscribe((result) => {
-      if (!result) return;
+    if (!result) return;
 
-      if (result.action === 'update') {
-          console.log('✏️ Mise à jour demandée :', result.data);
-          this.updateVehicule(result.data, result.deletedPhotoIds || [], result.newPhotos || []); 
-      } else if (result.action === 'delete') {
-          console.log('🗑️ Suppression demandée pour ID :', result.data.id);
-          this.supprimerVehicule(result.data.id);
-      }
+    if (result.action === 'update') {
+      this.updateVehicule(result.data, result.deletedPhotoIds || [], result.newPhotos || []);
+    } else if (result.action === 'delete') {
+      this.supprimerVehicule(result.data.id);
+    }
   });
 }
+
 
   deleteVehicule(id: number) {
     this.http.delete(`http://localhost:8080/api/vehicules/${id}`).subscribe(() => {

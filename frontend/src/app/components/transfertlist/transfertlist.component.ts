@@ -63,7 +63,7 @@ export class TransfertListComponent implements OnInit {
 
   ngOnInit(): void {
     this.recupererRoleUtilisateur();
-
+  
     this.route.queryParams.subscribe(params => {
       if (params['vehicules']) {
         this.modeSelection = 'selection_initiale';
@@ -71,9 +71,10 @@ export class TransfertListComponent implements OnInit {
       } else {
         this.modeSelection = 'ajout_vehicules';
         this.vehiculesSelectionnes = [];
+        this.chargerTousVehicules();
       }
     });
-
+  
     this.chargerParcs();
     this.chargerChauffeurs();
     this.chargerVehiculesTransport();
@@ -90,7 +91,34 @@ export class TransfertListComponent implements OnInit {
       this.vehiculesFiltres.forEach(v => this.selection.select(v));
     }
   }
-
+  verifierVehiculeUtilise(vehiculeId: number): Promise<boolean> {
+    return this.http.get<boolean>(`http://localhost:8080/api/ordres-mission/vehicule/${vehiculeId}/en-utilisation`)
+      .toPromise()
+      .then(result => result ?? false)
+      .catch(err => {
+        console.error(`Erreur vérif véhicule ${vehiculeId}`, err);
+        return false;
+      });
+  }
+  
+  chargerTousVehicules() {
+    this.http.get<any[]>('http://localhost:8080/api/vehicules').subscribe(data => {
+      const vehiculesPromises = data.map(v =>
+        this.http.get<boolean>(`http://localhost:8080/api/ordres-mission/vehicule/${v.id}/en-utilisation`).toPromise().then(enUtilisation => {
+          return { ...v, enUtilisation };
+        })
+      );
+  
+      Promise.all(vehiculesPromises).then(resultats => {
+        this.vehicules = resultats.filter(v =>
+          !v.enUtilisation &&
+          v.parcNom === this.userParc &&
+          !['AVARIE', 'VENDU', 'RESERVE', 'LIVREE'].includes(v.statut)
+        );
+      });
+    });
+  }
+  
   mettreAJourVehiculesSelectionnes() {
     this.vehiculesSelectionnes = this.selection.selected;
   }
@@ -105,39 +133,48 @@ export class TransfertListComponent implements OnInit {
       });
   }
 
-  rechercherVehicule() {
-    if (!this.searchQuery.trim()) {
+  async rechercherVehicule() {
+    const query = this.searchQuery.trim().toLowerCase();
+  
+    if (!query) {
       this.vehiculesFiltres = [];
       return;
     }
-
-    this.http.get<any[]>('http://localhost:8080/api/vehicules')
-      .subscribe(data => {
-        this.vehicules = data;
-        this.vehiculesFiltres = data.filter(v =>
-          v.numeroChassis.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
-          !this.vehiculesSelectionnes.some(sel => sel.id === v.id) &&
-          v.statut !== 'AVARIE' &&
-          v.statut !== 'VENDU' &&
-          v.statut !== 'RESERVE' &&
-          v.statut !== 'LIVREE' &&
-          v.parcNom === this.userParc
-        );
-      });
+  
+    const vehiculesDisponibles = this.vehicules.filter(v =>
+      v.numeroChassis.toLowerCase().includes(query) &&
+      !this.vehiculesSelectionnes.some(sel => sel.id === v.id) &&
+      v.statut !== 'AVARIE' && v.statut !== 'VENDU' &&
+      v.statut !== 'RESERVE' && v.statut !== 'LIVREE' &&
+      v.parcNom === this.userParc
+    );
+  
+    // Vérifier en parallèle ceux qui sont déjà utilisés
+    const verifications = await Promise.all(
+      vehiculesDisponibles.map(v =>
+        this.verifierVehiculeUtilise(v.id).then(utilise => ({ vehicule: v, utilise }))
+      )
+    );
+  
+    // Garder uniquement ceux qui ne sont pas utilisés
+    this.vehiculesFiltres = verifications
+      .filter(result => !result.utilise)
+      .map(result => result.vehicule);
   }
+  
 
   supprimerVehiculeSelectionne(vehicule: any) {
     this.vehiculesSelectionnes = this.vehiculesSelectionnes.filter(v => v.id !== vehicule.id);
-    if (this.searchQuery.trim() && vehicule.numeroChassis.toLowerCase().includes(this.searchQuery.toLowerCase())) {
+  
+    const query = this.searchQuery.trim().toLowerCase();
+    if (query && vehicule.numeroChassis.toLowerCase().includes(query)) {
       if (!this.vehiculesFiltres.some(v => v.id === vehicule.id)) {
         this.vehiculesFiltres.push(vehicule);
       }
     }
-
-    if (!this.searchQuery.trim()) {
-      this.vehiculesFiltres = [];
-    }
   }
+  
+  
 
   ajouterVehiculesSelectionnes() {
     if (this.selection.selected.length === 0) return;
@@ -157,8 +194,10 @@ export class TransfertListComponent implements OnInit {
       const payload = JSON.parse(atob(token.split('.')[1]));
       this.userRole = payload.role;
       this.userParc = payload.parcNom || null;
+      console.log("👤 Role:", this.userRole, "📍 Parc:", this.userParc);
     }
   }
+  
 
   chargerParcs() {
     this.http.get<any[]>('http://localhost:8080/api/parcs').subscribe(data => {
@@ -202,16 +241,25 @@ export class TransfertListComponent implements OnInit {
     return payload.id || null;
   }
 
-  initierTransfert() {
+  async initierTransfert() {
     if (!this.chauffeurSelectionne || !this.vehiculeTransportSelectionne || this.vehiculesSelectionnes.length === 0) {
       return;
     }
-
+  
+    // Vérification d’unicité pour chaque véhicule
+    for (const vehicule of this.vehiculesSelectionnes) {
+      const enUtilisation = await this.verifierVehiculeUtilise(vehicule.id);
+      if (enUtilisation) {
+        alert(`❌ Le véhicule ${vehicule.numeroChassis} est déjà utilisé dans un autre ordre mission non clôturé.`);
+        return;
+      }
+    }
+  
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
       'Content-Type': 'application/json'
     });
-
+  
     const payload = {
       vehiculeIds: this.vehiculesSelectionnes.map(v => v.id),
       chauffeurId: parseInt(this.chauffeurSelectionne ?? '0', 10),
@@ -220,19 +268,31 @@ export class TransfertListComponent implements OnInit {
       parcArriveeId: this.parcDestination ? parseInt(this.parcDestination, 10) : 0,
       utilisateurId: this.getUtilisateurIdFromToken() ?? 0
     };
-
-    this.http.post<{ ordreMissionId: number, pdfUrl: string }>('http://localhost:8080/api/ordres-mission/creer', payload, { headers })
-      .subscribe(response => {
-        const token = localStorage.getItem('token');
-        const pdfUrlComplet = `http://localhost:8080${response.pdfUrl}`;
-        this.http.get(pdfUrlComplet, {
-          headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }),
-          responseType: 'blob'
-        }).subscribe(file => {
-          const blob = new Blob([file], { type: 'application/pdf' });
-          const url = window.URL.createObjectURL(blob);
-          window.open(url, '_blank');
-        });
+  
+    this.http.post<{ ordreMissionId: number, numeroOrdre: string, pdfUrl: string }>(
+      'http://localhost:8080/api/ordres-mission/creer',
+      payload,
+      { headers }
+    ).subscribe(response => {
+      const token = localStorage.getItem('token');
+      const pdfUrlComplet = `http://localhost:8080${response.pdfUrl}`;
+    
+      this.http.get(pdfUrlComplet, {
+        headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }),
+        responseType: 'blob'
+      }).subscribe(file => {
+        const blob = new Blob([file], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+    
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${response.numeroOrdre}.pdf`;
+        link.click();
+        setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+    
+        this.router.navigate(['/ordres-mission']);
       });
+    });
   }
 }
