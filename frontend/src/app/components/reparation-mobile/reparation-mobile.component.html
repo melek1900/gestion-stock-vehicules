@@ -1,0 +1,27 @@
+<div class="reparation-mobile-container">
+    <h2>📱 Véhicules Avariés</h2>
+  
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>🔍 Rechercher</mat-label>
+      <input matInput [(ngModel)]="recherche" (ngModelChange)="filtrerVehicules()" placeholder="N° châssis, modèle, marque" />
+    </mat-form-field>
+  
+    <div *ngIf="vehiculesFiltres.length === 0" class="empty-message">
+      <p>✅ Aucun véhicule en avarie.</p>
+    </div>
+  
+    <mat-card *ngFor="let vehicule of vehiculesFiltres" class="vehicule-card">
+      <mat-card-content>
+        <p><strong>N° Châssis:</strong> {{ vehicule.numeroChassis }}</p>
+        <p><strong>Marque:</strong> {{ vehicule.shortDescription }}</p>
+        <p><strong>Modèle:</strong> {{ vehicule.modele }}</p>
+        <p><strong>Couleur:</strong> {{ vehicule.shortColor }}</p>
+        <p><strong>Parc:</strong> {{ vehicule.parcNom }}</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="ouvrirPopupModification(vehicule)">
+          🔧 Voir Détails
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>

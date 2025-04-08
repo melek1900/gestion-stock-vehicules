@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-ordre-mission-list',
@@ -25,7 +26,8 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
     MatSelectModule,
     FormsModule,
     MatInputModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatIconModule
   ]
 })
 export class OrdreMissionListComponent implements OnInit {
@@ -33,8 +35,9 @@ export class OrdreMissionListComponent implements OnInit {
 
 dataSource = new MatTableDataSource<any>([]);
   ordresMission: any[] = [];
-  displayedColumns: string[] = ['numeroMission', 'date', 'chauffeur', 'vehicule', 'parcDepart', 'parcArrivee', 'statut'];
-  private http = inject(HttpClient);
+  displayedColumns: string[] = [
+    'numeroMission', 'date', 'chauffeur', 'vehicule', 'parcDepart', 'parcArrivee', 'statut', 'actions'
+  ];  private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
   statutFiltre: string = '';  // ✅ Stocke le statut sélectionné
   ordresMissionFiltres: any[] = []; // ✅ Liste filtrée
@@ -87,7 +90,8 @@ dataSource = new MatTableDataSource<any>([]);
       next: (data) => {
         this.ordresMission = data.map(ordre => ({
           ...ordre,
-          dateCreation: new Date(ordre.dateCreation)
+          dateCreation: new Date(ordre.dateCreation),
+          pdfUrl: `http://localhost:8080/api/ordres-mission/${ordre.id}/pdf`
         }));
         this.dataSource.data = this.ordresMission;
         this.ordresMissionFiltres = this.ordresMission;
@@ -100,18 +104,22 @@ dataSource = new MatTableDataSource<any>([]);
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
-  
-  /** ✅ Télécharger ou afficher l’ordre de mission */
-  afficherOrdreMission(pdfUrl: string) {
+  telechargerOrdreMission(pdfUrl: string, numeroOrdre: string) {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
-
-    this.http.get(pdfUrl, { headers, responseType: 'blob' }).subscribe(blob => {
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, '_blank'); // ✅ Ouvrir le PDF dans un nouvel onglet
-    }, error => {
-      this.snackBar.open('❌ Erreur lors de l’ouverture du document', 'Fermer', { duration: 3000 });
+  
+    this.http.get(pdfUrl, { headers, responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${numeroOrdre}.pdf`; // ✅ le nom du fichier correspond au numéro
+        link.click();
+      },
+      error: () => {
+        this.snackBar.open('❌ Erreur lors du téléchargement du document', 'Fermer', { duration: 3000 });
+      }
     });
   }
+  
 }

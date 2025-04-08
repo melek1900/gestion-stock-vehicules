@@ -35,4 +35,7 @@ export class GestionnaireStockDashboardComponent {
   naviguerVersOrdresMissions(){
     this.router.navigate(['/ordre-mission-mobile']);
   }
+  naviguerVersListeAvarie(){
+    this.router.navigate(['/avarie-list-mobile']);
+  }
 }

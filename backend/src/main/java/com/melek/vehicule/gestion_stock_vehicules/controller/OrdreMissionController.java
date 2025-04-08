@@ -4,6 +4,7 @@ import com.melek.vehicule.gestion_stock_vehicules.dto.VehiculeDTO;
 import com.melek.vehicule.gestion_stock_vehicules.model.OrdreMission;
 import com.melek.vehicule.gestion_stock_vehicules.repository.OrdreMissionRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.ParcRepository;
+import com.melek.vehicule.gestion_stock_vehicules.repository.VehiculeRepository;
 import com.melek.vehicule.gestion_stock_vehicules.service.OrdreMissionPDFService;
 import com.melek.vehicule.gestion_stock_vehicules.service.OrdreMissionService;
 import jakarta.transaction.Transactional;
@@ -27,12 +28,16 @@ public class OrdreMissionController {
 
     private final OrdreMissionService ordreMissionService;
     private final OrdreMissionPDFService ordreMissionPDFService;
-    private  OrdreMissionRepository ordreMissionRepository;
+    private final OrdreMissionRepository ordreMissionRepository;
+    private final VehiculeRepository vehiculeRepository ;
 
-    public OrdreMissionController(OrdreMissionService ordreMissionService, OrdreMissionPDFService ordreMissionPDFService,OrdreMissionRepository ordreMissionRepository) {
+
+    public OrdreMissionController(OrdreMissionService ordreMissionService, OrdreMissionPDFService ordreMissionPDFService,OrdreMissionRepository ordreMissionRepository,VehiculeRepository vehiculeRepository) {
         this.ordreMissionService = ordreMissionService;
         this.ordreMissionPDFService = ordreMissionPDFService;
         this.ordreMissionRepository = ordreMissionRepository;
+        this.vehiculeRepository = vehiculeRepository;
+
     }
     @GetMapping("/{numeroOrdre}/vehicules")
     public ResponseEntity<List<VehiculeDTO>> getVehiculesParNumeroOrdre(@PathVariable String numeroOrdre) {
@@ -63,11 +68,11 @@ public class OrdreMissionController {
             return ResponseEntity.badRequest().body(Map.of("message", "❌ Impossible de prélever ce véhicule."));
         }
     }
-    @PreAuthorize("hasAnyRole('ADMIN', 'GESTIONNAIRE_STOCK')")
     @GetMapping("/{ordreId}/pdf")
     public ResponseEntity<byte[]> telechargerOrdreMission(@PathVariable Long ordreId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
+            System.out.println("⛔ Authentification invalide");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
@@ -77,16 +82,16 @@ public class OrdreMissionController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.inline()
-                    .filename("ordre_mission_" + ordreId + ".pdf")
+            headers.setContentDisposition(ContentDisposition.attachment()
+                    .filename("ordre_mission_" + ordreMission.getNumeroOrdre() + ".pdf")
                     .build());
 
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace(); // <-- ici
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_GESTIONNAIRE_STOCK')")
     @GetMapping
     public ResponseEntity<List<OrdreMission>> getAllOrdresMission() {
@@ -110,6 +115,7 @@ public class OrdreMissionController {
 
             return ResponseEntity.ok(Map.of(
                     "ordreMissionId", ordreMission.getId(),
+                    "numeroOrdre", ordreMission.getNumeroOrdre(),
                     "pdfUrl", "/api/ordres-mission/" + ordreMission.getId() + "/pdf"
             ));
 
@@ -118,7 +124,14 @@ public class OrdreMissionController {
         }
     }
 
-
+    @GetMapping("/vehicule/{vehiculeId}/en-utilisation")
+    public ResponseEntity<Boolean> verifierVehiculeUtilise(@PathVariable Long vehiculeId) {
+        boolean utilise = ordreMissionService.vehiculeDejaDansOrdre(
+                vehiculeRepository.findById(vehiculeId)
+                        .orElseThrow(() -> new RuntimeException("Véhicule non trouvé"))
+        );
+        return ResponseEntity.ok(utilise);
+    }
 
     @PutMapping("/cloturer/{ordreId}")
     public ResponseEntity<Map<String, String>> cloturerOrdreMission(@PathVariable Long ordreId) {

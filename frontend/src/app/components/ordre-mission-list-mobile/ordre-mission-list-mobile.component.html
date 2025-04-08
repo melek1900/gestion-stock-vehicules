@@ -25,9 +25,10 @@
         <mat-card-content>
           <div class="mission-header">
             <h3>📌 Mission #{{ ordre.numeroOrdre }}</h3>
-            <button mat-icon-button (click)="afficherOrdreMission('/api/ordres-mission/' + ordre.id + '/pdf')" aria-label="Télécharger PDF">
+            <button mat-icon-button (click)="telechargerOrdreMission(ordre.pdfUrl, ordre.numeroOrdre)" aria-label="Télécharger PDF">
               <mat-icon>picture_as_pdf</mat-icon>
             </button>
+            
           </div>
           <p><strong>📅 Date :</strong> {{ ordre.dateCreation | date:'dd/MM/yyyy' }}</p>
           <p><strong>🚚 Véhicule :</strong> {{ ordre.vehiculeTransport.matricule }} - {{ ordre.vehiculeTransport.type }}</p>

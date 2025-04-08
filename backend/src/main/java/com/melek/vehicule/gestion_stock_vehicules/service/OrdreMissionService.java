@@ -104,11 +104,22 @@ public class OrdreMissionService {
         return ordreMissionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("🚨 Ordre de mission introuvable avec l'ID : " + id));
     }
-
+    public boolean vehiculeDejaDansOrdre(Vehicule vehicule) {
+        return ordreMissionRepository.existsByVehiculesContainingAndStatutNot(vehicule, StatutOrdreMission.CLOTURE);
+    }
     @Transactional
     public OrdreMission creerOrdreMission(List<Integer> vehiculeIds, Integer chauffeurId, Integer vehiculeTransportId, Integer parcDepartId, Integer parcArriveeId) {
         List<Long> vehiculeIdsLong = vehiculeIds.stream().map(Integer::longValue).toList();
         List<Vehicule> vehicules = vehiculeRepository.findAllById(vehiculeIdsLong);
+        List<Vehicule> vehiculesUtilisables = new ArrayList<>();
+
+        for (Vehicule v : vehicules) {
+            if (vehiculeDejaDansOrdre(v)) {
+                throw new RuntimeException("❌ Le véhicule " + v.getNumeroChassis() + " est déjà utilisé dans un autre ordre non clôturé !");
+            }
+            vehiculesUtilisables.add(v);
+        }
+
         if (vehicules.isEmpty()) throw new RuntimeException("❌ Aucun véhicule trouvé pour cet ordre de mission.");
 
         Chauffeur chauffeur = chauffeurRepository.findById(chauffeurId.longValue())

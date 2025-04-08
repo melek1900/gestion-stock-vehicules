@@ -74,7 +74,7 @@ export class PrelevementVehiculeMobileComponent {
         (decodedText: string) => {
           console.log("✅ Ordre de mission détecté :", decodedText);
           this.ordreMission = decodedText;
-          this.chargerOrdreMission();  // recharge les véhicules
+          this.chargerOrdreMission();
           this.stopOrdreMissionScanner();
         },
         (errorMessage: string) => {
@@ -102,7 +102,7 @@ export class PrelevementVehiculeMobileComponent {
     if (numero.length >= 10) {
       console.log("🚀 Numéro détecté automatiquement :", numero);
       this.scannerVehicule(numero);
-      this.numeroChassisSaisi = ''; // Réinitialise après scan
+      this.numeroChassisSaisi = ''; 
     }
   }
   soumettreNumeroChassis() {
@@ -113,8 +113,8 @@ export class PrelevementVehiculeMobileComponent {
       return;
     }
   
-    this.scannerVehicule(numero); // 🔄 Réutilise exactement la même logique que le scanner
-    this.numeroChassisSaisi = ''; // Reset après scan
+    this.scannerVehicule(numero); 
+    this.numeroChassisSaisi = ''; 
   }
   startScanner() {
     console.log("▶️ Démarrage du scanner demandé...");
