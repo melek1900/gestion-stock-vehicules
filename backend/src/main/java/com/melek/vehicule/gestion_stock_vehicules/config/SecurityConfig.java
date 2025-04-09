@@ -27,7 +27,6 @@ import java.util.List;
 public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-
     private final JwtFilter jwtFilter;
     private final UtilisateurService utilisateurService;
 
@@ -48,10 +47,11 @@ public class SecurityConfig {
                 )
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfig = new CorsConfiguration();
-                    corsConfig.setAllowedOrigins(List.of("http://localhost:4200"));
+                    // Utilise un motif pour autoriser toutes les origines locales, sans spécifier une adresse IP
+                    corsConfig.setAllowedOriginPatterns(List.of("http://localhost:*", "http://192.168.*.*"));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
-                    corsConfig.setAllowCredentials(true);
+                    corsConfig.setAllowCredentials(true);  // Permet les cookies et les informations d'authentification
                     return corsConfig;
                 }))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -81,8 +81,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -93,3 +91,5 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }
+
+

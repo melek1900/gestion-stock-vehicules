@@ -38,7 +38,7 @@ export class UtilisateurListComponent implements OnInit {
   }
 
   chargerUtilisateurs() {
-    this.http.get<any[]>('http://localhost:8080/api/utilisateurs').subscribe(data => {
+    this.http.get<any[]>('http://192.168.1.121:8080/api/utilisateurs').subscribe(data => {
       this.utilisateurs = data;
       this.filtrerUtilisateurs();
     });
@@ -78,7 +78,7 @@ export class UtilisateurListComponent implements OnInit {
       if (result?.action === 'update') {
         const utilisateurModifie = result.data;
   
-        this.http.put(`http://localhost:8080/api/utilisateurs/${utilisateurModifie.id}`, utilisateurModifie)
+        this.http.put(`http://192.168.1.121:8080/api/utilisateurs/${utilisateurModifie.id}`, utilisateurModifie)
           .subscribe(() => {
             this.chargerUtilisateurs(); // recharge la liste
           });
@@ -107,7 +107,7 @@ export class UtilisateurListComponent implements OnInit {
       if (result?.action === 'update') {
         const nouvelUtilisateur = result.data;
   
-        this.http.post('http://localhost:8080/api/utilisateurs', nouvelUtilisateur)
+        this.http.post('http://192.168.1.121:8080/api/utilisateurs', nouvelUtilisateur)
           .subscribe(() => {
             this.chargerUtilisateurs(); // recharge la liste
           });
@@ -115,7 +115,7 @@ export class UtilisateurListComponent implements OnInit {
     });
   }
   supprimerUtilisateur(id: number) {
-    this.http.delete(`http://localhost:8080/api/utilisateurs/${id}`).subscribe(() => {
+    this.http.delete(`http://192.168.1.121:8080/api/utilisateurs/${id}`).subscribe(() => {
       this.chargerUtilisateurs();
     });
   }
