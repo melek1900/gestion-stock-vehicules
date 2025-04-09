@@ -46,7 +46,7 @@
 
           <div class="photo-preview" *ngIf="photosPreviews[i] && photosPreviews[i].length > 0">
             <h4>Photos</h4>
-            <img *ngFor="let photo of photosPreviews[i]" [src]="'http://localhost:8080/photos/' + photo" alt="photo" class="preview-image" />
+            <img *ngFor="let photo of photosPreviews[i]" [src]="'http://192.168.1.121:8080/photos/' + photo" alt="photo" class="preview-image" />
           </div>
         </mat-card>
       </div>

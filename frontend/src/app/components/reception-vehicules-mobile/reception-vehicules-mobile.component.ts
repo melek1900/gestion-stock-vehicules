@@ -95,7 +95,7 @@ export class ReceptionVehiculesMobileComponent implements OnDestroy {
     const parcNom = decoded?.parcNom;
   
     // ✅ Vérification d'existence du véhicule
-    this.http.get(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}`).subscribe({
+    this.http.get(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}`).subscribe({
       next: () => {
         // ✅ Véhicule trouvé → on redirige
         this.router.navigate(['/enregistrer-vehicule'], {

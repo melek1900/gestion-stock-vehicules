@@ -179,7 +179,7 @@ export class PopupAvarieComponent {
       });
     });
 
-    this.http.put(`http://localhost:8080/api/vehicules/${this.data.vehicule.numeroChassis}/avaries`, formData, { headers }).subscribe({
+    this.http.put(`http://192.168.1.121:8080/api/vehicules/${this.data.vehicule.numeroChassis}/avaries`, formData, { headers }).subscribe({
       next: () => {
         this.snackBar.open('✅ Avarie mise à jour avec succès', 'Fermer', { duration: 3000 });
         this.dialogRef.close({ action: 'update', data: this.avaries });
@@ -202,7 +202,7 @@ export class PopupAvarieComponent {
     const body = { commentaire: this.commentaireExpert };
   
     this.http.patch(
-      `http://localhost:8080/api/vehicules/${this.data.vehicule.numeroChassis}/reparer`,
+      `http://192.168.1.121:8080/api/vehicules/${this.data.vehicule.numeroChassis}/reparer`,
       body,
       { headers }
     ).subscribe({

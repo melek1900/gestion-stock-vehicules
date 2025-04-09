@@ -77,7 +77,7 @@ export class ReparationComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>('http://localhost:8080/api/vehicules/by-statut?statut=AVARIE', { headers }).subscribe({
+    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules/by-statut?statut=AVARIE', { headers }).subscribe({
       next: (data) => {
         this.vehiculesAvaries = data;
         this.dataSource.data = data; 
@@ -113,7 +113,7 @@ export class ReparationComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.patch(`http://localhost:8080/api/vehicules/${numeroChassis}/reparer`, {}, { headers }).subscribe({
+    this.http.patch(`http://192.168.1.121:8080/api/vehicules/${numeroChassis}/reparer`, {}, { headers }).subscribe({
       next: () => {
         this.snackBar.open('✅ Véhicule réparé et remis en stock !', 'Fermer', { duration: 3000 });
   

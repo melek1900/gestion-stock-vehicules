@@ -86,12 +86,12 @@ dataSource = new MatTableDataSource<any>([]);
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.get<any[]>('http://localhost:8080/api/ordres-mission', { headers }).subscribe({
+    this.http.get<any[]>('http://192.168.1.121:8080/api/ordres-mission', { headers }).subscribe({
       next: (data) => {
         this.ordresMission = data.map(ordre => ({
           ...ordre,
           dateCreation: new Date(ordre.dateCreation),
-          pdfUrl: `http://localhost:8080/api/ordres-mission/${ordre.id}/pdf`
+          pdfUrl: `http://192.168.1.121:8080/api/ordres-mission/${ordre.id}/pdf`
         }));
         this.dataSource.data = this.ordresMission;
         this.ordresMissionFiltres = this.ordresMission;

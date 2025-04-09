@@ -92,7 +92,7 @@ export class TransfertListComponent implements OnInit {
     }
   }
   verifierVehiculeUtilise(vehiculeId: number): Promise<boolean> {
-    return this.http.get<boolean>(`http://localhost:8080/api/ordres-mission/vehicule/${vehiculeId}/en-utilisation`)
+    return this.http.get<boolean>(`http://192.168.1.121:8080/api/ordres-mission/vehicule/${vehiculeId}/en-utilisation`)
       .toPromise()
       .then(result => result ?? false)
       .catch(err => {
@@ -102,9 +102,9 @@ export class TransfertListComponent implements OnInit {
   }
   
   chargerTousVehicules() {
-    this.http.get<any[]>('http://localhost:8080/api/vehicules').subscribe(data => {
+    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules').subscribe(data => {
       const vehiculesPromises = data.map(v =>
-        this.http.get<boolean>(`http://localhost:8080/api/ordres-mission/vehicule/${v.id}/en-utilisation`).toPromise().then(enUtilisation => {
+        this.http.get<boolean>(`http://192.168.1.121:8080/api/ordres-mission/vehicule/${v.id}/en-utilisation`).toPromise().then(enUtilisation => {
           return { ...v, enUtilisation };
         })
       );
@@ -125,7 +125,7 @@ export class TransfertListComponent implements OnInit {
 
   recupererVehiculesSelectionnes(vehiculesIds: string) {
     const ids = vehiculesIds.split(',').map(id => parseInt(id, 10));
-    this.http.get<any[]>('http://localhost:8080/api/vehicules')
+    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules')
       .subscribe(data => {
         this.vehiculesSelectionnes = data.filter(v => ids.includes(v.id));
         this.vehicules = data.filter(v => !ids.includes(v.id));
@@ -200,7 +200,7 @@ export class TransfertListComponent implements OnInit {
   
 
   chargerParcs() {
-    this.http.get<any[]>('http://localhost:8080/api/parcs').subscribe(data => {
+    this.http.get<any[]>('http://192.168.1.121:8080/api/parcs').subscribe(data => {
       if (this.vehiculesSelectionnes.length > 0) {
         const parcActuel = this.vehiculesSelectionnes[0].parcNom;
         this.parcs = data.filter(parc =>
@@ -217,7 +217,7 @@ export class TransfertListComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>('http://localhost:8080/api/chauffeurs/disponibles', { headers })
+    this.http.get<any[]>('http://192.168.1.121:8080/api/chauffeurs/disponibles', { headers })
       .subscribe(data => {
         this.chauffeurs = data.filter(chauffeur => chauffeur.disponible);
       });
@@ -228,7 +228,7 @@ export class TransfertListComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>('http://localhost:8080/api/vehicules-transport/disponibles', { headers })
+    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules-transport/disponibles', { headers })
       .subscribe(data => {
         this.vehiculesTransport = data.filter(vehicule => vehicule.disponible);
       });
@@ -270,12 +270,12 @@ export class TransfertListComponent implements OnInit {
     };
   
     this.http.post<{ ordreMissionId: number, numeroOrdre: string, pdfUrl: string }>(
-      'http://localhost:8080/api/ordres-mission/creer',
+      'http://192.168.1.121:8080/api/ordres-mission/creer',
       payload,
       { headers }
     ).subscribe(response => {
       const token = localStorage.getItem('token');
-      const pdfUrlComplet = `http://localhost:8080${response.pdfUrl}`;
+      const pdfUrlComplet = `http://192.168.1.121:8080${response.pdfUrl}`;
     
       this.http.get(pdfUrlComplet, {
         headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }),
