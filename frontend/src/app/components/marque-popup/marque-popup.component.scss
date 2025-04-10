@@ -1,0 +1,54 @@
+:host {
+    display: block;
+    padding: 24px;
+    background-color: #fff;
+    border-radius: 12px;
+    max-width: 450px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  mat-form-field.full-width {
+    width: 100%;
+    margin-bottom: 16px;
+  
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      border-radius: 6px;
+    }
+  
+    ::ng-deep input.mat-input-element {
+      padding: 12px;
+      font-size: 15px;
+    }
+  }
+  
+  mat-dialog-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: #003366;
+  }
+  
+  mat-dialog-actions {
+    padding-top: 12px;
+  
+    button {
+      text-transform: uppercase;
+      font-weight: 600;
+      font-size: 13px;
+      border-radius: 6px;
+  
+      &:not(:first-child) {
+        margin-left: 8px;
+      }
+    }
+  
+    button[mat-flat-button] {
+      background-color: #0073A8;
+      color: white;
+  
+      &:hover {
+        background-color: #005e8c;
+      }
+    }
+  }
+  

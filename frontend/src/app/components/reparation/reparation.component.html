@@ -1,9 +1,7 @@
 <mat-card class="reparation-container">
   <h2>🔧 Consultation des Véhicules Avariés</h2>
 
-  <div *ngIf="vehiculesAvaries.length === 0" class="empty-message">
-    <p>✅ Aucun véhicule en avarie actuellement.</p>
-  </div>
+  
   <mat-form-field appearance="fill" class="search-field">
     <mat-label>🔍 Rechercher</mat-label>
     <input matInput placeholder="Rechercher par N° Châssis, modele , marque" [(ngModel)]="recherche" (ngModelChange)="filtrerVehicules()" />
@@ -14,6 +12,9 @@
       [pageSizeOptions]="[10, 20, 50]"
       showFirstLastButtons>
     </mat-paginator>
+  </div>
+  <div *ngIf="vehiculesAvaries.length === 0" class="empty-message">
+    <p>✅ Aucun véhicule en avarie actuellement.</p>
   </div>
   <table  mat-table [dataSource]="dataSource" class="mat-elevation-z8" *ngIf="vehiculesFiltres.length > 0">
     

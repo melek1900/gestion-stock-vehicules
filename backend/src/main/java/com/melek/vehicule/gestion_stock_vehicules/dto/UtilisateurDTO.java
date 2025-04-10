@@ -1,7 +1,5 @@
 package com.melek.vehicule.gestion_stock_vehicules.dto;
 
-import com.melek.vehicule.gestion_stock_vehicules.model.Marque;
-import com.melek.vehicule.gestion_stock_vehicules.model.Parc;
 import com.melek.vehicule.gestion_stock_vehicules.model.RoleUtilisateur;
 import java.util.List;
 import java.util.Set;
@@ -14,7 +12,8 @@ public class UtilisateurDTO {
     private RoleUtilisateur role;
     private String parcNom;
     private List<String> parcsAccessibles;
-    private Set<Marque> marquesAccessibles;
+    private Set<String> marquesAccessibles;
+
 
     public Long getId() {
         return id;
@@ -64,11 +63,11 @@ public class UtilisateurDTO {
         this.parcNom = parcNom;
     }
 
-    public Set<Marque> getMarquesAccessibles() {
+    public Set<String> getMarquesAccessibles() {
         return marquesAccessibles;
     }
 
-    public void setMarquesAccessibles(Set<Marque> marquesAccessibles) {
+    public void setMarquesAccessibles(Set<String> marquesAccessibles) {
         this.marquesAccessibles = marquesAccessibles;
     }
 

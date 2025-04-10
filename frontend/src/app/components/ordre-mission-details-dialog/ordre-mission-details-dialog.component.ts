@@ -5,6 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { PopupVehiculeComponent } from '../popup-vehicule/popup-vehicule.component';
 
 @Component({
   selector: 'app-ordre-mission-details-dialog',
@@ -16,8 +18,9 @@ export class OrdreMissionDetailsDialogComponent {
   
   constructor(
     public dialogRef: MatDialogRef<OrdreMissionDetailsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private dialog: MatDialog
+  ){
     console.log("📦 Données véhicules reçues :", this.data.vehicules);
   
     // ✅ Marquer les véhicules comme prélevés si parc.id === 3 (TRANSFERT)
@@ -34,5 +37,14 @@ export class OrdreMissionDetailsDialogComponent {
 
   fermer() {
     this.dialogRef.close();
+  }
+  ouvrirDetailsVehicule(vehicule: any) {
+    this.dialog.open(PopupVehiculeComponent, {
+      width: '600px',
+      data: {
+        vehicule,
+        isReadonly: true
+      }
+    });
   }
 }

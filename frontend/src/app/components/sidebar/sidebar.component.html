@@ -66,6 +66,23 @@
         </button>
       </li>
   
+
+
+      <li>
+        <button *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION' && userRole !== 'ROLE_ADMINISTRATEUR'" class="menu-item" (click)="toggleConstatMenu()">
+          <mat-icon>assignment_turned_in</mat-icon>
+          <span>Constats</span>
+          <mat-icon class="chevron" [class.rotate]="parametresConstatOpen">chevron_right</mat-icon>
+        </button>
+        <ul *ngIf="parametresConstatOpen"  class="submenu">
+          <li  [routerLink]="['/reparation']" class="submenu-link">
+            <mat-icon>person_add</mat-icon>
+            <span>Création utilisateurs</span>
+          </li>
+        </ul>
+      </li>
+
+      
       <!-- Administration -->
    <li>
     <button   *ngIf="userRole !== 'ROLE_MANAGER' && userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION'" class="menu-item" (click)="toggleAdminMenu()">
@@ -77,6 +94,10 @@
       <li  [routerLink]="['/addUser']" class="submenu-link">
         <mat-icon>person_add</mat-icon>
         <span>Création utilisateurs</span>
+      </li>
+      <li  [routerLink]="['/list-marque']" class="submenu-link">
+        <mat-icon>menu</mat-icon>
+        <span>Gestion Marque</span>
       </li>
       <li   [routerLink]="['/register']" class="submenu-link">
         <mat-icon>menu</mat-icon>

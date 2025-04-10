@@ -16,6 +16,7 @@ export class SidebarComponent {
   ordreMissionMenuOpen = false;
   adminMenuOpen = false;
   parametresMenuOpen = false;
+  parametresConstatOpen = false;
   isSidebarOpen = true; // Pour responsive mobile
   userRole: string = '';
   constructor() {
@@ -41,5 +42,8 @@ export class SidebarComponent {
 
   toggleParametresMenu() {
     this.parametresMenuOpen = !this.parametresMenuOpen;
+  }
+  toggleConstatMenu() {
+    this.parametresConstatOpen = !this.parametresConstatOpen;
   }
 }

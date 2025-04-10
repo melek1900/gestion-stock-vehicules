@@ -181,7 +181,7 @@ export class VehiculeListComponent implements OnInit {
       this.userRole = payload.role;
       const parcUtilisateur = payload.parcNom || null;
   
-      this.marquesAccessibles = payload.marquesAccessibles || [];
+      this.marquesAccessibles = (payload.marquesAccessibles || []).map((m: string) => m.trim().toUpperCase());
   
       if (this.userRole === 'ROLE_GESTIONNAIRE_APPLICATION') {
         this.isOrdreMission = true;
@@ -301,15 +301,18 @@ chargerVehicules() {
       console.log("📡 Véhicules reçus :", JSON.stringify(data, null, 2));
 
       this.vehicules = data.map(v => ({
+        
         ...v,
         parcNom: mappingParcNom[v.parcId] || 'Parc Inconnu',
         productionDate: v.productionDate ? new Date(v.productionDate) : null,
         shortColor: v.shortColor || 'Non défini',
-        shortDescription: v.shortDescription || 'Non défini',
+        shortDescription: (v.shortDescription || 'Non défini').toUpperCase(),
       }));
+      console.log("✅ Marques reçues :", data.map(v => v.shortDescription));
 
       // ✅ Extraire toutes les marques présentes dans les véhicules
-      this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription))];
+      this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription.toUpperCase()))];
+      console.log("📋 Marques disponibles :", this.marquesDisponibles);
 
       // ✅ Sélectionne par défaut les marques accessibles si rien n’est sélectionné
       if (this.selectedMarques.length === 0 && this.marquesAccessibles.length > 0) {
@@ -323,6 +326,8 @@ chargerVehicules() {
 
       this.filtrerVehicules();
       this.cdr.detectChanges();
+      console.log("🧾 Marques transformées :", this.vehicules.map(v => v.shortDescription));
+
     },
     error: (err) => {
       console.error("❌ Erreur lors du chargement des véhicules :", err);
@@ -381,7 +386,7 @@ filtrerVehicules() {
 
     const matchParc = this.selectedParcs.length === 0 || this.selectedParcs.includes(vehicule.parcNom);
     const matchStatut = this.selectedStatut === 'all' || vehicule.statut?.toUpperCase() === this.selectedStatut.toUpperCase();
-    const matchMarque = this.selectedMarques.length === 0 || this.selectedMarques.includes(vehicule.shortDescription);
+    const matchMarque = this.selectedMarques.length === 0 || this.selectedMarques.includes(vehicule.shortDescription?.toUpperCase());
 
     let matchSearch = true;
     if (searchLower) {
@@ -557,22 +562,5 @@ initierTransfert() {
   });
 }
 
-mettreAJourPreparation(preparation: any) {
-  const payload = {
-    vehiculeId: preparation.id,
-    nettoyageEffectue: preparation.nettoyage,  // ✅ Correction : Accès direct aux valeurs du formulaire
-    inspectionEffectuee: preparation.inspection,
-    remarques: preparation.remarques
-  };
 
-  this.http.post('http://192.168.1.121:8080/api/vehicules/preparation', payload).subscribe({
-    next: () => {
-      console.log('✅ Préparation mise à jour avec succès !');
-      this.chargerVehicules(); // ✅ Recharge la liste après mise à jour
-    },
-    error: (err) => {
-      console.error('❌ Erreur lors de la mise à jour de la préparation :', err);
-    }
-  });
-}
 }
