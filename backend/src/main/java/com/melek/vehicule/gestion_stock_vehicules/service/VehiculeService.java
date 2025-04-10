@@ -62,11 +62,9 @@ public class VehiculeService {
 
 
     public List<VehiculeDTO> getVehiculesFiltres(List<Long> parcIds, Set<String> marquesAccessibles) {
-        List<Vehicule> tous = vehiculeRepository.findAll();
-
-        return tous.stream()
+        return vehiculeRepository.findAll().stream()
                 .filter(v -> v.getParc() != null && parcIds.contains(v.getParc().getId()))
-                .filter(v -> marquesAccessibles.contains(v.getShortDescription()))
+                .filter(v -> v.getShortDescription() != null && marquesAccessibles.contains(v.getShortDescription().toUpperCase()))
                 .map(VehiculeDTO::new)
                 .toList();
     }

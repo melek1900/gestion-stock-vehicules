@@ -39,7 +39,6 @@ export class LoginComponent {
       password: ['', Validators.required],
     });
   }
-
   login() {
     if (this.form.valid) {
       console.log("📡 Envoi de la requête de connexion...");

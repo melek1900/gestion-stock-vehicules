@@ -2,6 +2,7 @@ package com.melek.vehicule.gestion_stock_vehicules.controller;
 
 import com.melek.vehicule.gestion_stock_vehicules.dto.UtilisateurDTO;
 import com.melek.vehicule.gestion_stock_vehicules.model.Parc;
+import com.melek.vehicule.gestion_stock_vehicules.model.Marque;
 import com.melek.vehicule.gestion_stock_vehicules.model.RoleUtilisateur;
 import com.melek.vehicule.gestion_stock_vehicules.model.Utilisateur;
 import com.melek.vehicule.gestion_stock_vehicules.repository.UtilisateurRepository;
@@ -10,16 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import com.melek.vehicule.gestion_stock_vehicules.repository.MarqueRepository;
 
 @RestController
 @RequestMapping("/api/utilisateurs")
 public class UtilisateurController {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
+    private MarqueRepository marqueRepository;
 
     @Autowired
     private UtilisateurService utilisateurService;
@@ -55,8 +60,12 @@ public class UtilisateurController {
                     List<Parc> parcs = utilisateurService.getParcsByNoms(dto.getParcsAccessibles());
                     existing.setParcsAcces(parcs);
 
-                    // 🧠 Idem pour les marques
-                    existing.setMarquesAccessibles(dto.getMarquesAccessibles());
+                    Set<Marque> marques = dto.getMarquesAccessibles().stream()
+                            .map(nom -> marqueRepository.findByNom(nom)
+                                    .orElseThrow(() -> new RuntimeException("Marque introuvable : " + nom)))
+                            .collect(Collectors.toSet());
+
+                    existing.setMarquesAccessibles(marques);
 
                     return ResponseEntity.ok(utilisateurRepository.save(existing));
                 })
@@ -74,9 +83,11 @@ public class UtilisateurController {
         return ResponseEntity.ok(parcsAcces);
     }
     @GetMapping("/marques-accessibles")
-    public ResponseEntity<?> getMarquesDisponibles() {
-        List<String> marques = List.of("GM", "ISUZU", "CHEVROLET");
-        return ResponseEntity.ok(marques);
+    public List<String> getMarquesDisponibles() {
+        return marqueRepository.findAll()
+                .stream()
+                .map(Marque::getNom)
+                .collect(Collectors.toList());
     }
 
 }

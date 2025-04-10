@@ -277,21 +277,28 @@ public class VehiculeController {
 
     @GetMapping
     public ResponseEntity<List<VehiculeDTO>> getVehiculesParUtilisateurConnecte(Authentication authentication) {
+        // ✅ Récupération de l'utilisateur connecté
         String email = authentication.getName();
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
+        // ✅ Récupération des IDs des parcs accessibles
         List<Long> parcsAccessiblesIds = utilisateur.getParcsAcces().stream()
                 .map(Parc::getId)
                 .toList();
 
-        Set<String> marques = utilisateur.getMarquesAccessibles().stream()
-                .map(Enum::name)
+        // ✅ Récupération des noms des marques accessibles
+        Set<String> marquesAccessibles = utilisateur.getMarquesAccessibles().stream()
+                .map(Marque::getNom)  // Marque est une entité, on récupère le nom
+                .map(String::toUpperCase) // Normalisation pour comparaison
                 .collect(Collectors.toSet());
 
-        List<VehiculeDTO> vehiculesFiltres = vehiculeService.getVehiculesFiltres(parcsAccessiblesIds, marques);
+        // ✅ Appel du service pour filtrer les véhicules
+        List<VehiculeDTO> vehiculesFiltres = vehiculeService.getVehiculesFiltres(parcsAccessiblesIds, marquesAccessibles);
+
         return ResponseEntity.ok(vehiculesFiltres);
     }
+
 
 
 

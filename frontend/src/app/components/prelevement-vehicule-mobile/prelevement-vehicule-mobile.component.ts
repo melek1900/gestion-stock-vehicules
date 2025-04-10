@@ -208,14 +208,17 @@ export class PrelevementVehiculeMobileComponent {
   }
   
   scannerVehicule(numeroChassis: string) {
-    console.log('📷 Donnée scannée reçue:', numeroChassis);
+    const ordreNettoye = this.ordreMission?.trim();
+    const numeroChassisNettoye = numeroChassis?.trim();
   
-    if (!this.ordreMission?.trim()) {
+    console.log('📷 Donnée scannée reçue:', JSON.stringify(numeroChassisNettoye));
+  
+    if (!ordreNettoye) {
       this.snackBar.open("⚠️ Numéro d'ordre de mission invalide", "Fermer", { duration: 3000 });
       return;
     }
   
-    if (!numeroChassis?.trim()) {
+    if (!numeroChassisNettoye) {
       this.snackBar.open("⚠️ Numéro de châssis invalide", "Fermer", { duration: 3000 });
       return;
     }
@@ -227,21 +230,21 @@ export class PrelevementVehiculeMobileComponent {
     }
   
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    const url = `http://192.168.1.121:8080/api/ordres-mission/${encodeURIComponent(this.ordreMission)}/prelever/${encodeURIComponent(numeroChassis)}`;
+    const url = `http://192.168.1.121:8080/api/ordres-mission/${encodeURIComponent(ordreNettoye)}/prelever/${encodeURIComponent(numeroChassisNettoye)}`;
   
     this.isLoading = true;
   
     this.http.patch(url, {}, { headers }).subscribe({
       next: (res: any) => {
-        const vehicule = this.vehicules.find(v => v.numeroChassis === numeroChassis);
+        const vehicule = this.vehicules.find(v => v.numeroChassis === numeroChassisNettoye);
         if (vehicule) {
           vehicule.preleve = true;
           vehicule.parc = "TRANSFERT";
-          vehicule.justScanned = true; // ✅ Pour affichage temporaire "🚀 Nouveau"
+          vehicule.justScanned = true;
         }
   
-        this.trierVehicules(); // ✅ Tri dynamique après modification
-        this.snackBar.open(`✅ Véhicule ${numeroChassis} prélevé`, 'Fermer', { duration: 3000 });
+        this.trierVehicules();
+        this.snackBar.open(`✅ Véhicule ${numeroChassisNettoye} prélevé`, 'Fermer', { duration: 3000 });
         this.vibrate(150);
   
         if (this.peutValiderPrelevement()) {

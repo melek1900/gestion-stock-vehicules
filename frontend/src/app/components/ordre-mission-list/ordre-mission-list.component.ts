@@ -63,7 +63,7 @@ dataSource = new MatTableDataSource<any>([]);
   
       let dateMatch = false;
       if (ordre.dateCreation instanceof Date && !isNaN(ordre.dateCreation)) {
-        const formattedDate = new Intl.DateTimeFormat('fr-FR').format(ordre.dateCreation); // ex: 04/04/2025
+        const formattedDate = new Intl.DateTimeFormat('fr-FR').format(ordre.dateCreation);
         dateMatch = formattedDate.toLowerCase().includes(rechercheLower);
       }
   
@@ -113,7 +113,7 @@ dataSource = new MatTableDataSource<any>([]);
       next: (blob) => {
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
-        link.download = `${numeroOrdre}.pdf`; // ✅ le nom du fichier correspond au numéro
+        link.download = `${numeroOrdre}.pdf`;
         link.click();
       },
       error: () => {

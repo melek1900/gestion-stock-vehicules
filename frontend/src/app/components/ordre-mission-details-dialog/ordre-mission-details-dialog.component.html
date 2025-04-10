@@ -19,8 +19,9 @@
       <div *ngFor="let vehicule of data.vehicules" class="vehicule-item" [ngClass]="{'preleve': vehicule.preleve}">
         <mat-icon>directions_car</mat-icon>
         <div class="vehicule-details">
-            <p><strong>{{ vehicule.numeroChassis }}</strong> - {{ vehicule.modele }}</p>
-            <mat-chip [color]="vehicule.preleve ? 'primary' : 'warn'">
+          <p class="clickable" (click)="ouvrirDetailsVehicule(vehicule)">
+            <strong>{{ vehicule.numeroChassis }}</strong> - {{ vehicule.modele }}
+          </p>            <mat-chip [color]="vehicule.preleve ? 'primary' : 'warn'">
                 {{ vehicule.preleve ? 'Prélevé' : 'Non Prélevé' }}
               </mat-chip>
           </div>

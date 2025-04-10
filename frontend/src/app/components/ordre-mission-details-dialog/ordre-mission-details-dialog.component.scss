@@ -25,7 +25,11 @@
     color: #333;
     margin: 5px 0;
   }
-  
+  .clickable {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #1976d2; // couleur Material
+  }
   .vehicule-list {
     display: flex;
     flex-direction: column;

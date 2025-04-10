@@ -6,11 +6,11 @@ import com.melek.vehicule.gestion_stock_vehicules.model.Marque;
 import com.melek.vehicule.gestion_stock_vehicules.model.Parc;
 import com.melek.vehicule.gestion_stock_vehicules.model.RoleUtilisateur;
 import com.melek.vehicule.gestion_stock_vehicules.model.Utilisateur;
+import com.melek.vehicule.gestion_stock_vehicules.repository.MarqueRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.ParcRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.UtilisateurRepository;
 import com.melek.vehicule.gestion_stock_vehicules.security.JwtUtil;
 import com.melek.vehicule.gestion_stock_vehicules.service.UtilisateurService;
-import org.springframework.context.support.BeanDefinitionDsl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,18 +33,22 @@ public class AuthController {
     private final UtilisateurRepository utilisateurRepository;
     private final ParcRepository parcRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;  // Ajoute l'injection de AuthenticationManager
+    private final AuthenticationManager authenticationManager;
+    private final MarqueRepository marqueRepository;
+
 
     // Ajoute AuthenticationManager dans le constructeur
     public AuthController(UtilisateurService utilisateurService, JwtUtil jwtUtil,
                           UtilisateurRepository utilisateurRepository, ParcRepository parcRepository,PasswordEncoder passwordEncoder,
-                          AuthenticationManager authenticationManager) {
+                          AuthenticationManager authenticationManager,MarqueRepository marqueRepository) {
         this.utilisateurService = utilisateurService;
         this.jwtUtil = jwtUtil;
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;  // Injecte AuthenticationManager
         this.parcRepository=parcRepository;
+        this.marqueRepository=marqueRepository;
+
     }
 
     @PostMapping("/login")
@@ -71,7 +75,7 @@ public class AuthController {
 
             // ✅ Récupération des marques accessibles dynamiques
             List<String> marquesAccessibles = utilisateur.getMarquesAccessibles().stream()
-                    .map(Marque::name)
+                    .map(Marque::getNom)
                     .collect(Collectors.toList());
             System.out.println("🎯 Marques accessibles depuis la BDD : " + marquesAccessibles);
 
@@ -118,9 +122,14 @@ public class AuthController {
             }
         }
         List<String> marquesStr = (List<String>) request.get("marquesAccessibles");
-        Set<Marque> marquesAccessibles = marquesStr != null
-                ? marquesStr.stream().map(Marque::valueOf).collect(Collectors.toSet())
-                : new HashSet<>();
+        Set<Marque> marquesAccessibles = new HashSet<>();
+
+        if (marquesStr != null) {
+            marquesAccessibles = marquesStr.stream()
+                    .map(nomMarque  -> marqueRepository.findByNom(nomMarque)
+                            .orElseThrow(() -> new RuntimeException("Marque introuvable : " + nomMarque)))
+                    .collect(Collectors.toSet());
+        }
 
 
         Utilisateur utilisateur = new Utilisateur(nom, prenom, email, passwordEncoder.encode(motDePasse), RoleUtilisateur.valueOf(roleStr), parc);

@@ -291,7 +291,7 @@ export class TransfertListComponent implements OnInit {
         link.click();
         setTimeout(() => window.URL.revokeObjectURL(url), 2000);
     
-        this.router.navigate(['/ordres-mission']);
+        this.router.navigate(['/ordre-mission']);
       });
     });
   }

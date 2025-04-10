@@ -26,7 +26,7 @@
         <mat-label>Marque</mat-label>
         <mat-select [(ngModel)]="selectedMarques" multiple (selectionChange)="filtrerVehicules()">
           <mat-option *ngFor="let marque of marquesDisponibles" [value]="marque">
-            {{ marque }}
+            {{ marque.toUpperCase() }}
           </mat-option>
         </mat-select>
       </mat-form-field>

@@ -33,14 +33,14 @@ public class Utilisateur implements UserDetails {
     @Enumerated(EnumType.STRING)
     private RoleUtilisateur role;
 
-    @ElementCollection(targetClass = Marque.class, fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
             name = "utilisateur_marques_accessibles",
-            joinColumns = @JoinColumn(name = "utilisateur_id")
+            joinColumns = @JoinColumn(name = "utilisateur_id"),
+            inverseJoinColumns = @JoinColumn(name = "marque_id")
     )
-    @Column(name = "marque")
     private Set<Marque> marquesAccessibles = new HashSet<>();
+
 
     public Utilisateur() {}
     public Utilisateur(String nom, String prenom, String email, String motDePasse, RoleUtilisateur role, Parc parc) {
@@ -61,6 +61,7 @@ public class Utilisateur implements UserDetails {
         this.role = role;
         this.parc = parc;
     }
+
 
     public Set<Marque> getMarquesAccessibles() {
         return marquesAccessibles;
