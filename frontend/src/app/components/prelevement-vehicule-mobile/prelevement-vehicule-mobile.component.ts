@@ -116,41 +116,7 @@ export class PrelevementVehiculeMobileComponent {
     this.scannerVehicule(numero); 
     this.numeroChassisSaisi = ''; 
   }
-  startScanner() {
-    console.log("▶️ Démarrage du scanner demandé...");
-    this.scannerStarted = true;
-  
-    setTimeout(() => {
-      console.log("🕒 Initialisation du scanner dans le setTimeout...");
-      const readerElement = document.getElementById("reader");
-  
-      if (!readerElement) {
-        console.error("❌ Élément #reader introuvable dans le DOM !");
-        return;
-      }
-  
-      console.log("📸 Élément #reader trouvé. Initialisation Html5Qrcode...");
-      this.html5QrCode = new Html5Qrcode("reader");
-  
-      this.html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText: string) => {
-          console.log("✅ QR détecté :", decodedText);
-          this.scannerVehicule(decodedText);
-          this.stopScanner();
-        },
-        (errorMessage: string) => {
-          console.log("🔁 Erreur de scan (soft) :", errorMessage);
-        }
-      ).then(() => {
-        console.log("🎥 Scanner démarré avec succès !");
-      }).catch((err) => {
-        console.error("❌ Erreur lors du démarrage du scanner :", err);
-      });
-  
-    }, 300);
-  }
+ 
   
   stopScanner() {
     if (this.scannerStarted && this.html5QrCode) {

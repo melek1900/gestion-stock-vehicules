@@ -39,7 +39,11 @@ export class AppComponent {
       }
     });
   }
-
+  ngOnInit() {
+    setTimeout(() => {
+      document.querySelector('.page-container')?.classList.add('visible');
+    }, 0);
+  }
   checkUserRole() {
     const token = localStorage.getItem('token');
     if (token) {

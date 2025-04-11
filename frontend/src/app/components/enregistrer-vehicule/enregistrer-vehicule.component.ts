@@ -42,14 +42,12 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 })
 
 export class EnregistrerVehiculeComponent {
-  @ViewChild('videoElement') videoElement!: ElementRef;
   form: FormGroup;
   isScanning = false;
   qrResult: string = '';
   scannerFormats = [BarcodeFormat.QR_CODE];
   avaries!: FormArray;  // ✅ Déclaration correcte de avaries
   photoPreviews: string[][] = []; // ✅ Liste des photos prévisualisées
-  isCameraOpen = false;
   activeIndex: number | null = null;
   isCapturing = false;
   isExistingVehicle = false;
@@ -358,80 +356,6 @@ export class EnregistrerVehiculeComponent {
 
   fermerImage() {
     this.imageAgrandie = null;
-  }
-
-  /** ✅ Gérer la caméra */
-  openCamera(index: number) {
-    this.isCameraOpen = true;
-    this.activeIndex = index;
-  
-    setTimeout(() => {
-      const video = this.videoElement?.nativeElement;
-      if (video) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then((stream) => {
-            video.srcObject = stream;
-            video.play();
-          })
-          .catch((err) => console.error("🚨 Erreur d'accès à la caméra :", err));
-      }
-    }, 100); // ✅ Petit délai pour éviter un bug d'affichage
-  }
-
-  capturePhoto(avarieIndex: number) {
-    if (!this.videoElement || !this.videoElement.nativeElement) {
-      console.error("🚨 Erreur : Élement vidéo non trouvé !");
-      return;
-    }
-  
-    // ✅ 1️⃣ Récupérer la vidéo
-    const video = this.videoElement.nativeElement as HTMLVideoElement;
-  
-    // ✅ 2️⃣ Créer un canvas temporaire pour capturer l'image
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;  // Utiliser la taille de la vidéo
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext("2d");
-  
-    if (!context) {
-      console.error("🚨 Erreur : Impossible d'obtenir le contexte 2D du canvas !");
-      return;
-    }
-  
-    // ✅ 3️⃣ Dessiner la vidéo sur le canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-  
-    // ✅ 4️⃣ Convertir l'image en base64
-    const imageUrl = canvas.toDataURL("image/png");
-  
-    // ✅ 5️⃣ Ajouter l'image capturée à `photoPreviews`
-    if (!this.photoPreviews[avarieIndex]) {
-      this.photoPreviews[avarieIndex] = [];
-    }
-    this.photoPreviews[avarieIndex].push(imageUrl);
-  
-    console.log("📸 Photo capturée et ajoutée à l'aperçu pour l’avarie", avarieIndex);
-  
-    // ✅ 6️⃣ Fermer la caméra après capture
-    this.closeCamera();
-  }
-  
-
-  closeCamera() {
-    this.isCameraOpen = false;
-    this.activeIndex = null;
-  
-    const video = this.videoElement?.nativeElement;
-    if (video && video.srcObject) {
-      const stream = video.srcObject as MediaStream;
-      const tracks = stream.getTracks();
-      tracks.forEach(track => track.stop()); // ✅ Arrête la caméra proprement
-    }
-  }
-
-  toggleCamera(index: number) {
-    this.isUsingFrontCamera = !this.isUsingFrontCamera;
-    console.log("🔄 Caméra changée");
   }
 
   enregistrerVehicule() {

@@ -1,4 +1,4 @@
-<mat-card class="ordre-mission-container">
+<mat-card class="page-container">
     <h2>📜 Liste des Ordres de Mission</h2>
     <div class="filtres">
         <!-- 🔍 Recherche à gauche -->
@@ -17,7 +17,7 @@
                 <mat-select [(ngModel)]="statutFiltre" (selectionChange)="filtrerOrdres()">
                     <mat-option value="">Tous</mat-option>
                     <mat-option value="EN_COURS">En cours</mat-option>
-                    <mat-option value="PARTIELLE">Partielle</mat-option>
+                    <mat-option value="PARTIELLE">Partiel</mat-option>
                     <mat-option value="CLOTURE">Clôturé</mat-option>
                 </mat-select>
             </mat-form-field>
@@ -30,7 +30,7 @@
         showFirstLastButtons>
       </mat-paginator>
     </div>
-      <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 table-style">
       
       <!-- Numéro de Mission -->
       <ng-container matColumnDef="numeroMission">

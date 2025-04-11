@@ -7,18 +7,9 @@
       <button mat-raised-button color="accent" class="btn-action" (click)="allerVersEnregistrement()">
         <mat-icon>edit</mat-icon> Réception Manuelle
       </button>
-
-      <button mat-raised-button color="primary" class="btn-action" (click)="startScanner()">
-        <mat-icon>qr_code_scanner</mat-icon> Scanner
-      </button>
     </div>
 
-    <!-- ✅ Zone de scan -->
-    <div class="scanner-wrapper" *ngIf="scannerStarted">
-      <!-- L'élément 'reader' sera rendu une fois que scannerStarted est vrai -->
-      <div id=reader></div>
-      <button class="close-scanner" (click)="stopScanner()">❌ Fermer Scanner</button>
-    </div>
+    
     
 
     <!-- ✅ Formulaire de réception -->

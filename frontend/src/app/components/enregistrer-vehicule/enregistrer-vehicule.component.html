@@ -59,7 +59,7 @@
 
           <input type="file" #fileInput (change)="onFileChange($event, i)" accept="image/*" multiple hidden />
           <button mat-button color="primary" (click)="fileInput.click()" type="button">
-            📸 Ajouter une Photo
+            📸 Ajouter
           </button>
 
           <div *ngIf="photoPreviews[i]?.length" class="photo-preview">
@@ -71,9 +71,17 @@
             </div>
           </div>
 
-          <button mat-button color="primary" (click)="openCamera(i)" type="button">
-            📷 Ouvrir la Caméra
-          </button>
+          <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          (change)="onFileChange($event, i)"
+          style="display: none"
+          #nativeCameraInput
+        />
+        <button mat-button color="primary" (click)="nativeCameraInput.click()" type="button">
+          📷 Prendre
+        </button>
         </div>
 
         <!-- ✅ Actions sur l'avarie -->
@@ -118,17 +126,7 @@
   </form>
 </mat-card>
 
-<!-- ✅ Caméra Modal -->
-<div *ngIf="isCameraOpen" class="camera-modal">
-  <div class="camera-content">
-    <video #videoElement autoplay></video>
-    <div class="camera-buttons">
-      <button mat-button (click)="capturePhoto(activeIndex || 0)">📸 Capturer</button>
-      <button mat-button color="warn" (click)="closeCamera()">❌ Fermer</button>
-      <button mat-button color="primary" (click)="toggleCamera(activeIndex || 0)">🔄 Changer Caméra</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- ✅ Modal pour afficher l'image en plein écran -->
 <div *ngIf="imageAgrandie" class="image-modal" (click)="fermerImage()">
