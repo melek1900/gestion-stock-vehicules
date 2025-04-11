@@ -509,7 +509,7 @@ displaySelectedMarques = (): string => {
         const couleurs: Record<string, string> = {
           EN_COURS: '#0073A8',
           CLOTURE: '#A4B0BE',
-          PARTIELLE: '#9E9E9E'
+          PARTIEL: '#9E9E9E'
         };
 
         this.ordreStatuts = Object.entries(data).map(([statut, count]) => ({

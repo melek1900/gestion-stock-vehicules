@@ -14,7 +14,9 @@
           <mat-option value="">Tous</mat-option>
           <mat-option value="EN_COURS">En cours</mat-option>
           <mat-option value="CLOTURE">Clôturé</mat-option>
-          <mat-option value="PARTIELLE">Partielle</mat-option> <!-- ✅ À ajouter -->
+          <mat-option value="PARTIEL">Partiel</mat-option>
+          <mat-option value="ANNULE">Annulé</mat-option>
+
         </mat-select>
       </mat-form-field>
     </div>
@@ -37,20 +39,34 @@
           <p><strong>🎯 Parc Arrivée :</strong> {{ ordre.parcArrivee.nom }}</p>
   
           <mat-chip
-          [color]="
-            ordre.statut === 'EN_COURS'
-              ? 'warn'
-              : ordre.statut === 'PARTIELLE'
-              ? 'accent'
-              : 'primary'
-          ">
-          {{ ordre.statut === 'EN_COURS' ? 'En cours' : ordre.statut === 'PARTIELLE' ? 'Partielle' : 'Clôturé' }}
-        </mat-chip>
+  [color]="
+    ordre.statut === 'EN_COURS'
+      ? 'warn'
+      : ordre.statut === 'PARTIEL'
+      ? 'accent'
+      : ordre.statut === 'ANNULE'
+      ? 'warn'
+      : 'primary'
+  ">
+  {{
+    ordre.statut === 'EN_COURS'
+      ? 'En cours'
+      : ordre.statut === 'PARTIEL'
+      ? 'Partiel'
+      : ordre.statut === 'ANNULE'
+      ? 'Annulé'
+      : 'Clôturé'
+  }}
+</mat-chip>
+
         </mat-card-content>
   
         <mat-card-actions>
           <button mat-raised-button color="primary" (click)="ouvrirDialogDetails(ordre)">
             📄 Voir Mission
+          </button>
+          <button mat-raised-button color="warn" (click)="annulerOrdreMission(ordre.id)" *ngIf="ordre.statut === 'EN_COURS'">
+            ❌ Annuler
           </button>
         </mat-card-actions>
       </mat-card>

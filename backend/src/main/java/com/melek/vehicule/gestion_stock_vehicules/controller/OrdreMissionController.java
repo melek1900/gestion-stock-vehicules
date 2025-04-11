@@ -132,7 +132,11 @@ public class OrdreMissionController {
         );
         return ResponseEntity.ok(utilise);
     }
-
+    @PutMapping("/annuler/{ordreId}")
+    public ResponseEntity<Map<String, String>> annulerOrdreMission(@PathVariable Long ordreId) {
+        ordreMissionService.annulerOrdreMission(ordreId);
+        return ResponseEntity.ok(Map.of("message", "✅ Ordre de mission annulé et véhicules libérés."));
+    }
     @PutMapping("/cloturer/{ordreId}")
     public ResponseEntity<Map<String, String>> cloturerOrdreMission(@PathVariable Long ordreId) {
         ordreMissionService.cloturerOrdreMission(ordreId);

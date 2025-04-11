@@ -118,7 +118,7 @@ body {
 .status.en_cours {
   background: linear-gradient(to right, #ff9800, #ffb74d);
 }
-.status.partielle {
+.status.partiel {
   background: linear-gradient(to right, #FF0000, #ff824d);
 }
 .status.cloture {
@@ -131,7 +131,7 @@ body {
 .status.livre { background: #009688; }
 .status.avarie { background: #D32F2F; }
 .status.en_cours { background: linear-gradient(to right, #ff9800, #ffb74d); }
-.status.partielle { background: linear-gradient(to right, #FF0000, #ff824d); }
+.status.partiel { background: linear-gradient(to right, #FF0000, #ff824d); }
 .status.cloture { background: linear-gradient(to right, #4CAF50, #66BB6A); }
 
 /* === RESPONSIVE === */

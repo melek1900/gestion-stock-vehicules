@@ -60,7 +60,7 @@ public class OrdreMissionService {
             ordre.setStatut(StatutOrdreMission.CLOTURE);
             System.out.println("✅ Tous les véhicules sont prélevés, l'ordre peut être clôturé.");
         } else if (auMoinsUnPreleve) {
-            ordre.setStatut(StatutOrdreMission.PARTIELLE);
+            ordre.setStatut(StatutOrdreMission.PARTIEL);
             System.out.println("⚠️ Prélèvement partiel, statut mis à jour en PARTIELLE.");
         } else {
             ordre.setStatut(StatutOrdreMission.EN_COURS);
@@ -107,6 +107,29 @@ public class OrdreMissionService {
     public boolean vehiculeDejaDansOrdre(Vehicule vehicule) {
         return ordreMissionRepository.existsByVehiculesContainingAndStatutNot(vehicule, StatutOrdreMission.CLOTURE);
     }
+    @Transactional
+    public void annulerOrdreMission(Long ordreId) {
+        OrdreMission ordre = ordreMissionRepository.findById(ordreId)
+                .orElseThrow(() -> new EntityNotFoundException("🚨 Ordre de mission introuvable"));
+
+        if (ordre.getStatut() == StatutOrdreMission.CLOTURE) {
+            throw new IllegalStateException("🚨 Impossible d'annuler un ordre déjà clôturé !");
+        }
+
+        // Libération des véhicules : suppression de leur lien avec cet ordre (s'ils sont "réquisitionnés")
+        for (Vehicule vehicule : ordre.getVehicules()) {
+            if ("TRANSFERT".equalsIgnoreCase(vehicule.getParc().getNom())) {
+                Parc parcDepart = ordre.getParcDepart();
+                vehicule.setParc(parcDepart); // retour au parc initial
+                vehicule.setStatut(StatutVehicule.EN_ETAT); // statut réinitialisé
+                vehiculeRepository.save(vehicule);
+            }
+        }
+
+        ordre.setStatut(StatutOrdreMission.ANNULE);
+        ordreMissionRepository.save(ordre);
+    }
+
     @Transactional
     public OrdreMission creerOrdreMission(List<Integer> vehiculeIds, Integer chauffeurId, Integer vehiculeTransportId, Integer parcDepartId, Integer parcArriveeId) {
         List<Long> vehiculeIdsLong = vehiculeIds.stream().map(Integer::longValue).toList();
