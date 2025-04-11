@@ -16,7 +16,7 @@
           <mat-icon class="chevron" [class.rotate]="stockMenuOpen">chevron_right</mat-icon>
         </button>
         <ul *ngIf="stockMenuOpen" class="submenu">          
-          <li *ngIf="userRole !== 'ROLE_GESTIONNAIRE_APPLICATION' && userRole !== 'ROLE_COMMERCIAL' " [routerLink]="['/vehicules']" class="submenu-link">
+          <li  [routerLink]="['/vehicules']" class="submenu-link">
             <mat-icon>garage</mat-icon>
             <span>Visualisation</span>
           </li>
@@ -32,7 +32,7 @@
             <mat-icon>local_shipping</mat-icon>
             <span>Livraison</span>
           </li>
-          <li *ngIf="userRole !== 'ROLE_COMMERCIAL'" [routerLink]="['/import-vehicules']" class="submenu-link">
+          <li *ngIf="userRole !== 'ROLE_COMMERCIAL'  && userRole !== 'ROLE_MANAGER'" [routerLink]="['/import-vehicules']" class="submenu-link">
             <mat-icon>file_upload</mat-icon>
             <span>Import</span>
           </li>
@@ -58,16 +58,6 @@
         </ul>
       </li>
   
-      <!-- Constats -->
-      <li *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION' && userRole !== 'ROLE_ADMINISTRATEUR'" >
-        <button class="menu-item" [routerLink]="['/reparation']">
-          <mat-icon>assignment_turned_in</mat-icon>
-          <span>Constats</span>
-        </button>
-      </li>
-  
-
-
       <li>
         <button *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION' && userRole !== 'ROLE_ADMINISTRATEUR'" class="menu-item" (click)="toggleConstatMenu()">
           <mat-icon>assignment_turned_in</mat-icon>
@@ -77,7 +67,7 @@
         <ul *ngIf="parametresConstatOpen"  class="submenu">
           <li  [routerLink]="['/reparation']" class="submenu-link">
             <mat-icon>person_add</mat-icon>
-            <span>Création utilisateurs</span>
+            <span>Visualisation</span>
           </li>
         </ul>
       </li>

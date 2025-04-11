@@ -1,51 +1,51 @@
 <mat-dialog-content class="popup-container">
-  <h2 mat-dialog-title>
+  <h2 mat-dialog-title style="color: #003366 ;">
     {{ isReadonly ? 'Détails du Véhicule' : 'Ajouter / Modifier le Véhicule' }}
   </h2>
 
   <form [formGroup]="form">
     <mat-form-field appearance="fill">
-      <mat-label>Marque</mat-label>
+      <mat-label style="color: #003366 ;">Marque</mat-label>
       <input matInput formControlName="shortDescription" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
-      <mat-label>Modèle</mat-label>
+      <mat-label style="color: #003366 ;">Modèle</mat-label>
       <input matInput formControlName="modele" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
-      <mat-label>Numéro de Châssis</mat-label>
+      <mat-label style="color: #003366 ;">Numéro de Châssis</mat-label>
       <input matInput formControlName="numeroChassis" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
-      <mat-label>Couleur</mat-label>
+      <mat-label style="color: #003366 ;">Couleur</mat-label>
       <input matInput formControlName="shortColor" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
-      <mat-label>Date de production</mat-label>
+      <mat-label style="color: #003366 ;">Date de production</mat-label>
       <input matInput type="date" formControlName="productionDate"  />
     </mat-form-field>
 
-    <div *ngIf="avariesForm.length > 0">
+    <div *ngIf="avariesForm.length > 0" style="color: #003366 ;">
       <h3>Avaries détectées</h3>
 
       <div *ngFor="let avarie of avariesForm.controls; let i = index" class="avarie-section">
         <mat-card>
           <mat-form-field appearance="fill">
-            <mat-label>Type d'avarie</mat-label>
+            <mat-label style="color: #003366 ;">Type d'avarie</mat-label>
             <input matInput [formControl]="getFormControl(avarie, 'type')" />
           </mat-form-field>
 
           <mat-form-field appearance="fill">
-            <mat-label>Commentaire</mat-label>
+            <mat-label style="color: #003366 ;">Commentaire</mat-label>
             <textarea matInput [formControl]="getFormControl(avarie, 'commentaire')"></textarea>
           </mat-form-field>
 
           <div class="photo-preview" *ngIf="photosPreviews[i] && photosPreviews[i].length > 0">
-            <h4>Photos</h4>
+            <h4 style="color: #003366 ;">Photos</h4>
             <img *ngFor="let photo of photosPreviews[i]" [src]="'http://192.168.1.121:8080/photos/' + photo" alt="photo" class="preview-image" />
           </div>
         </mat-card>

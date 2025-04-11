@@ -56,7 +56,7 @@
 
           <input type="file" #fileInput (change)="onFileChange($event, i)" accept="image/*" multiple hidden />
           <button mat-button color="primary" (click)="fileInput.click()" type="button">
-            📸 Ajouter une Photo
+            📸 Ajouter
           </button>
 
           <div *ngIf="photoPreviews[i]?.length" class="photo-preview">
@@ -68,9 +68,17 @@
             </div>
           </div>
 
-          <button mat-button color="primary" (click)="openCamera(i)" type="button">
-            📷 Ouvrir la Caméra
-          </button>
+          <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          (change)="onFileChange($event, i)"
+          style="display: none"
+          #nativeCameraInput
+        />
+        <button mat-button color="primary" (click)="nativeCameraInput.click()" type="button">
+          📷 Prendre
+        </button>
         </div>
 
         <!-- ✅ Actions sur avarie -->

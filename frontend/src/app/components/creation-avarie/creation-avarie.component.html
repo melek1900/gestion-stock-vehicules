@@ -6,15 +6,7 @@
         <button mat-raised-button color="accent" class="btn-action" (click)="allerVersEnregistrement()">
           <mat-icon>edit</mat-icon> Création manuelle
         </button>
-        <button mat-raised-button color="primary" class="btn-action" (click)="startScanner()">
-          <mat-icon>qr_code_scanner</mat-icon> Scanner
-        </button>
-      </div>
-  
-      <!-- ✅ Zone de scan -->
-      <div class="scanner-wrapper" *ngIf="scannerStarted">
-        <div id="reader"></div>
-        <button class="close-scanner" (click)="stopScanner()">❌ Fermer Scanner</button>
+        
       </div>
   
       <form [formGroup]="qrForm" (ngSubmit)="receptionnerVehicule()" class="reception-form">

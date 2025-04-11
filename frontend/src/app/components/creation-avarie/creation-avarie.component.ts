@@ -9,10 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { BarcodeFormat } from '@zxing/browser';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { JwtHelperService } from '@auth0/angular-jwt';
-import { Html5Qrcode } from 'html5-qrcode';
 
 @Component({
   selector: 'app-creation-avarie',
@@ -34,7 +31,6 @@ import { Html5Qrcode } from 'html5-qrcode';
 export class CreationAvarieComponent {
   qrForm: FormGroup;
   scannerStarted = false;
-  html5QrCode!: Html5Qrcode;
 
   constructor(
     private http: HttpClient,
@@ -47,45 +43,7 @@ export class CreationAvarieComponent {
     });
   }
 
-  startScanner() {
-    this.scannerStarted = true;
-
-    setTimeout(() => {
-      const readerElement = document.getElementById("reader");
-
-      if (!readerElement) {
-        console.error("❌ Élément #reader introuvable");
-        return;
-      }
-
-      this.html5QrCode = new Html5Qrcode("reader");
-
-      this.html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText: string) => {
-          console.log("QR détecté:", decodedText);
-          this.qrForm.controls['numeroChassis'].setValue(decodedText);
-          this.snackBar.open("✅ Code détecté", "Fermer", { duration: 2000 });
-          this.stopScanner();
-        },
-        (err) => { }
-      ).catch(err => {
-        console.error("❌ Erreur démarrage scanner:", err);
-        this.snackBar.open("Erreur lors du démarrage du scanner", "Fermer", { duration: 3000 });
-      });
-    }, 300);
-  }
-
-  stopScanner() {
-    if (this.scannerStarted && this.html5QrCode) {
-      this.html5QrCode.stop().then(() => {
-        this.scannerStarted = false;
-      }).catch((err) => {
-        console.error("❌ Erreur arrêt scanner:", err);
-      });
-    }
-  }
+  
 
   receptionnerVehicule() {
     const numeroChassis = this.qrForm.value.numeroChassis;
@@ -123,8 +81,6 @@ export class CreationAvarieComponent {
     return 'MEGRINE';
   }
 
-  ngOnDestroy() {
-    this.stopScanner();
-  }
+ 
 }
 
