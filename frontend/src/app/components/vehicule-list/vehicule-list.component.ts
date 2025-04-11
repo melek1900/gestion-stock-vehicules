@@ -57,8 +57,8 @@ export class VehiculeListComponent implements OnInit {
     'shortColor',
     'numeroChassis',
     'productionDate',
-    'statut',
     'parcNom',
+    'statut',
     'actions'
   ];
   dataSource = new MatTableDataSource<any>([]);
@@ -279,59 +279,38 @@ mettreAJourVehiculesSelectionnes() {
 
 chargerVehicules() {
   const token = localStorage.getItem('token');
-  if (!token) {
-    console.warn("⚠️ Aucun token trouvé, impossible de charger les véhicules !");
-    return;
-  }
+  if (!token) return;
 
-  const mappingParcNom: Record<number, string> = {
-    1: 'MEGRINE',
-    2: 'CHARGUIA',
-    4: 'AUPORT'
-  };
+  const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-  const headers = new HttpHeaders({
-    'Authorization': `Bearer ${token}`
-  });
+  this.http.get<Vehicule[]>('http://192.168.1.121:8080/api/vehicules', { headers }).subscribe({
+    next: async (data) => {
+      const mappingParcNom: Record<number, string> = { 1: 'MEGRINE', 2: 'CHARGUIA', 4: 'AUPORT' };
 
-  const apiUrl = `http://192.168.1.121:8080/api/vehicules`;
+      const vehiculesAvecUtilisation = await Promise.all(
+        data.map(async (v) => {
+          const enUtilisation = await this.http.get<boolean>(
+            `http://192.168.1.121:8080/api/ordres-mission/vehicule/${v.id}/en-utilisation`,
+            { headers }
+          ).toPromise().catch(() => false);
 
-  this.http.get<Vehicule[]>(apiUrl, { headers }).subscribe({
-    next: (data) => {
-      console.log("📡 Véhicules reçus :", JSON.stringify(data, null, 2));
+          return {
+            ...v,
+            parcNom: mappingParcNom[v.parcId] || 'Parc Inconnu',
+            productionDate: v.productionDate ? new Date(v.productionDate) : null,
+            shortColor: v.shortColor || 'Non défini',
+            shortDescription: (v.shortDescription || 'Non défini').toUpperCase(),
+            enUtilisation
+          };
+        })
+      );
 
-      this.vehicules = data.map(v => ({
-        
-        ...v,
-        parcNom: mappingParcNom[v.parcId] || 'Parc Inconnu',
-        productionDate: v.productionDate ? new Date(v.productionDate) : null,
-        shortColor: v.shortColor || 'Non défini',
-        shortDescription: (v.shortDescription || 'Non défini').toUpperCase(),
-      }));
-      console.log("✅ Marques reçues :", data.map(v => v.shortDescription));
-
-      // ✅ Extraire toutes les marques présentes dans les véhicules
+      this.vehicules = vehiculesAvecUtilisation;
       this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription.toUpperCase()))];
-      console.log("📋 Marques disponibles :", this.marquesDisponibles);
-
-      // ✅ Sélectionne par défaut les marques accessibles si rien n’est sélectionné
-      if (this.selectedMarques.length === 0 && this.marquesAccessibles.length > 0) {
-        this.selectedMarques = [...this.marquesAccessibles];
-      }
-
-      // ✅ Appliquer les filtres
-      if (this.paginator) {
-        this.dataSource.paginator = this.paginator;
-      }
-
       this.filtrerVehicules();
       this.cdr.detectChanges();
-      console.log("🧾 Marques transformées :", this.vehicules.map(v => v.shortDescription));
-
     },
-    error: (err) => {
-      console.error("❌ Erreur lors du chargement des véhicules :", err);
-    }
+    error: (err) => console.error("❌ Erreur chargement véhicules :", err)
   });
 }
 

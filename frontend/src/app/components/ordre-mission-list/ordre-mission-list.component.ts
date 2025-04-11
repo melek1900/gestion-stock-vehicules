@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-ordre-mission-list',
@@ -27,7 +28,8 @@ import { MatIconModule } from '@angular/material/icon';
     FormsModule,
     MatInputModule,
     MatPaginatorModule,
-    MatIconModule
+    MatIconModule,
+    MatMenuModule 
   ]
 })
 export class OrdreMissionListComponent implements OnInit {
@@ -103,6 +105,23 @@ dataSource = new MatTableDataSource<any>([]);
   }
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
+  }
+  annulerOrdreMission(ordreId: number) {
+    if (!confirm('⚠️ Confirmer l\'annulation de cet ordre de mission ?')) return;
+  
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    });
+  
+    this.http.put(`http://192.168.1.121:8080/api/ordres-mission/annuler/${ordreId}`, {}, { headers }).subscribe({
+      next: () => {
+        this.snackBar.open('✅ Ordre de mission annulé avec succès', 'Fermer', { duration: 3000 });
+        this.chargerOrdresMission(); // 🔄 Refresh
+      },
+      error: () => {
+        this.snackBar.open('❌ Échec de l\'annulation de l\'ordre', 'Fermer', { duration: 3000 });
+      }
+    });
   }
   telechargerOrdreMission(pdfUrl: string, numeroOrdre: string) {
     const headers = new HttpHeaders({

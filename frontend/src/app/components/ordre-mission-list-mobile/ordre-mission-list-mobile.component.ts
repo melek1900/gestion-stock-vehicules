@@ -68,20 +68,33 @@ export class OrdreMissionListMobileComponent implements OnInit {
       },
     });
   }
-
+  annulerOrdreMission(ordreId: number) {
+    if (!confirm('⚠️ Confirmer l\'annulation de cet ordre de mission ?')) return;
+  
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    });
+  
+    this.http.put(`http://192.168.1.121:8080/api/ordres-mission/annuler/${ordreId}`, {}, { headers }).subscribe({
+      next: () => {
+        this.snackBar.open('✅ Ordre de mission annulé avec succès', 'Fermer', { duration: 3000 });
+        this.chargerOrdresMission(); // Recharge la liste
+      },
+      error: () => {
+        this.snackBar.open('❌ Échec de l\'annulation de l\'ordre', 'Fermer', { duration: 3000 });
+      }
+    });
+  }
   /** 🔎 Filtrer la liste */
   filtrerOrdres() {
-    if (this.statutFiltre === 'CLOTURE') {
-      this.ordresMissionFiltres = this.ordresMission
-        .filter(ordre => ordre.statut === 'CLOTURE')
-        .sort(this.ordreStatutSort);
-    } else if (this.statutFiltre) {
+    if (this.statutFiltre) {
       this.ordresMissionFiltres = this.ordresMission
         .filter(ordre => ordre.statut === this.statutFiltre)
         .sort(this.ordreStatutSort);
     } else {
+      // Par défaut, on exclut les statuts CLOTURE et ANNULE
       this.ordresMissionFiltres = this.ordresMission
-        .filter(ordre => ordre.statut !== 'CLOTURE')
+        .filter(ordre => ordre.statut !== 'CLOTURE' && ordre.statut !== 'ANNULE')
         .sort(this.ordreStatutSort);
     }
 
@@ -93,14 +106,14 @@ export class OrdreMissionListMobileComponent implements OnInit {
     }
   }
 
-  /** 🔄 Tri personnalisé : EN_COURS > PARTIELLE > CLOTURE */
-  ordreStatutSort(a: { statut: 'EN_COURS' | 'PARTIELLE' | 'CLOTURE' }, b: { statut: 'EN_COURS' | 'PARTIELLE' | 'CLOTURE' }): number {
-    const priorité: Record<'EN_COURS' | 'PARTIELLE' | 'CLOTURE', number> = {
+  /** 🔄 Tri personnalisé : EN_COURS > PARTIEL > CLOTURE */
+  ordreStatutSort(a: { statut: string }, b: { statut: string }): number {
+    const priorité: Record<string, number> = {
       EN_COURS: 1,
-      PARTIELLE: 2,
+      PARTIEL: 2,
       CLOTURE: 3,
+      ANNULE: 4
     };
-  
     return priorité[a.statut] - priorité[b.statut];
   }
   

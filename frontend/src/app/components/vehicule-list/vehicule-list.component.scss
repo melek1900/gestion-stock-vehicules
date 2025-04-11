@@ -119,7 +119,10 @@ button:hover {
   gap: 10px;
   align-items: center;
 }
-
+tr[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
 .filters .search-field {
   flex-grow: 1;
   max-width: 500px;
