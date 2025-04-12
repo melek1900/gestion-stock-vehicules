@@ -15,7 +15,11 @@
           <span>Stock véhicule</span>
           <mat-icon class="chevron" [class.rotate]="stockMenuOpen">chevron_right</mat-icon>
         </button>
-        <ul *ngIf="stockMenuOpen" class="submenu">          
+        <ul *ngIf="stockMenuOpen" class="submenu">  
+          <li *ngIf="userRole !== 'ROLE_COMMERCIAL'  && userRole !== 'ROLE_MANAGER'" [routerLink]="['/import-vehicules']" class="submenu-link">
+            <mat-icon>file_upload</mat-icon>
+            <span>Import</span>
+          </li>        
           <li  [routerLink]="['/vehicules']" class="submenu-link">
             <mat-icon>garage</mat-icon>
             <span>Visualisation</span>
@@ -32,10 +36,7 @@
             <mat-icon>local_shipping</mat-icon>
             <span>Livraison</span>
           </li>
-          <li *ngIf="userRole !== 'ROLE_COMMERCIAL'  && userRole !== 'ROLE_MANAGER'" [routerLink]="['/import-vehicules']" class="submenu-link">
-            <mat-icon>file_upload</mat-icon>
-            <span>Import</span>
-          </li>
+         
         </ul>
       </li>
   

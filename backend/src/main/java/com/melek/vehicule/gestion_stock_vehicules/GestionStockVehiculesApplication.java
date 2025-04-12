@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication
-public class GestionStockVehiculesApplication {
+public class git GestionStockVehiculesApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(GestionStockVehiculesApplication.class, args);
