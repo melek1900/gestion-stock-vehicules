@@ -1,5 +1,5 @@
 .custom-navbar {
-  background-color: white; // 🎨 gris clair
+  background-color: #003366;
   color: #3D3D3D;
   display: flex;
   align-items: center;
@@ -19,9 +19,9 @@
   align-items: center;
 
   img.navbar-logo {
-    height: 100%;              // ❗ prend la hauteur de la navbar (64px)
-    width: auto;               // auto pour garder le ratio
-    max-width: none;           // ❗ annule les éventuelles limitations héritées
+    height: 100px;              
+    width: auto;              
+    max-width: none;           
     display: block;
   }
 }
