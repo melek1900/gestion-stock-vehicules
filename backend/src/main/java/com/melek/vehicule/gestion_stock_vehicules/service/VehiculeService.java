@@ -68,7 +68,30 @@ public class VehiculeService {
                 .map(VehiculeDTO::new)
                 .toList();
     }
+    @Transactional
+    public Avarie ajouterAvarieEtPhotos(Long vehiculeId, Avarie avarie, List<MultipartFile> photos) {
+        Vehicule vehicule = vehiculeRepository.findById(vehiculeId)
+                .orElseThrow(() -> new EntityNotFoundException("🚨 Véhicule non trouvé"));
 
+        avarie.setVehicule(vehicule);
+        Avarie saved = avarieRepository.save(avarie);
+
+        if (photos != null) {
+            for (MultipartFile file : photos) {
+                try {
+                    Photo photo = new Photo();
+                    photo.setFileName(file.getOriginalFilename());
+                    photo.setData(file.getBytes());
+                    photo.setAvarie(saved);
+                    photoRepository.save(photo);
+                } catch (IOException e) {
+                    throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
+                }
+            }
+        }
+
+        return saved;
+    }
 
     /**
      * ✅ Ajouter un véhicule avec ses avaries et photos

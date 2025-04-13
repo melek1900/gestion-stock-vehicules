@@ -22,6 +22,7 @@ public class OrdreMission {
     )
     private List<Vehicule> vehicules;
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private StatutOrdreMission statut;
     @ManyToOne
     @JoinColumn(name = "parc_arrivee_id", nullable = false)

@@ -55,6 +55,23 @@ public class VehiculeController {
         this.avarieService = avarieService;
 
     }
+    @PostMapping(value = "/{vehiculeId}/avaries/photos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> ajouterAvarieAvecPhotos(
+            @PathVariable Long vehiculeId,
+            @RequestPart("avarie") String avarieJson,
+            @RequestPart(value = "photos", required = false) List<MultipartFile> photos
+    ) {
+        System.out.println("📨 Reçu POST /vehicules/" + vehiculeId + "/avaries/photos");
+        System.out.println("🔍 JSON Avarie = " + avarieJson);
+        System.out.println("📸 Nombre de photos = " + (photos != null ? photos.size() : 0));
+        try {
+            Avarie avarie = new ObjectMapper().readValue(avarieJson, Avarie.class);
+            Avarie saved = vehiculeService.ajouterAvarieEtPhotos(vehiculeId, avarie, photos);
+            return ResponseEntity.ok(new AvarieDTO(saved));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Erreur : " + e.getMessage());
+        }
+    }
     @GetMapping("/statistiques/par-parc")
     public List<Map<String, Object>> countVehiculesParParc() {
         return vehiculeRepository.countVehiculesGroupedByParc();
