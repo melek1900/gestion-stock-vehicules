@@ -59,7 +59,12 @@ export class PopupVehiculeComponent {
       data.vehicule.avaries.forEach((av: any) => this.ajouterAvarieExistante(av));
     }
   }
-
+  getPhotoUrl(fileName: string): string {
+    if (!fileName) return '';
+    // Supprime tous les slashes en début de nom de fichier
+    const safeName = fileName.replace(/^\/+/, '');
+    return `http://192.168.1.121:8080/photos/by-name/${encodeURIComponent(safeName)}`;
+  }
   ajouterAvarieExistante(avarie: any) {
     const avariesFormArray = this.form.get('avaries') as FormArray;
     const avarieForm = this.fb.group({

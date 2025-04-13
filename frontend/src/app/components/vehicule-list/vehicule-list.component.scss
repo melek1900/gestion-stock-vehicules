@@ -1,26 +1,3 @@
-.vehicule-list-wrapper {
-  width: 100%;
-  height: auto;
-  max-height: none;
-  overflow: visible; 
-  padding: 10px;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.table-container {
-  flex: 1;
-  padding: 15px;
-  width: 100%;
-  max-width: 100%; // ✅ Empêche tout débordement horizontal
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(5px);
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden; // ✅ Empêche le scroll horizontal
-  box-sizing: border-box;
-}
 
 /* ✅ TABLEAU ADAPTÉ SANS SCROLL HORIZONTAL */
 table.mat-mdc-table {

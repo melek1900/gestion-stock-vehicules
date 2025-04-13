@@ -16,7 +16,7 @@
     <form [formGroup]="qrForm" (ngSubmit)="receptionnerVehicule()" class="reception-form">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Numéro de Châssis</mat-label>
-        <input matInput formControlName="numeroChassis" required />
+        <input matInput formControlName="numeroChassis" appAutofocus  required />
       </mat-form-field>
 
       <button mat-raised-button color="primary" type="submit" class="btn-submit" [disabled]="qrForm.invalid">

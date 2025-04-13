@@ -3,6 +3,8 @@ package com.melek.vehicule.gestion_stock_vehicules.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.melek.vehicule.gestion_stock_vehicules.dto.AvarieCreationDTO;
+import com.melek.vehicule.gestion_stock_vehicules.dto.AvarieWithPhotosDTO;
 import com.melek.vehicule.gestion_stock_vehicules.dto.PreparationDTO;
 import com.melek.vehicule.gestion_stock_vehicules.dto.VehiculeDTO;
 import com.melek.vehicule.gestion_stock_vehicules.model.*;
@@ -55,10 +57,6 @@ public class VehiculeService {
     /**
      * ✅ Enregistrer une liste de véhicules (Import Excel)
      */
-    @Transactional
-    public void saveAllVehicules(List<Vehicule> vehicules) {
-        vehiculeRepository.saveAll(vehicules);
-    }
 
 
     public List<VehiculeDTO> getVehiculesFiltres(List<Long> parcIds, Set<String> marquesAccessibles) {
@@ -98,43 +96,49 @@ public class VehiculeService {
      */
     @Transactional
     public Vehicule createVehicule(Vehicule vehicule, List<Avarie> avaries, List<MultipartFile> photos) {
-        // ✅ 1️⃣ Vérifier que le parc MEGRINE existe et l'associer au véhicule
+        // ✅ 1️⃣ Associer le parc (AUPORT ici → ID = 3)
         Parc parcAuport = parcRepository.findById(3L)
                 .orElseThrow(() -> new EntityNotFoundException("🚨 Parc AUPORT (ID = 3) introuvable"));
 
         vehicule.setParc(parcAuport);
-
-        // ✅ 2️⃣ Vérifier le stock du parc MEGRINE
-
         vehicule.setStatut(StatutVehicule.EN_ETAT);
 
-        // ✅ 3️⃣ Enregistrer le véhicule
+        // ✅ 2️⃣ Sauvegarde du véhicule
         Vehicule savedVehicule = vehiculeRepository.save(vehicule);
 
-        // ✅ 4️⃣ Gérer les avaries et photos si présentes
+        // ✅ 3️⃣ Enregistrement des avaries (si fournies)
+        List<Avarie> savedAvaries = new ArrayList<>();
         if (avaries != null && !avaries.isEmpty()) {
             for (Avarie avarie : avaries) {
                 avarie.setVehicule(savedVehicule);
-                avarieRepository.save(avarie);
+                Avarie savedAvarie = avarieRepository.save(avarie);
+                savedAvaries.add(savedAvarie);
             }
         }
 
+        // ✅ 4️⃣ Enregistrement des photos (si fournies)
         if (photos != null && !photos.isEmpty()) {
             for (MultipartFile file : photos) {
                 try {
                     Photo photo = new Photo();
                     photo.setFileName(file.getOriginalFilename());
+                    photo.setData(file.getBytes());
+
+                    // ✅ Si on a une seule avarie (souvent le cas), on l’associe
+                    if (!savedAvaries.isEmpty()) {
+                        photo.setAvarie(savedAvaries.get(0)); // ou un mapping plus avancé si besoin
+                    }
+
                     photoRepository.save(photo);
-                } catch (Exception e) {
-                    throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
+                } catch (IOException e) {
+                    throw new RuntimeException("❌ Erreur lors de l'enregistrement de la photo", e);
                 }
             }
         }
 
-
-
         return savedVehicule;
     }
+
 
     @Transactional
     public Vehicule updateVehiculeFromDTO(String numeroChassis, VehiculeDTO dto) {
@@ -189,15 +193,7 @@ public class VehiculeService {
         return vehicule;
     }
 
-    /**
-     * ✅ Récupérer tous les véhicules
-     */
-    public List<VehiculeDTO> getAllVehicules() {
-        List<Vehicule> vehicules = vehiculeRepository.findAll();
-        return vehicules.stream()
-                .map(VehiculeDTO::new) // Convertit chaque Vehicule en DTO
-                .toList();
-    }
+
 
     /**
      * ✅ Récupérer un véhicule par ID
@@ -219,30 +215,6 @@ public class VehiculeService {
     }
 
     /**
-     * ✅ Convertir JSON en Vehicule
-     */
-    public Vehicule convertJsonToVehicule(String vehiculeJson) {
-        try {
-            return objectMapper.readValue(vehiculeJson, Vehicule.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la conversion du JSON vers Vehicule", e);
-        }
-    }
-
-    /**
-     * ✅ Convertir JSON en liste d'avaries
-     */
-    public List<Avarie> convertJsonToAvaries(String avariesJson) {
-        try {
-            return List.of(objectMapper.readValue(avariesJson, Avarie[].class));
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la conversion du JSON vers Avaries", e);
-        }
-    }
-
-
-
-    /**
      * ✅ Ajouter une avarie à un véhicule existant
      */
     public Avarie ajouterAvarie(Long vehiculeId, Avarie avarie) {
@@ -262,14 +234,16 @@ public class VehiculeService {
 
         try {
             Photo photo = new Photo();
-            photo.setFileName(file.getOriginalFilename()); // ✅ Associe le nom du fichier
-            photo.setAvarie(avarie); // ✅ Associe la photo à l'avarie
+            photo.setFileName(file.getOriginalFilename());
+            photo.setData(file.getBytes()); // ✅ Ajout du contenu de la photo
+            photo.setAvarie(avarie);
 
             return photoRepository.save(photo);
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
+        } catch (IOException e) {
+            throw new RuntimeException("❌ Erreur lors de l'enregistrement de la photo", e);
         }
     }
+
 
 
     @Transactional
@@ -288,8 +262,8 @@ public class VehiculeService {
         }
 
         avarie.setVehicule(vehicule);
-        avarieRepository.save(avarie);
-        System.out.println("✅ Avarie enregistrée avec succès : " + avarie.getType());
+        Avarie savedAvarie = avarieRepository.save(avarie);
+        System.out.println("✅ Avarie enregistrée avec succès : " + savedAvarie.getType());
 
         // ✅ Associer les photos à l’avarie
         if (photos != null && !photos.isEmpty()) {
@@ -297,18 +271,20 @@ public class VehiculeService {
                 try {
                     Photo photo = new Photo();
                     photo.setFileName(file.getOriginalFilename());
-                    photo.setAvarie(avarie);
+                    photo.setData(file.getBytes()); // ✅ Important : données binaires
+                    photo.setAvarie(savedAvarie);
+
                     photoRepository.save(photo);
                     System.out.println("📸 Photo enregistrée : " + file.getOriginalFilename());
-                } catch (Exception e) {
-                    throw new RuntimeException("❌ Erreur enregistrement photo", e);
+                } catch (IOException e) {
+                    throw new RuntimeException("❌ Erreur lors de l'enregistrement de la photo", e);
                 }
             }
         } else {
             System.out.println("⚠️ Aucune photo reçue pour cette avarie.");
         }
 
-        // ✅ Modifier le statut du véhicule en "AVARIÉ"
+        // ✅ Modifier le statut du véhicule
         vehicule.setStatut(StatutVehicule.AVARIE);
         vehiculeRepository.save(vehicule);
 
@@ -333,7 +309,7 @@ public class VehiculeService {
     }
 
     @Transactional
-    public Vehicule receptionnerVehicule(String numeroChassis, Long parcId, String avarieJson, List<MultipartFile> photos) {
+    public Vehicule receptionnerVehicule(String numeroChassis, Long parcId, String avariesJson, List<MultipartFile> photos) {
         Vehicule vehicule = vehiculeRepository.findByNumeroChassis(numeroChassis)
                 .orElseThrow(() -> new EntityNotFoundException("🚨 Véhicule non trouvé : " + numeroChassis));
 
@@ -344,163 +320,58 @@ public class VehiculeService {
             throw new IllegalStateException("🚨 Ce véhicule est déjà dans le parc sélectionné");
         }
 
-        System.out.println("🚗 Avant mise à jour - Parc: " + vehicule.getParc().getNom() + ", Statut: " + vehicule.getStatut());
-
-        // ✅ Mise à jour du parc
         vehicule.setParc(nouveauParc);
 
-        // ✅ Vérification de l'avarie (si elle existe)
         boolean hasAvarie = false;
 
-        if (avarieJson != null && !avarieJson.isEmpty()) {
+        if (avariesJson != null && !avariesJson.isBlank()) {
             try {
-                System.out.println("🔍 Contenu de `avarieJson` avant conversion : " + avarieJson);
+                // 🔁 Liste d’avaries
+                List<AvarieWithPhotosDTO> avaries = objectMapper.readValue(avariesJson, new TypeReference<>() {});
 
-                if (avarieJson.trim().startsWith("[") && avarieJson.trim().endsWith("]")) {
-                    List<Avarie> avarieList = objectMapper.readValue(avarieJson, new TypeReference<List<Avarie>>() {});
-                    if (!avarieList.isEmpty()) {
-                        Avarie avarie = avarieList.get(0); // ✅ On prend la première avarie
-                        avarie.setVehicule(vehicule);
-                        avarieRepository.save(avarie);
-                        hasAvarie = true;
+                for (AvarieWithPhotosDTO dto : avaries) {
+                    Avarie avarie = new Avarie();
+                    avarie.setType(dto.getType());
+                    avarie.setCommentaire(dto.getCommentaire());
+                    avarie.setVehicule(vehicule);
 
-                        // ✅ Ajouter les photos d’avarie
-                        if (photos != null && !photos.isEmpty()) {
-                            for (MultipartFile file : photos) {
+                    List<Photo> photoEntities = new ArrayList<>();
+                    if (photos != null) {
+                        for (MultipartFile file : photos) {
+                            // ✅ on suppose que les fichiers ont un nom sous forme `photo-{key}-...`
+                            if (file.getOriginalFilename() != null && file.getOriginalFilename().contains(dto.getKey())) {
                                 Photo photo = new Photo();
                                 photo.setFileName(file.getOriginalFilename());
+                                photo.setData(file.getBytes());
                                 photo.setAvarie(avarie);
-                                photoRepository.save(photo);
+                                photoEntities.add(photo);
                             }
                         }
                     }
-                } else {
-                    Avarie avarie = objectMapper.readValue(avarieJson, Avarie.class);
-                    avarie.setVehicule(vehicule);
-                    avarieRepository.save(avarie);
-                    hasAvarie = true;
 
-                    // ✅ Ajouter les photos d’avarie
-                    if (photos != null && !photos.isEmpty()) {
-                        for (MultipartFile file : photos) {
-                            Photo photo = new Photo();
-                            photo.setFileName(file.getOriginalFilename());
-                            photo.setAvarie(avarie);
-                            photoRepository.save(photo);
-                        }
+                    avarie.setPhotos(photoEntities);
+                    avarieRepository.save(avarie);
+                    if (!photoEntities.isEmpty()) {
+                        photoRepository.saveAll(photoEntities);
                     }
+
+                    hasAvarie = true;
                 }
 
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("❌ Erreur lors de la conversion JSON de l'avarie : " + e.getMessage(), e);
+            } catch (IOException e) {
+                throw new RuntimeException("❌ Erreur de parsing JSON des avaries : " + e.getMessage(), e);
             }
         }
 
-        // ✅ Vérification et mise à jour du statut
-        if (hasAvarie) {
-            vehicule.setStatut(StatutVehicule.AVARIE);
-            System.out.println("🚨 Le véhicule a une avarie, statut mis à AVARIE.");
-        } else {
-            vehicule.setStatut(StatutVehicule.EN_ETAT);
-            System.out.println("✅ Le véhicule est réceptionné sans avarie, statut mis à RECU.");
-        }
-
-        // ✅ Sauvegarde en base
+        vehicule.setStatut(hasAvarie ? StatutVehicule.AVARIE : StatutVehicule.EN_ETAT);
         vehiculeRepository.saveAndFlush(vehicule);
-        entityManager.clear(); // ✅ Vide le cache Hibernate
+        entityManager.clear();
 
-        System.out.println("✅ Après mise à jour - Parc: " + vehicule.getParc().getNom() + ", Statut: " + vehicule.getStatut());
         return vehicule;
     }
-    /**
-     * ✅ Réception manuelle d'un véhicule
-     */
-    @PostMapping("/reception-manuelle")
-    public ResponseEntity<Map<String, String>> receptionManuelle(@RequestBody VehiculeDTO vehiculeDTO) {
-        try {
-            Parc parcMegrine = parcRepository.findByNom("MEGRINE")
-                    .orElseThrow(() -> new EntityNotFoundException("🚨 Parc MEGRINE introuvable"));
 
-            Vehicule vehicule = new Vehicule();
-            vehicule.setProductionDate(vehiculeDTO.getProductionDate());
-            vehicule.setNumeroChassis(vehiculeDTO.getNumeroChassis());
-            vehicule.setModele(vehiculeDTO.getModele());
-            vehicule.setDescription(vehiculeDTO.getDescription());
-            vehicule.setEngine(vehiculeDTO.getEngine());
-            vehicule.setKeyCode(vehiculeDTO.getKeyCode());
-            vehicule.setCouleur(vehiculeDTO.getCouleur());
-            vehicule.setPegCode(vehiculeDTO.getPegCode());
 
-            vehicule.setStatut(StatutVehicule.EN_ETAT);
-            vehicule.setParc(parcMegrine);
-            Parc parcAuport = parcRepository.findById(3L)
-                    .orElseThrow(() -> new EntityNotFoundException("🚨 Parc AUPORT (ID = 3) introuvable"));
-            vehicule.setParc(parcAuport);
-            vehiculeRepository.save(vehicule);
 
-            // ✅ Mise à jour du stock du parc MEGRINE
-            Stock stockMegrine = stockRepository.findByParc(parcMegrine)
-                    .orElseThrow(() -> new EntityNotFoundException("🚨 Stock du parc MEGRINE introuvable"));
-
-            stockMegrine.setNombreTotal(stockMegrine.getNombreTotal() + 1);
-            stockRepository.save(stockMegrine);
-
-            return ResponseEntity.ok(Map.of("message", "✅ Véhicule ajouté au parc MEGRINE", "status", "success"));
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("message", "❌ Erreur lors de l'ajout du véhicule", "status", "error"));
-        }
-    }
-    @Transactional
-    public Vehicule mettreAJourVehiculeDepuisReception(String numeroChassis, String avarieJson, List<MultipartFile> photos) {
-        // ✅ 1️⃣ Vérifier que le véhicule existe
-        Vehicule vehicule = vehiculeRepository.findByNumeroChassis(numeroChassis)
-                .orElseThrow(() -> new EntityNotFoundException("🚨 Véhicule non trouvé dans le parc AUPORT !"));
-
-        // ✅ 2️⃣ Vérifier l'avarie
-        if (avarieJson != null && !avarieJson.isEmpty()) {
-            try {
-                Avarie avarie = objectMapper.readValue(avarieJson, Avarie.class);
-                avarie.setVehicule(vehicule);
-                avarieRepository.save(avarie);
-
-                // ✅ Filtrer les photos valides (exclure `{}`)
-                if (photos != null && !photos.isEmpty()) {
-                    System.out.println("📸 Nombre total de photos reçues : " + photos.size());
-
-                    Set<String> fileNames = new HashSet<>();
-
-                    for (MultipartFile file : photos) {
-                        String fileName = file.getOriginalFilename();
-
-                        // Vérification : éviter d'ajouter une photo vide ou en double
-                        if (fileName != null && !fileName.isEmpty() && !fileNames.contains(fileName)) {
-                            Photo photo = new Photo();
-                            photo.setFileName(fileName);
-                            photo.setAvarie(avarie);
-                            photoRepository.save(photo);
-
-                            fileNames.add(fileName);
-                            System.out.println("✅ Photo ajoutée : " + fileName);
-                        } else {
-                            System.out.println("🚨 Doublon détecté ou fichier vide ignoré : " + fileName);
-                        }
-                    }
-                }
-
-                // ✅ Modifier le statut du véhicule en "AVARIÉ"
-                vehicule.setStatut(StatutVehicule.AVARIE);
-                System.out.println("🚗 Véhicule mis à jour en statut AVARIÉ.");
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Erreur lors de la conversion JSON de l'avarie", e);
-            }
-        } else {
-            // ✅ Modifier le statut en "REÇU" si pas d’avarie
-            vehicule.setStatut(StatutVehicule.EN_ETAT);
-            System.out.println("✅ Véhicule réceptionné sans avarie, statut mis à REÇU.");
-        }
-
-        return vehiculeRepository.save(vehicule);
-    }
     public Vehicule findByNumeroChassis(String numeroChassis) {
         return vehiculeRepository.findByNumeroChassis(numeroChassis).orElse(null);
     }
@@ -509,7 +380,6 @@ public class VehiculeService {
         Vehicule vehicule = vehiculeRepository.findByNumeroChassis(numeroChassis)
                 .orElseThrow(() -> new EntityNotFoundException("🚨 Véhicule non trouvé : " + numeroChassis));
 
-        // ✅ Désérialiser l’avarie
         Avarie avarie;
         try {
             avarie = objectMapper.readValue(avarieJson, Avarie.class);
@@ -518,16 +388,15 @@ public class VehiculeService {
         }
 
         avarie.setVehicule(vehicule);
-        avarieRepository.save(avarie);
+        avarie = avarieRepository.save(avarie); // 🔁 on récupère l'objet persisté
 
-        // ✅ Ajouter les photos si présentes
         if (photos != null && !photos.isEmpty()) {
             for (MultipartFile file : photos) {
                 try {
                     Photo photo = new Photo();
                     photo.setFileName(file.getOriginalFilename());
+                    photo.setData(file.getBytes()); // ✅ important
                     photo.setAvarie(avarie);
-                    photo.setData(file.getBytes()); // facultatif si tu veux stocker le contenu
                     photoRepository.save(photo);
                 } catch (IOException e) {
                     throw new RuntimeException("❌ Erreur lors de l’enregistrement de la photo", e);
@@ -535,7 +404,6 @@ public class VehiculeService {
             }
         }
 
-        // ✅ Mettre à jour le statut si besoin
         if (vehicule.getStatut() != StatutVehicule.AVARIE) {
             vehicule.setStatut(StatutVehicule.AVARIE);
             vehiculeRepository.save(vehicule);
@@ -544,6 +412,7 @@ public class VehiculeService {
         return vehicule;
     }
 
+
     @Transactional
     public Vehicule save(Vehicule vehicule) {
         return vehiculeRepository.save(vehicule);
@@ -551,39 +420,7 @@ public class VehiculeService {
     public List<Vehicule> getVehiculesByParcs(List<Long> ids) {
         return vehiculeRepository.findByParcIdIn(ids);
     }
-    @Transactional
-    public void ajouterAvariesAuVehicule(Vehicule vehicule, List<Avarie> avaries, List<MultipartFile> photos) {
-        for (int i = 0; i < avaries.size(); i++) {
-            Avarie avarie = avaries.get(i);
-            avarie.setVehicule(vehicule);
 
-            // ✅ Ajouter les photos si disponibles
-            if (photos != null && !photos.isEmpty()) {
-                List<Photo> photosAvarie = new ArrayList<>();
-                for (MultipartFile photoFile : photos) {
-                    try {
-                        Photo photo = new Photo();
-                        photo.setAvarie(avarie);
-                        photo.setFileName(photoFile.getOriginalFilename());
-                        photo.setData(photoFile.getBytes());
-                        photosAvarie.add(photo);
-                    } catch (IOException e) {
-                        throw new RuntimeException("🚨 Erreur lors de l'enregistrement de la photo", e);
-                    }
-                }
-                avarie.setPhotos(photosAvarie);
-            }
-            vehicule.getAvaries().add(avarie);
-        }
-
-        // ✅ Mettre à jour le statut si des avaries sont ajoutées
-        if (!vehicule.getAvaries().isEmpty()) {
-            vehicule.setStatut(StatutVehicule.AVARIE);
-            System.out.println("🚨 Le véhicule a reçu des avaries, statut mis à AVARIE.");
-        }
-
-        vehiculeRepository.saveAndFlush(vehicule);
-    }
     public List<VehiculeDTO> getVehiculesByParc(String parcNom) {
         System.out.println("🔍 Recherche des véhicules pour le parc : " + parcNom);
         List<Vehicule> vehicules = vehiculeRepository.findByParcNom(parcNom);

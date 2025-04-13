@@ -1,24 +1,24 @@
 <mat-dialog-content class="popup-container">
-    <h2 mat-dialog-title>🛠 Avaries à Réparer</h2>
+    <h2  style="color: #003366 ;" mat-dialog-title>🛠 Avaries à Réparer</h2>
   
     <!-- ✅ Liste des avaries existantes -->
     <div *ngIf="avaries.length > 0">
-      <h3>📋 Avaries détectées</h3>
+      <h3  style="color: #003366 ;">📋 Avaries détectées</h3>
       <div *ngFor="let avarie of avaries; let i = index" class="avarie-container">
   
         <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Type</mat-label>
-          <input matInput [value]="avarie.type" disabled />
+          <mat-label  style="color: #003366 ;">Type</mat-label>
+          <input style="color: #fab940" matInput [value]="avarie.type" disabled />
         </mat-form-field>
   
         <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Commentaire</mat-label>
-          <textarea matInput [value]="avarie.commentaire" disabled></textarea>
+          <mat-label  style="color: #003366 ;">Commentaire</mat-label>
+          <textarea style="color: #fab940" matInput [value]="avarie.commentaire" disabled></textarea>
         </mat-form-field>
   
         <!-- 📷 Affichage des photos existantes -->
         <div class="photo-preview" *ngIf="photoPreviews?.[i]">
-            <h4>📷 Photos</h4>
+            <h4  style="color: #003366 ;">📷 Photos</h4>
             <div class="photo-grid">
               
               <!-- ✅ Affichage de squelette pendant le chargement -->
@@ -41,7 +41,7 @@
           </div>
           <div class="photo-empty" *ngIf="!photoPreviews?.[i]?.length">
             <mat-icon color="disabled">image_not_supported</mat-icon>
-            <span>Aucune photo disponible</span>
+            <span style="color: #fab940">Aucune photo disponible</span>
           </div>
         <!-- 📂 Ajout de photos depuis un fichier -->
         <div class="add-photo-btn" *ngIf="isExpert">
@@ -52,7 +52,7 @@
   
         <!-- ✅ Commentaire expert -->
         <mat-form-field *ngIf="isExpert" appearance="fill" class="full-width">
-          <mat-label>Commentaire de l'expert</mat-label>
+          <mat-label  style="color: #003366 ;">Commentaire de l'expert</mat-label>
           <textarea matInput [(ngModel)]="commentaireExpert" (ngModelChange)="verifierFormulaire()"></textarea>
         </mat-form-field>
       </div>

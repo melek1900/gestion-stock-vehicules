@@ -70,7 +70,12 @@ export class DashboardStatistiquesComponent implements OnInit {
     },
     title: {
       text: 'Ventes par genre - Nos marques',
-      align: 'center'
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
     },
     dataLabels: {
       enabled: true
@@ -127,7 +132,12 @@ displaySelectedMarques = (): string => {
         colors,
         title: {
           text: 'Ventes par genre - Concurrence',
-          align: 'center'
+          align: 'left',
+          style: {
+            fontSize: '18px',
+            fontWeight: '600',
+            color: '#003366'
+          }
         },
         dataLabels: { enabled: false }
       };
@@ -159,7 +169,12 @@ displaySelectedMarques = (): string => {
           colors,
           title: {
             text: 'Ventes par genre - Concurrence',
-            align: 'center'
+            align: 'left',
+            style: {
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#003366'
+            }
           },
           plotOptions: {
             bar: {
@@ -246,7 +261,12 @@ displaySelectedMarques = (): string => {
     },
     title: {
       text: 'Ventes par genre - Concurrence',
-      align: 'center'
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
     },
     dataLabels: {
       enabled: true
@@ -282,7 +302,12 @@ displaySelectedMarques = (): string => {
     labels: [],
     title: {
       text: 'Répartition des ventes par modèle',
-      align: 'center'
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
     },
     dataLabels: {
       enabled: true
@@ -322,18 +347,15 @@ displaySelectedMarques = (): string => {
         barHeight: '30%'
       }
     },
-    xaxis: {
-      categories: [],
-      labels: {
-        style: {
-          colors: '#333',
-          fontSize: '14px'
-        }
-      }
-    },
+   
     title: {
       text: 'Stock par parcs',
-      align: 'center'
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
     },
     dataLabels: {
       enabled: true,
@@ -369,7 +391,12 @@ displaySelectedMarques = (): string => {
     },
     title: {
       text: 'Stock par marque',
-      align: 'center'
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
     },
     dataLabels: {
       enabled: true
@@ -402,7 +429,12 @@ displaySelectedMarques = (): string => {
     },
     title: {
       text: 'Stock parc par marque',
-      align: 'center'
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
     },
     colors: [],
     legend: {

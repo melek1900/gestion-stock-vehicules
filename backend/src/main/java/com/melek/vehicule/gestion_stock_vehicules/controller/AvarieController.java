@@ -4,7 +4,6 @@ import com.melek.vehicule.gestion_stock_vehicules.model.Avarie;
 import com.melek.vehicule.gestion_stock_vehicules.service.AvarieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,13 +17,13 @@ public class AvarieController {
     private AvarieService avarieService;
 
     @PostMapping("/ajouter")
-    public ResponseEntity<Avarie> ajouterAvarie(
+    public ResponseEntity<Avarie> ajouterAvarieAvecPhotos(
             @RequestParam Long vehiculeId,
             @RequestParam String type,
             @RequestParam String commentaire,
-            @RequestParam(required = false) String photoUrl) {
+            @RequestParam(required = false) List<MultipartFile> photos) {
 
-        Avarie avarie = avarieService.ajouterAvarie(vehiculeId, type, commentaire, photoUrl);
+        Avarie avarie = avarieService.ajouterAvarie(vehiculeId, type, commentaire, photos);
         return ResponseEntity.ok(avarie);
     }
 

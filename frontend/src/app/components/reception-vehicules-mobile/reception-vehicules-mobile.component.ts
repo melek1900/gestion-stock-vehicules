@@ -9,11 +9,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { NgIf } from '@angular/common';
+import { AutofocusDirective } from '../../../autofocus.directive';
 @Component({
   selector: 'app-reception-vehicules-mobile',
   templateUrl: './reception-vehicules-mobile.component.html',
   styleUrls: ['./reception-vehicules-mobile.component.scss'],
-  imports: [MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule,ReactiveFormsModule,NgIf]
+  imports: [MatCardModule,AutofocusDirective, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule,ReactiveFormsModule,NgIf]
 })
 export class ReceptionVehiculesMobileComponent {
   qrForm: FormGroup;
