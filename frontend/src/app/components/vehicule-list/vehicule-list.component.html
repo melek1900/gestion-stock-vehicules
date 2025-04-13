@@ -1,5 +1,3 @@
-<mat-card class="page-container">
-  <h2>📜 Liste des Ordres des Véhicules</h2>
   <!-- 🔍 Filtres -->
   <div class="filters">
     <mat-form-field class="search-field" appearance="fill">
@@ -17,9 +15,9 @@
       <mat-form-field appearance="fill">
         <mat-label>Parc</mat-label>
         <mat-select [(ngModel)]="selectedParcs" multiple (selectionChange)="filtrerVehicules()">
-          <mat-option *ngFor="let parc of parcsAccessibles" [value]="parc.nom">
+          <mat-option *ngFor="let parc of parcsPourFiltre" [value]="parc.nom">
             {{ parc.nom }}
-          </mat-option>       
+          </mat-option>     
          </mat-select>
       </mat-form-field>
       <mat-form-field appearance="fill">
@@ -70,8 +68,8 @@
   <!-- 📄 Pagination -->
   <div class="pagination-container">
     <mat-paginator
-      [pageSize]="10"
-      [pageSizeOptions]="[10, 20, 50]"
+      [pageSize]="15"
+      [pageSizeOptions]="[15, 20, 50]"
       showFirstLastButtons
     ></mat-paginator>
   </div>
@@ -163,4 +161,3 @@
   <div *ngIf="vehiculesFiltres.length === 0 && searchQuery">
     <p style="text-align:center; color: #999;">❌ Aucun véhicule trouvé pour cette recherche.</p>
   </div>
-</mat-card>

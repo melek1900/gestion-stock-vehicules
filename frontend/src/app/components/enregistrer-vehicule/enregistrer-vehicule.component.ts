@@ -48,6 +48,8 @@ export class EnregistrerVehiculeComponent {
   scannerFormats = [BarcodeFormat.QR_CODE];
   avaries!: FormArray;  // ✅ Déclaration correcte de avaries
   photoPreviews: string[][] = []; // ✅ Liste des photos prévisualisées
+  photosParAvarie: { [key: string]: File[] } = {};
+
   activeIndex: number | null = null;
   isCapturing = false;
   isExistingVehicle = false;
@@ -152,54 +154,7 @@ export class EnregistrerVehiculeComponent {
       console.log("📸 Photos sélectionnées :", this.photos);
     }
   }
-  /** ✅ Détection dynamique de l'ID du parc */
-//   getParcId() {
-//     const parcIdFromUrl = this.route.snapshot.queryParams['parc'];
-//     console.log("🔍 Vérification brute de `parcIdFromUrl`:", parcIdFromUrl, "Type:", typeof parcIdFromUrl);
-
-//     if (parcIdFromUrl) {
-//         // 🔹 Vérifier si `parcIdFromUrl` est bien une chaîne
-//         const mappingParcId: { [key: string]: number } = {
-//             'MEGRINE': 1,
-//             'A': 1,
-//             'CHARGUIA': 2,
-//             'B': 2,
-//             'AUPORT': 4,
-//             'C': 4,
-//         };
-
-//         // 🔹 Vérifier si la valeur existe dans le mapping
-//         if (mappingParcId[parcIdFromUrl]) {
-//             this.parcId = mappingParcId[parcIdFromUrl]; // 🔥 Récupération sûre
-//         } else {
-//             console.warn("⚠️ Parc non reconnu, utilisation de la valeur par défaut.");
-//             this.parcId = 1;
-//         }
-
-//         console.log("📌 Parc ID attribué:", this.parcId);
-//     } else {
-//         console.warn("⚠️ `parcIdFromUrl` est NULL ou UNDEFINED, tentative récupération utilisateur...");
-//         this.authService.getUser().subscribe(user => {
-//             if (user && user.parcId) {
-//                 this.parcId = user.parcId;
-//                 console.log("🟢 Parc ID récupéré depuis l'utilisateur :", this.parcId);
-//             } else {
-//                 this.parcId = 1;
-//                 console.log("⚠️ Parc ID non trouvé, valeur par défaut :", this.parcId);
-//             }
-//             this.form.controls['parc'].setValue(this.parcId);
-//         });
-//     }
-
-//     // 🔹 Vérification finale et correction si `NaN`
-//     if (isNaN(this.parcId)) {
-//         console.error("🚨 ERREUR: `parcId` est NaN après attribution, correction en 1 !");
-//         this.parcId = 1;
-//     }
-
-//     this.form.controls['parc'].setValue(this.parcId);
-// }
-
+ 
   ajouterAvarie() {
     this.avaries.push(this.fb.group({
       type: ['', Validators.required],
@@ -266,22 +221,30 @@ export class EnregistrerVehiculeComponent {
   }
   confirmerAvarie(index: number) {
     const avarie = this.avaries.at(index).value;
-
-    // 📌 Ajouter la liste des photos à l'avarie confirmée
-    const photos = this.photoPreviews[index] || [];
-
+  
+    // 🔑 Créer une clé unique
+    const key = `av${Date.now()}_${index}`;
+  
+    // 📸 Extraire les fichiers depuis le FormArray photos
+    const photosArray = this.avaries.at(index).get('photos') as FormArray;
+    const files: File[] = photosArray.controls.map(ctrl => ctrl.value);
+  
+    // 🗂 Associer les fichiers à cette avarie via la clé
+    this.photosParAvarie[key] = files;
+  
+    // 📝 Ajouter à la liste des avaries confirmées
     this.avariesConfirmees.push({
-        type: avarie.type,
-        commentaire: avarie.commentaire,
-        photos: [...photos] // Ajout des photos associées
+      type: avarie.type,
+      commentaire: avarie.commentaire,
+      key: key
     });
-
-    // 🔥 Supprimer l'avarie de la liste en cours
+  
+    // 🔥 Nettoyage
     this.avaries.removeAt(index);
     this.photoPreviews.splice(index, 1);
-
+  
     this.snackBar.open("✅ Avarie confirmée avec succès", "Fermer", { duration: 3000 });
-}
+  }
   supprimerAvarieConfirmee(index: number) {
     this.avariesConfirmees.splice(index, 1);
     this.snackBar.open("❌ Avarie supprimée", "Fermer", { duration: 3000 });
@@ -340,6 +303,13 @@ export class EnregistrerVehiculeComponent {
       console.log("🔍 Nouvelle prévisualisation :", this.photoPreviews[avarieIndex]);
     };
     reader.readAsDataURL(file);
+    const confirmed = this.avariesConfirmees.find(av => av.index === avarieIndex);
+  if (confirmed && confirmed.key) {
+  if (!this.photosParAvarie[confirmed.key]) {
+    this.photosParAvarie[confirmed.key] = [];
+  }
+  this.photosParAvarie[confirmed.key].push(file);
+}
   }
 
   /** ✅ Supprimer une photo */
@@ -414,7 +384,7 @@ export class EnregistrerVehiculeComponent {
       const role = decodedToken.role.replace('ROLE_', '').toUpperCase();
   
       if (role === "GESTIONNAIRE_STOCK") {
-        this.router.navigate(['/gestionnaire-stock-dashboard']);
+        this.router.navigate(['/reception-vehicules-mobile']);
       } else {
         this.router.navigate(['/vehicules']);
       }
@@ -423,46 +393,41 @@ export class EnregistrerVehiculeComponent {
     }
   }
   enregistrerVehicule() {
+    console.warn("📋 Formulaire actuel :", this.form.value);
+  
     if (this.form.invalid) {
       this.snackBar.open('🚨 Formulaire invalide', 'Fermer', { duration: 3000 });
       return;
     }
   
     const formData = new FormData();
+  
     formData.append('numeroChassis', this.form.value.numeroChassis);
-    formData.append('parcId', this.parcId ? this.parcId.toString() : '1');
+    formData.append('parcId', this.parcId?.toString() ?? '1');
   
-    // 🔧 Ajouter la première avarie (juste pour compatibilité backend)
-    if (this.avariesConfirmees.length > 0) {
-      const avarie = { ...this.avariesConfirmees[0] };
-      if (Array.isArray(avarie.photos)) {
-        avarie.photos = avarie.photos.filter((photo: any) => Object.keys(photo).length > 0);
+    // ✅ Ajouter la liste d’avaries (sous forme de JSON)
+    const avariesFormatees = this.avariesConfirmees.map((av, index) => ({
+      type: av.type,
+      commentaire: av.commentaire,
+      key: av.key || `av${index}` // 🔑 assure une clé unique pour relier aux photos
+    }));
+    formData.append('avarie', JSON.stringify(avariesFormatees));
+  
+    // ✅ Ajouter les photos avec nom incluant la clé d’avarie (photo-avX-filename)
+    avariesFormatees.forEach(avarie => {
+      const photos = this.photosParAvarie[avarie.key] || []; // 📸 photos associées à chaque avarie
+      if (!photos.length) {
+        console.warn(`⚠️ Aucune photo trouvée pour la clé ${avarie.key}`);
       }
-      delete avarie.photos;
-      formData.append('avarie', JSON.stringify(avarie));
-    } else {
-      formData.append('avarie', "");
-    }
-  
-    if (this.photos && this.photos.length > 0) {
-      this.photos.forEach((photo) => {
-        formData.append('photos', photo);
+      photos.forEach((file: File, i: number) => {
+        const fileName = `photo-${avarie.key}-${i}.png`;
+        formData.append('photos', file, fileName);
       });
-    }
+    });
   
-    console.log("✅ FormData avant envoi:");
-    for (let pair of formData.entries()) {
-      if (pair[1] instanceof File) {
-        console.log(`${pair[0]}:`, pair[1].name);
-      } else {
-        console.log(`${pair[0]}:`, pair[1]);
-      }
-    }
-  
-    const numeroChassis = this.form.value.numeroChassis;
-  
+    // ✅ Appel backend
     this.http.post(
-      `http://192.168.1.121:8080/api/vehicules/reception`,
+      'http://192.168.1.121:8080/api/vehicules/reception',
       formData,
       {
         headers: new HttpHeaders({
@@ -473,35 +438,18 @@ export class EnregistrerVehiculeComponent {
     ).subscribe({
       next: () => {
         this.snackBar.open("🚗 Véhicule réceptionné avec succès !", "Fermer", { duration: 3000 });
-  
-        // 🔁 Étape supplémentaire : récupérer l'ID du véhicule
-        this.http.get<Vehicule>(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}`).subscribe({
-          next: (vehicule) => {
-            if (vehicule && vehicule.id) {
-              this.avariesConfirmees.forEach((avarie, i) => {
-                this.envoyerAvarieAvecPhotos(vehicule.id, avarie, i);
-              });
-            }
-  
-            // ✅ Redirection après réception + enregistrement avaries
-            this.redirectAfterReception();
-          },
-          error: (err) => {
-            console.error("⚠️ Erreur récupération véhicule :", err);
-            this.redirectAfterReception();
-          }
-        });
+        
+        this.redirectAfterReception();
       },
       error: (err) => {
         console.error("❌ Erreur réception véhicule:", err);
-        if (err.status === 409 && typeof err.error === 'string' && err.error.includes("déjà dans le parc")) {
-          this.snackBar.open("🚫 Ce véhicule est déjà réceptionné dans ce parc !", "Fermer", { duration: 4000 });
-        } else {
-          this.snackBar.open("❌ Échec de la réception du véhicule", "Fermer", { duration: 3000 });
-        }
+        this.snackBar.open("❌ Échec de la réception du véhicule", "Fermer", { duration: 3000 });
       }
     });
   }
+  
+  
+  
   
   getPhotoUrl(photoId: number): string {
     return `http://192.168.1.121:8080/photos/${photoId}`;

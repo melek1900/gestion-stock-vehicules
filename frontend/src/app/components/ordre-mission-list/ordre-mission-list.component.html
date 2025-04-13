@@ -1,6 +1,4 @@
-<mat-card class="page-container">
-    <h2>📜 Liste des Ordres de Mission</h2>
-    <div class="filtres">
+<div class="filtres">
         <!-- 🔍 Recherche à gauche -->
         <div class="recherche-container">
             <mat-form-field appearance="fill">
@@ -27,8 +25,8 @@
     </div>
     <div class="pagination-container">
       <mat-paginator
-        [pageSize]="10"
-        [pageSizeOptions]="[10, 20, 50]"
+        [pageSize]="15"
+        [pageSizeOptions]="[15, 20, 50]"
         showFirstLastButtons>
       </mat-paginator>
     </div>
@@ -72,7 +70,7 @@
   
       <!-- Statut -->
       <ng-container matColumnDef="statut">
-        <th mat-header-cell *matHeaderCellDef > Statut </th>
+        <th mat-header-cell *matHeaderCellDef  > Statut </th>
         <td mat-cell *matCellDef="let ordre">
           <span class="status" [ngClass]="ordre.statut?.toLowerCase()">
             {{ ordre.statut }}
@@ -105,5 +103,3 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;" [ngClass]="row.statut === 'ANNULE' ? 'annule' : ''"></tr>
     </table>
-  </mat-card>
-  

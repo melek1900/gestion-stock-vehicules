@@ -60,7 +60,7 @@
       </li>
   
       <li>
-        <button *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION' && userRole !== 'ROLE_ADMINISTRATEUR'" class="menu-item" (click)="toggleConstatMenu()">
+        <button *ngIf="userRole !== 'ROLE_COMMERCIAL'  && userRole !== 'ROLE_ADMINISTRATEUR'" class="menu-item" (click)="toggleConstatMenu()">
           <mat-icon>assignment_turned_in</mat-icon>
           <span>Constats</span>
           <mat-icon class="chevron" [class.rotate]="parametresConstatOpen">chevron_right</mat-icon>

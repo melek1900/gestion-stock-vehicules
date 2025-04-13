@@ -146,7 +146,7 @@
 
   <!-- 📦 Statuts des Ordres de Mission -->
   <div class="ordres-mission-status-card" *ngIf="ordreStatuts.length > 0" appScrollAnimate>
-    <h3>📦 Statuts des Ordres de Mission</h3>
+    <h3 class="section-title">📦 Statuts des Ordres de Mission</h3>
     <div class="statut-list">
       <div class="statut-item" *ngFor="let s of ordreStatuts">
         <span class="statut-dot" [ngStyle]="{ 'background-color': s.color }"></span>

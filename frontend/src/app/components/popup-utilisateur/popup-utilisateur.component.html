@@ -1,31 +1,31 @@
 <mat-dialog-content class="popup-container">
-    <h2 mat-dialog-title>
+    <h2 mat-dialog-title style="color: #003366 ;">
       {{ isModification ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur' }}
     </h2>
   
     <form [formGroup]="form">
       <mat-form-field>
-        <mat-label>Nom</mat-label>
+        <mat-label style="color: #003366 ;">Nom</mat-label>
         <input matInput formControlName="nom" required />
       </mat-form-field>
   
       <mat-form-field>
-        <mat-label>Prénom</mat-label>
+        <mat-label style="color: #003366 ;">Prénom</mat-label>
         <input matInput formControlName="prenom" required />
       </mat-form-field>
   
       <mat-form-field>
-        <mat-label>Email</mat-label>
+        <mat-label style="color: #003366 ;">Email</mat-label>
         <input matInput formControlName="email" required type="email" />
       </mat-form-field>
   
       <mat-form-field *ngIf="!isModification">
-        <mat-label>Mot de passe</mat-label>
+        <mat-label style="color: #003366 ;">Mot de passe</mat-label>
         <input matInput formControlName="motDePasse" required type="password" />
       </mat-form-field>
   
       <mat-form-field>
-        <mat-label>Rôle</mat-label>
+        <mat-label style="color: #003366 ;">Rôle</mat-label>
         <mat-select formControlName="role">
           <mat-option *ngFor="let role of roles" [value]="role">
             {{ formatRole(role) }}
@@ -34,7 +34,7 @@
       </mat-form-field>
   
       <mat-form-field>
-        <mat-label>Parcs accessibles</mat-label>
+        <mat-label style="color: #003366 ;">Parcs accessibles</mat-label>
         <mat-select formControlName="parcsAccessibles" multiple>
           <mat-option *ngFor="let parc of parcsDisponibles" [value]="parc.nom">
             {{ parc.nom }}
@@ -43,9 +43,9 @@
       </mat-form-field>
   
       <mat-form-field>
-        <mat-label>Marques accessibles</mat-label>
+        <mat-label style="color: #003366 ;">Marques accessibles</mat-label>
         <mat-select formControlName="marquesAccessibles" multiple>
-          <mat-option *ngFor="let marque of marquesDisponibles" [value]="marque">
+          <mat-option  *ngFor="let marque of marquesDisponibles" [value]="marque">
             {{ marque }}
           </mat-option>
         </mat-select>

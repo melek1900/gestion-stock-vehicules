@@ -80,6 +80,7 @@ export class VehiculeListComponent implements OnInit {
   selectedMarques: string[] = [];
   selectedParcs: string[] = [];
   parcsAccessibles: any[] = [];
+  parcsPourFiltre: any[] = [];
   searchQuery: string = '';
   searchChassis = '';
   searchColor = '';
@@ -104,6 +105,10 @@ export class VehiculeListComponent implements OnInit {
       this.chargerVehicules();
   
       const parcNom = this.obtenirParcAssocie();
+      // 💡 Ajout temporaire de TRANSFERT juste pour le chargement
+  if (!this.selectedParcs.includes('TRANSFERT')) {
+    this.selectedParcs.push('TRANSFERT');
+  }
       if (this.selectedParcs.length === 0 && parcNom) {
         this.selectedParcs = [parcNom];
       }
@@ -191,13 +196,21 @@ export class VehiculeListComponent implements OnInit {
         this.selectedParcs = [parcUtilisateur];
       }
   
-      // Ajout automatique des parcs accessibles formatés { nom: '...' }
+      // ✅ Parcs accessibles normaux → pour filtrage logique
       if (Array.isArray(payload.parcsAcces)) {
         this.parcsAccessibles = payload.parcsAcces.map((nom: string) => ({ nom }));
       }
+  
+      // ✅ On crée un tableau séparé pour l'affichage du filtre
+      this.parcsPourFiltre = [...this.parcsAccessibles];
+  
+      // ✅ Ajout du parc TRANSFERT uniquement pour le filtre visuel
+      const transfertPresent = this.parcsPourFiltre.some(parc => parc.nom === 'TRANSFERT');
+      if (!transfertPresent) {
+        this.parcsPourFiltre.push({ nom: 'TRANSFERT' });
+      }
     }
   }
-  
   ouvrirPopupLivraison(vehicule: any) {
     console.log("📌 Livraison du véhicule :", vehicule);
     this.ouvrirPopup(vehicule); // 🔥 Pour l’instant, utiliser la même popup
@@ -277,43 +290,80 @@ mettreAJourVehiculesSelectionnes() {
   this.vehiculesSelectionnes = this.selection.selected;
 }
 
-chargerVehicules() {
+async chargerVehicules() {
   const token = localStorage.getItem('token');
   if (!token) return;
 
   const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-  this.http.get<Vehicule[]>('http://192.168.1.121:8080/api/vehicules', { headers }).subscribe({
-    next: async (data) => {
-      const mappingParcNom: Record<number, string> = { 1: 'MEGRINE', 2: 'CHARGUIA', 4: 'AUPORT' };
+  console.log("📌 Parcs sélectionnés :", this.selectedParcs);
+  console.log("📌 Marques accessibles :", this.marquesAccessibles);
 
-      const vehiculesAvecUtilisation = await Promise.all(
-        data.map(async (v) => {
-          const enUtilisation = await this.http.get<boolean>(
-            `http://192.168.1.121:8080/api/ordres-mission/vehicule/${v.id}/en-utilisation`,
-            { headers }
-          ).toPromise().catch(() => false);
+  // 🚀 Charger les véhicules autorisés (selon les parcs accessibles)
+  const vehiculesAutorisés = await this.http
+    .get<Vehicule[]>('http://192.168.1.121:8080/api/vehicules', { headers })
+    .toPromise();
 
-          return {
-            ...v,
-            parcNom: mappingParcNom[v.parcId] || 'Parc Inconnu',
-            productionDate: v.productionDate ? new Date(v.productionDate) : null,
-            shortColor: v.shortColor || 'Non défini',
-            shortDescription: (v.shortDescription || 'Non défini').toUpperCase(),
-            enUtilisation
-          };
-        })
-      );
+  console.log("✅ Véhicules autorisés récupérés :", vehiculesAutorisés?.length);
 
-      this.vehicules = vehiculesAvecUtilisation;
-      this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription.toUpperCase()))];
-      this.filtrerVehicules();
-      this.cdr.detectChanges();
-    },
-    error: (err) => console.error("❌ Erreur chargement véhicules :", err)
-  });
+  let vehiculesTransfert: Vehicule[] = [];
+
+  // 🔁 Si l’utilisateur a sélectionné TRANSFERT, on charge aussi les véhicules de ce parc
+  if (this.selectedParcs.includes('TRANSFERT')) {
+    try {
+      const data = await this.http
+        .get<Vehicule[]>('http://192.168.1.121:8080/api/vehicules/parc/transfert', { headers })
+        .toPromise();
+
+      vehiculesTransfert = data || [];
+      console.log("📦 Véhicules TRANSFERT récupérés :", vehiculesTransfert.length);
+    } catch (error) {
+      console.error("❌ Erreur chargement véhicules TRANSFERT :", error);
+    }
+  }
+
+  const allVehicules = [...(vehiculesAutorisés || []), ...vehiculesTransfert];
+  console.log("🔍 Total véhicules fusionnés (autorisés + TRANSFERT) :", allVehicules.length);
+  console.table(allVehicules.map(v => ({
+    id: v.id,
+    parcId: v.parcId,
+    shortDescription: v.shortDescription,
+    numeroChassis: v.numeroChassis
+  })));
+
+  const mappingParcNom: Record<number, string> = {
+    1: 'MEGRINE',
+    2: 'CHARGUIA',
+    3: 'TRANSFERT',
+    4: 'AUPORT'
+  };
+
+  const vehiculesAvecUtilisation = await Promise.all(
+    allVehicules.map(async (v) => {
+      const enUtilisation = await this.http.get<boolean>(
+        `http://192.168.1.121:8080/api/ordres-mission/vehicule/${v.id}/en-utilisation`,
+        { headers }
+      ).toPromise().catch(() => false);
+
+      return {
+        ...v,
+        parcNom: mappingParcNom[v.parcId] || 'Parc Inconnu',
+        productionDate: v.productionDate ? new Date(v.productionDate) : null,
+        shortColor: v.shortColor || 'Non défini',
+        shortDescription: (v.shortDescription || 'Non défini').toUpperCase(),
+        enUtilisation
+      };
+    })
+  );
+
+  this.vehicules = vehiculesAvecUtilisation;
+  this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription.toUpperCase()))];
+
+  console.log("🧪 Marques disponibles calculées :", this.marquesDisponibles);
+
+  this.filtrerVehicules(); // 🧠 Applique le filtrage (marques, parcs, statut, etc.)
+  this.cdr.detectChanges();
 }
-
 
 
 obtenirParcAssocie(): string | null {
@@ -355,15 +405,16 @@ getParcId() {
 
 
 
-
 filtrerVehicules() {
   const searchLower = this.searchQuery?.trim().toLowerCase();
 
   this.vehiculesFiltres = this.vehicules.filter(vehicule => {
-    const isAccessible = this.marquesAccessibles.length === 0 || this.marquesAccessibles.includes(vehicule.shortDescription);
-    if (!isAccessible) return false;
+    // ✅ Inclure TRANSFERT uniquement si explicitement sélectionné
+    const parcNom = vehicule.parcNom;
+    const isParcSelected = this.selectedParcs.length === 0 || this.selectedParcs.includes(parcNom);
+    const isParcAccessible = parcNom === 'TRANSFERT' || this.parcsAccessibles.some(p => p.nom === parcNom);
+    if (!isParcSelected || !isParcAccessible) return false;
 
-    const matchParc = this.selectedParcs.length === 0 || this.selectedParcs.includes(vehicule.parcNom);
     const matchStatut = this.selectedStatut === 'all' || vehicule.statut?.toUpperCase() === this.selectedStatut.toUpperCase();
     const matchMarque = this.selectedMarques.length === 0 || this.selectedMarques.includes(vehicule.shortDescription?.toUpperCase());
 
@@ -380,12 +431,13 @@ filtrerVehicules() {
       matchSearch = matchChassis || matchModele || matchCouleur || matchShortDesc || matchDate;
     }
 
-    return matchParc && matchStatut && matchMarque && matchSearch;
+    return matchStatut && matchMarque && matchSearch;
   });
 
   this.dataSource.data = this.vehiculesFiltres;
   if (this.paginator) this.paginator.firstPage();
 }
+
 
 
 toggleParcSelection(parc: string) {

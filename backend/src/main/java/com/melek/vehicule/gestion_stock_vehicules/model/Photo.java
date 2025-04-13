@@ -34,6 +34,10 @@ public class Photo {
     public byte[] getData() { return data; }
     public Avarie getAvarie() { return avarie; }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setFileName(String fileName) { this.fileName = fileName; }
     public void setData(byte[] data) { this.data = data; }
     public void setAvarie(Avarie avarie) { this.avarie = avarie; }
