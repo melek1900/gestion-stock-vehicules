@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output, HostListener } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Router, NavigationEnd } from '@angular/router';
-import { NgIf } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,14 +12,31 @@ import { MatMenuModule } from '@angular/material/menu';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
   standalone: true,
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule,NgIf],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule,NgIf,NgClass ],
 })
 export class NavbarComponent {
   nom: string = '';
   prenom: string = '';
   role: string = '';
   isMobile: boolean = false;
+  navbarClass = 'custom-navbar'; // valeur par défaut
 
+  private checkNavbarVisibility() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const jwtHelper = new JwtHelperService();
+      if (!jwtHelper.isTokenExpired(token)) {
+        const decodedToken = jwtHelper.decodeToken(token);
+        this.nom = decodedToken.nom || '';
+        this.prenom = decodedToken.prenom || '';
+        this.role = decodedToken.role?.replace('ROLE_', '') || 'Utilisateur';
+  
+        // 🎨 Mise à jour de la couleur de la navbar
+        this.navbarClass =
+          this.role === 'GESTIONNAIRE_STOCK' ? 'custom-navbar white-navbar' : 'custom-navbar';
+      }
+    }
+  }
   @Output() toggleSidebar = new EventEmitter<void>();
 
   constructor(private router: Router) {
@@ -36,19 +53,6 @@ export class NavbarComponent {
   @HostListener('window:resize', [])
   updateScreenSize() {
     this.isMobile = window.innerWidth <= 768;
-  }
-
-  private checkNavbarVisibility() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const jwtHelper = new JwtHelperService();
-      if (!jwtHelper.isTokenExpired(token)) {
-        const decodedToken = jwtHelper.decodeToken(token);
-        this.nom = decodedToken.nom || '';
-        this.prenom = decodedToken.prenom || '';
-        this.role = decodedToken.role?.replace('ROLE_', '') || 'Utilisateur';
-      }
-    }
   }
 
   getRoleLabel(): string {

@@ -42,8 +42,8 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
                                 "default-src 'self'; " +
                                         "font-src 'self' https://fonts.gstatic.com; " +
-                                        "style-src 'self' https://fonts.googleapis.com 'unsafe-inline';"
-                        ))
+                                        "style-src 'self' https://fonts.googleapis.com 'unsafe-inline';" +
+                                        "img-src 'self' data:;"  ))
                 )
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfig = new CorsConfiguration();
@@ -60,6 +60,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/parcs").permitAll()
                         .requestMatchers("/api/utilisateurs/marques-accessibles").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/photos-by-name/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

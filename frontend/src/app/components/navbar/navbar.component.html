@@ -1,7 +1,19 @@
-<mat-toolbar class="custom-navbar">
+<mat-toolbar [ngClass]="navbarClass">
   <!-- 🔗 Logo SmartFleet (accueil) -->
   <button mat-button class="logo-button" (click)="redirectToHome()">
-    <img src="assets/logo.jpg" alt="SmartFleet Logo" class="navbar-logo" />
+    <img
+      *ngIf="role === 'GESTIONNAIRE_STOCK'; else logoNormal"
+      src="assets/logoSmart.jpg"
+      alt="Logo Bleu Gestionnaire Stock"
+      class="navbar-logo"
+    />
+    <ng-template #logoNormal>
+      <img
+        src="assets/logo.jpg"
+        alt="Logo par défaut"
+        class="navbar-logo"
+      />
+    </ng-template>
   </button>
 
   <span class="spacer"></span>

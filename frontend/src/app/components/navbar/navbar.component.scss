@@ -1,6 +1,6 @@
 .custom-navbar {
   background-color: #003366;
-  color: #3D3D3D;
+  color: white;
   display: flex;
   align-items: center;
   height: 64px;
@@ -8,7 +8,28 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
+.white-navbar {
+  background-color: white !important;
+  color: #000000;
 
+  .logout-button {
+    background-color: #F4A300;
+    color: white;
+  }
+
+  .logout-button:hover {
+    background-color: #F4A300;
+    color: white;
+  }
+
+  .user-menu-icon {
+    color: #F4A300;
+  }
+
+  .role {
+    color: #F4A300;
+  }
+}
 .logo-button {
   padding: 0;
   margin: 0;
@@ -33,7 +54,7 @@
 .user-info {
   font-size: 1rem;
   font-weight: bold;
-  color: #000000;
+  color: white;
   display: flex;
   align-items: center;
 }
@@ -41,13 +62,13 @@
 .role {
   margin-left: 4px;
   margin-right: 5px;
-  color: #000000;
+  color: white;
   font-weight: bold;
 }
 
 .logout-button {
   background-color: #C4C4C4;
-  color: #000000;
+  color: white;
   border-radius: 8px;
   padding: 8px 15px;
 }

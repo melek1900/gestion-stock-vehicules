@@ -58,8 +58,15 @@ export class PopupAvarieComponent {
     }
     this.avaries = data.vehicule.avaries || [];
     this.photos = this.avaries.map(() => []);
-    this.photoPreviews = this.avaries.map(() => []);
-    
+    this.photoPreviews = this.avaries.map(a => a.photoUrls || []);
+    const baseUrl = 'http://192.168.1.121:8080';
+    console.log("📸 URLs générées :", this.photoPreviews);
+
+    this.photoPreviews = this.avaries.map(avarie =>
+      (avarie.photoUrls || []).map((fileName: string) =>
+        `${baseUrl}/api/photos-by-name/${fileName}`
+      )
+    );
   }
   verifierFormulaire() {
     this.peutReparer = this.commentaireExpert.trim().length > 0;

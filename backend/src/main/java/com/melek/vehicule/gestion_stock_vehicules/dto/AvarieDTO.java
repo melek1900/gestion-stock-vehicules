@@ -9,19 +9,27 @@ public class AvarieDTO {
     private Long id;
     private String type;
     private String commentaire;
-    private List<Long> photoIds;
+    private List<String> photoUrls;
 
 
     public AvarieDTO(Avarie avarie) {
         this.id = avarie.getId();
         this.type = avarie.getType();
         this.commentaire = avarie.getCommentaire();
-        this.photoIds = avarie.getPhotos().stream()
-                .map(Photo::getId)
+        this.photoUrls = avarie.getPhotos().stream()
+                .map(photo -> "/api/photos-by-name/" + photo.getFileName())
                 .toList();
     }
 
     // Getters et Setters
+
+    public List<String> getPhotoUrls() {
+        return photoUrls;
+    }
+
+    public void setPhotoUrls(List<String> photoUrls) {
+        this.photoUrls = photoUrls;
+    }
 
     public Long getId() {
         return id;
@@ -47,11 +55,5 @@ public class AvarieDTO {
         this.commentaire = commentaire;
     }
 
-    public List<Long> getPhotoIds() {
-        return photoIds;
-    }
 
-    public void setPhotoIds(List<Long> photoIds) {
-        this.photoIds = photoIds;
-    }
 }
