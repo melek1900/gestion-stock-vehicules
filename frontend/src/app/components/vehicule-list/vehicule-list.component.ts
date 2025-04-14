@@ -153,7 +153,7 @@ export class VehiculeListComponent implements OnInit {
   
   
   recupererParcsDepuisAPI() {
-    this.http.get<any[]>('http://localhost:8080/api/utilisateurs/parcs-accessibles')
+    this.http.get<any[]>('http://192.168.1.121:8080/api/utilisateurs/parcs-accessibles')
       .subscribe({
         next: (parcs) => {
           this.parcsAccessibles = parcs;
@@ -241,7 +241,7 @@ export class VehiculeListComponent implements OnInit {
     }
   
     // Fallback si erreur
-    this.http.get<any[]>('http://localhost:8080/api/utilisateurs/parcs-accessibles').subscribe({
+    this.http.get<any[]>('http://192.168.1.121:8080/api/utilisateurs/parcs-accessibles').subscribe({
       next: (parcs) => {
         this.parcsAccessibles = parcs;
         console.log("✅ Parcs accessibles via API :", parcs);
@@ -301,7 +301,7 @@ async chargerVehicules() {
 
   // 🚀 Charger les véhicules autorisés (selon les parcs accessibles)
   const vehiculesAutorisés = await this.http
-    .get<Vehicule[]>('http://localhost:8080/api/vehicules', { headers })
+    .get<Vehicule[]>('http://192.168.1.121:8080/api/vehicules', { headers })
     .toPromise();
 
   console.log("✅ Véhicules autorisés récupérés :", vehiculesAutorisés?.length);
@@ -312,7 +312,7 @@ async chargerVehicules() {
   if (this.selectedParcs.includes('TRANSFERT')) {
     try {
       const data = await this.http
-        .get<Vehicule[]>('http://localhost:8080/api/vehicules/parc/transfert', { headers })
+        .get<Vehicule[]>('http://192.168.1.121:8080/api/vehicules/parc/transfert', { headers })
         .toPromise();
 
       vehiculesTransfert = data || [];
@@ -323,13 +323,7 @@ async chargerVehicules() {
   }
 
   const allVehicules = [...(vehiculesAutorisés || []), ...vehiculesTransfert];
-  console.log("🔍 Total véhicules fusionnés (autorisés + TRANSFERT) :", allVehicules.length);
-  console.table(allVehicules.map(v => ({
-    id: v.id,
-    parcId: v.parcId,
-    shortDescription: v.shortDescription,
-    numeroChassis: v.numeroChassis
-  })));
+
 
   const mappingParcNom: Record<number, string> = {
     1: 'MEGRINE',
@@ -341,7 +335,7 @@ async chargerVehicules() {
   const vehiculesAvecUtilisation = await Promise.all(
     allVehicules.map(async (v) => {
       const enUtilisation = await this.http.get<boolean>(
-        `http://localhost:8080/api/ordres-mission/vehicule/${v.id}/en-utilisation`,
+        `http://192.168.1.121:8080/api/ordres-mission/vehicule/${v.id}/en-utilisation`,
         { headers }
       ).toPromise().catch(() => false);
 
@@ -359,7 +353,6 @@ async chargerVehicules() {
   this.vehicules = vehiculesAvecUtilisation;
   this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription.toUpperCase()))];
 
-  console.log("🧪 Marques disponibles calculées :", this.marquesDisponibles);
 
   this.filtrerVehicules(); // 🧠 Applique le filtrage (marques, parcs, statut, etc.)
   this.cdr.detectChanges();
@@ -456,7 +449,7 @@ toggleParcSelection(parc: string) {
 
     console.log('📡 Envoi de la requête DELETE pour ID :', id);
 
-    this.http.delete(`http://localhost:8080/api/vehicules/${id}`).subscribe({
+    this.http.delete(`http://192.168.1.121:8080/api/vehicules/${id}`).subscribe({
         next: () => {
             console.log('✅ Véhicule supprimé avec succès !');
             this.chargerVehicules();
@@ -471,7 +464,7 @@ ouvrirPopup(vehicule: any) {
     width: '500px',
     data: {
       vehicule,
-      isReadonly: true // ✅ mode lecture seule
+      isReadonly: true //mode lecture seule
     }
   });
 
@@ -488,7 +481,7 @@ ouvrirPopup(vehicule: any) {
 
 
   deleteVehicule(id: number) {
-    this.http.delete(`http://localhost:8080/api/vehicules/${id}`).subscribe(() => {
+    this.http.delete(`http://192.168.1.121:8080/api/vehicules/${id}`).subscribe(() => {
       this.chargerVehicules();
     });
   }
@@ -532,7 +525,7 @@ ouvrirPopup(vehicule: any) {
 
     console.log('📡 Envoi de la requête PUT pour la modif :', vehicule.id);
 
-    this.http.put(`http://localhost:8080/api/vehicules/${vehicule.id}`, formData, { headers }).subscribe({
+    this.http.put(`http://192.168.1.121:8080/api/vehicules/${vehicule.id}`, formData, { headers }).subscribe({
         next: () => {
             console.log('✅ Véhicule mis à jour avec succès !');
             this.chargerVehicules();
@@ -551,7 +544,7 @@ receptionnerTransfert(vehiculeId: number) {
     return;
   }
 
-  this.http.put<{ message: string }>(`http://localhost:8080/api/transferts/receptionner/${vehiculeId}`, {}).subscribe({
+  this.http.put<{ message: string }>(`http://192.168.1.121:8080/api/transferts/receptionner/${vehiculeId}`, {}).subscribe({
     next: (response) => {
       console.log("✅ Réponse API :", response);
 
@@ -578,7 +571,7 @@ initierTransfert() {
   }
 
   const vehiculeIds = this.selection.selected.map(v => v.id);
-  this.http.post<{ message: string }>('http://localhost:8080/api/transferts/initier', {
+  this.http.post<{ message: string }>('http://192.168.1.121:8080/api/transferts/initier', {
     vehiculeIds,
     parcDestinationId: 2
   }).subscribe(response => {

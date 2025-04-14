@@ -23,7 +23,7 @@ export class DemandesExpertiseComponent implements OnInit {
   }
 
   chargerDemandes() {
-    this.http.get<any[]>('http://localhost:8080/api/expertises').subscribe({
+    this.http.get<any[]>('http://192.168.1.121:8080/api/expertises').subscribe({
       next: (data) => {
         console.log("📡 Demandes d'expertise reçues :", data);
         this.demandes = data;
@@ -36,7 +36,7 @@ export class DemandesExpertiseComponent implements OnInit {
   }
 
   traiterDemande(demandeId: number) {
-    this.http.put(`http://localhost:8080/api/expertises/${demandeId}/traiter`, {}).subscribe({
+    this.http.put(`http://192.168.1.121:8080/api/expertises/${demandeId}/traiter`, {}).subscribe({
       next: () => {
         console.log(`✅ Demande ${demandeId} traitée avec succès`);
         this.snackBar.open("Demande traitée avec succès", "Fermer", { duration: 3000 });

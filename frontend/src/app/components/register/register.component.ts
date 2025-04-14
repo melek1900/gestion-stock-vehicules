@@ -66,7 +66,7 @@ export class RegisterComponent implements OnInit {
 
   }
   chargerMarques() {
-    this.http.get<string[]>('http://localhost:8080/api/utilisateurs/marques-accessibles')
+    this.http.get<string[]>('http://192.168.1.121:8080/api/utilisateurs/marques-accessibles')
       .subscribe({
         next: (data) => {
           this.marquesDisponibles = data;
@@ -80,7 +80,7 @@ export class RegisterComponent implements OnInit {
   
   chargerParcs() {
     this.loadingParcs = true;
-    this.http.get<any[]>('http://localhost:8080/api/parcs')
+    this.http.get<any[]>('http://192.168.1.121:8080/api/parcs')
       .subscribe({
         next: (data) => {
           // ✅ Exclure "TRANSFERT" et "AUPORT" du parc de travail
@@ -110,7 +110,7 @@ export class RegisterComponent implements OnInit {
       formData.prenom = formData.prenom.trim();
       formData.email = formData.email.trim();
 
-      this.http.post('http://localhost:8080/auth/register', formData, { responseType: 'text' })
+      this.http.post('http://192.168.1.121:8080/auth/register', formData, { responseType: 'text' })
       .subscribe({
         next: (response) => {
           console.log('✅ Inscription réussie', response);

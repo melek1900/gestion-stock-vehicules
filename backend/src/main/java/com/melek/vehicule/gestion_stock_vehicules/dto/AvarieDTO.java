@@ -26,7 +26,7 @@ public class AvarieDTO {
                     .collect(Collectors.toList());
 
             this.photoUrls = avarie.getPhotos().stream()
-                    .map(photo -> "http://localhost:8080/photos/" + photo.getId())
+                    .map(photo -> "http://192.168.1.121:8080/photos/" + photo.getId())
                     .collect(Collectors.toList());
         } else {
             this.photoIds = List.of();

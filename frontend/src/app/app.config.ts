@@ -35,6 +35,7 @@ import { EnregistrerAvarieComponent } from './components/enregistrer-avarie/enre
 import { UtilisateurListComponent } from './components/utilisateur-list/utilisateur-list.component';
 import { ReparationMobileComponent } from './components/reparation-mobile/reparation-mobile.component';
 import { MarqueListeComponent } from './components/marque-liste/marque-liste.component';
+import { DashboardStatistiquesComponent } from './components/dashboard-statistiques/dashboard-statistiques.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -65,6 +66,8 @@ const appRoutes: Routes = [
   { path: 'utilisateur-list', component: UtilisateurListComponent},
   { path: 'avarie-list-mobile', component: ReparationMobileComponent},
   { path: 'list-marque', component: MarqueListeComponent},
+  { path: 'dashbord-stats', component: DashboardStatistiquesComponent},
+
 
 
   { path: '**', redirectTo: 'login', pathMatch: 'full' },

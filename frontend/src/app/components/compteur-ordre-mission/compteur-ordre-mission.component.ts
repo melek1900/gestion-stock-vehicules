@@ -54,7 +54,7 @@ export class CompteurOrdreMissionComponent implements OnInit {
   }
 
   chargerCompteur() {
-    this.http.get<any>(`http://localhost:8080/api/compteur-ordre-mission/${this.annee}`).subscribe({
+    this.http.get<any>(`http://192.168.1.121:8080/api/compteur-ordre-mission/${this.annee}`).subscribe({
       next: (data) => {
         this.compteur = data.compteur;
         this.numeroComplet = data.numeroComplet;
@@ -73,7 +73,7 @@ export class CompteurOrdreMissionComponent implements OnInit {
     if (!this.annee || this.nouvelleValeur === null) return;
 
     const params = new HttpParams().set('nouveauCompteur', this.nouvelleValeur.toString());
-    this.http.put<any>(`http://localhost:8080/api/compteur-ordre-mission/${this.annee}`, null, { params }).subscribe({
+    this.http.put<any>(`http://192.168.1.121:8080/api/compteur-ordre-mission/${this.annee}`, null, { params }).subscribe({
       next: (data) => {
         this.message = `✅ Compteur mis à jour : ${data.numeroComplet}`;
         this.compteur = data.compteur;
@@ -93,7 +93,7 @@ export class CompteurOrdreMissionComponent implements OnInit {
       .set('annee', this.nouvelleAnnee.toString())
       .set('compteur', this.valeurInitiale.toString());
 
-    this.http.post<any>(`http://localhost:8080/api/compteur-ordre-mission/initialiser`, null, { params }).subscribe({
+    this.http.post<any>(`http://192.168.1.121:8080/api/compteur-ordre-mission/initialiser`, null, { params }).subscribe({
       next: (data) => {
         this.message = `✅ Compteur initialisé : ${data.numeroComplet}`;
         this.nouvelleAnnee = null;

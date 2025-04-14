@@ -7,7 +7,15 @@
           <span>Tableau de bord</span>
         </button>
       </li>
-  
+      
+      
+      <li *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_ADMINISTRATEUR' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION'" >
+        <a [routerLink]="['/dashbord-stats']" class="submenu-link">
+          <mat-icon>insights</mat-icon>
+          <span>Copilot</span>
+        </a>
+      </li>
+
       <!-- Stock véhicule -->
       <li *ngIf="userRole !== 'ROLE_ADMINISTRATEUR'">
         <button class="menu-item" (click)="toggleStockMenu()">
