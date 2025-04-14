@@ -31,6 +31,7 @@ export class PopupVehiculeComponent {
   form: FormGroup;
   isReadonly: boolean = false;
   photosPreviews: { [key: number]: string[] } = {};
+  imageAgrandie: string | null = null;
 
   @ViewChildren('fileInput') fileInputs!: QueryList<ElementRef>;
 
@@ -59,19 +60,21 @@ export class PopupVehiculeComponent {
       data.vehicule.avaries.forEach((av: any) => this.ajouterAvarieExistante(av));
     }
   }
-  getPhotoUrl(fileName: string): string {
-    if (!fileName) return '';
-    // Supprime tous les slashes en début de nom de fichier
-    const safeName = fileName.replace(/^\/+/, '');
-    return `http://192.168.1.121:8080/photos/by-name/${encodeURIComponent(safeName)}`;
+  ouvrirImage(photoUrl: string) {
+    this.imageAgrandie = photoUrl;
   }
+  
+  fermerImage() {
+    this.imageAgrandie = null;
+  }
+
   ajouterAvarieExistante(avarie: any) {
     const avariesFormArray = this.form.get('avaries') as FormArray;
     const avarieForm = this.fb.group({
       id: [avarie.id || null],
       type: [{ value: avarie.type, disabled: this.isReadonly }],
       commentaire: [{ value: avarie.commentaire, disabled: this.isReadonly }],
-      photos: [avarie.photos || []]
+      photos: [avarie.photoUrls || []]
     });
 
     avariesFormArray.push(avarieForm);

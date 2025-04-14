@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
 
 @Component({
   selector: 'app-creation-avarie',
@@ -22,13 +21,13 @@ import { ZXingScannerModule } from '@zxing/ngx-scanner';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
-    MatIconModule,
-    ZXingScannerModule
-  ],
+    MatIconModule  ],
   templateUrl: './creation-avarie.component.html',
   styleUrl: './creation-avarie.component.scss'
 })
-export class CreationAvarieComponent {
+export class CreationAvarieComponent  implements AfterViewInit {
+  @ViewChild('chassisInput') chassisInputRef!: ElementRef<HTMLInputElement>;
+
   qrForm: FormGroup;
   scannerStarted = false;
 
@@ -45,6 +44,11 @@ export class CreationAvarieComponent {
 
   
 
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.chassisInputRef?.nativeElement.focus();
+    });
+  }
   receptionnerVehicule() {
     const numeroChassis = this.qrForm.value.numeroChassis;
     if (!numeroChassis) {

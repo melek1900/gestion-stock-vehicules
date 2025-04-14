@@ -19,9 +19,19 @@ public class AvarieDTO {
         this.id = avarie.getId();
         this.type = avarie.getType();
         this.commentaire = avarie.getCommentaire();
-        this.photoIds = avarie.getPhotos() != null
-                ? avarie.getPhotos().stream().map(p -> p.getId()).collect(Collectors.toList())
-                : List.of();
+
+        if (avarie.getPhotos() != null) {
+            this.photoIds = avarie.getPhotos().stream()
+                    .map(Photo::getId)
+                    .collect(Collectors.toList());
+
+            this.photoUrls = avarie.getPhotos().stream()
+                    .map(photo -> "http://localhost:8080/photos/" + photo.getId())
+                    .collect(Collectors.toList());
+        } else {
+            this.photoIds = List.of();
+            this.photoUrls = List.of();
+        }
     }
 
     public List<Long> getPhotoIds() {

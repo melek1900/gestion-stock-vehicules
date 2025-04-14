@@ -41,8 +41,10 @@ export class EnregistrerAvarieComponent {
   isScanning = false;
   qrResult: string = '';
   scannerFormats = [BarcodeFormat.QR_CODE];
-  avaries!: FormArray;  // ✅ Déclaration correcte de avaries
-  photoPreviews: string[][] = []; // ✅ Liste des photos prévisualisées
+  avaries!: FormArray;
+  photoPreviews: string[][] = [];
+  photosParAvarie: { [key: string]: File[] } = {};
+
   isCameraOpen = false;
   activeIndex: number | null = null;
   isCapturing = false;
@@ -177,7 +179,7 @@ export class EnregistrerAvarieComponent {
       Authorization: `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.post(`http://192.168.1.121:8080/api/vehicules/${numeroChassis}/avarie`, formData, { headers }).subscribe({
+    this.http.post(`http://localhost:8080/api/vehicules/${numeroChassis}/avarie`, formData, { headers }).subscribe({
       next: () => {
         this.snackBar.open("✅ Avarie enregistrée avec succès", "Fermer", { duration: 3000 });
         if (index === this.avariesConfirmees.length - 1) {
@@ -265,7 +267,7 @@ export class EnregistrerAvarieComponent {
     this.verifierVehicule(resultString);
   }
   verifierVehicule(numeroChassis: string) {
-    this.http.get<Vehicule>(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}`)
+    this.http.get<Vehicule>(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}`)
       .subscribe({
         next: (vehicule) => {
           console.log("📌 Véhicule trouvé :", vehicule);
@@ -290,22 +292,24 @@ export class EnregistrerAvarieComponent {
   }
   confirmerAvarie(index: number) {
     const avarie = this.avaries.at(index).value;
-
-    // 📌 Ajouter la liste des photos à l'avarie confirmée
-    const photos = this.photoPreviews[index] || [];
-
+    const key = `av${Date.now()}_${index}`;
+  
+    const photos = this.avaries.at(index).get('photos') as FormArray;
+    const files: File[] = photos.controls.map(c => c.value);
+  
+    this.photosParAvarie[key] = files;
+  
     this.avariesConfirmees.push({
-        type: avarie.type,
-        commentaire: avarie.commentaire,
-        photos: [...photos] // Ajout des photos associées
+      type: avarie.type,
+      commentaire: avarie.commentaire,
+      key,
+      photos: this.photoPreviews[index] || []
     });
-
-    // 🔥 Supprimer l'avarie de la liste en cours
+  
     this.avaries.removeAt(index);
     this.photoPreviews.splice(index, 1);
-
-    this.snackBar.open("✅ Avarie confirmée avec succès", "Fermer", { duration: 3000 });
-}
+  }
+  
   supprimerAvarieConfirmee(index: number) {
     this.avariesConfirmees.splice(index, 1);
     this.snackBar.open("❌ Avarie supprimée", "Fermer", { duration: 3000 });
@@ -455,7 +459,52 @@ export class EnregistrerAvarieComponent {
     this.isUsingFrontCamera = !this.isUsingFrontCamera;
     console.log("🔄 Caméra changée");
   }
-
+  enregistrerAvaries() {
+    const numeroChassis = this.form.get('numeroChassis')?.value;
+    if (!numeroChassis) {
+      this.snackBar.open("🚨 Numéro de châssis manquant", "Fermer", { duration: 3000 });
+      return;
+    }
+  
+    if (!this.avariesConfirmees.length) {
+      this.snackBar.open("🚨 Aucune avarie confirmée", "Fermer", { duration: 3000 });
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('numeroChassis', numeroChassis);
+    formData.append('parcId', this.parcId?.toString() || '1');
+  
+    const avariesPayload = this.avariesConfirmees.map((av, index) => ({
+      type: av.type,
+      commentaire: av.commentaire,
+      key: av.key || `av${index}`
+    }));
+  
+    formData.append('avarie', JSON.stringify(avariesPayload));
+  
+    avariesPayload.forEach(avarie => {
+      const photos = this.photosParAvarie[avarie.key] || [];
+      photos.forEach((file: File, i: number) => {
+        formData.append('photos', file, `photo-${avarie.key}-${i}.png`);
+      });
+    });
+  
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    });
+  
+    this.http.post(`http://localhost:8080/api/vehicules/reception`, formData, { headers }).subscribe({
+      next: () => {
+        this.snackBar.open("✅ Véhicule + avaries enregistrés avec succès !", "Fermer", { duration: 3000 });
+        this.router.navigate(['/creer-avarie']);
+      },
+      error: (err) => {
+        console.error("❌ Erreur enregistrement :", err);
+        this.snackBar.open("❌ Échec de l'enregistrement", "Fermer", { duration: 3000 });
+      }
+    });
+  }
   enregistrerVehicule() {
     if (this.form.invalid) {
       this.snackBar.open('🚨 Formulaire invalide', 'Fermer', { duration: 3000 });
@@ -499,7 +548,7 @@ export class EnregistrerAvarieComponent {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.post(`http://192.168.1.121:8080/api/vehicules/reception`, formData, { headers }).subscribe({
+    this.http.post(`http://localhost:8080/api/vehicules/reception`, formData, { headers }).subscribe({
       next: () => {
         this.snackBar.open("🚗 Véhicule réceptionné avec succès !", "Fermer", { duration: 3000 });
   
@@ -520,11 +569,11 @@ export class EnregistrerAvarieComponent {
   }
   
   getPhotoUrl(photoId: number): string {
-    return `http://192.168.1.121:8080/photos/${photoId}`;
+    return `http://localhost:8080/photos/${photoId}`;
   }
 /** ✅ Rafraîchir les données du véhicule après mise à jour */
 refreshVehiculeData(numeroChassis: string) {
-  this.http.get<Vehicule>(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}?nocache=${new Date().getTime()}`)
+  this.http.get<Vehicule>(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}?nocache=${new Date().getTime()}`)
     .subscribe({
       next: (updatedVehicule) => {
         console.log("✅ Véhicule mis à jour récupéré :", updatedVehicule);
@@ -607,7 +656,7 @@ getParcIdDepuisUrl(): void {
       })
     };
   
-    this.http.post(`http://192.168.1.121:8080/api/avaries`, avarieData, httpOptions).subscribe({
+    this.http.post(`http://localhost:8080/api/avaries`, avarieData, httpOptions).subscribe({
       next: (avarieEnregistree: any) => {
         console.log("✅ Avarie enregistrée :", avarieEnregistree);
         
@@ -624,53 +673,7 @@ getParcIdDepuisUrl(): void {
     });
   }
 
-  enregistrerAvaries() {
-    const numeroChassis = this.form.get('numeroChassis')?.value;
-    if (!numeroChassis) {
-      this.snackBar.open("🚨 Numéro de châssis manquant", "Fermer", { duration: 3000 });
-      return;
-    }
   
-    if (!this.avariesConfirmees.length) {
-      this.snackBar.open("🚨 Aucune avarie confirmée", "Fermer", { duration: 3000 });
-      return;
-    }
-  
-    let avariesEnvoyees = 0;
-  
-    this.avariesConfirmees.forEach((avarie, index) => {
-      const formData = new FormData();
-      const avarieSansPhotos = { ...avarie };
-      delete avarieSansPhotos.photos;
-  
-      formData.append('avarie', JSON.stringify(avarieSansPhotos));
-  
-      if (avarie.photos && avarie.photos.length) {
-        avarie.photos.forEach((photoBase64: string, i: number) => {
-          const blob = this.dataURLtoBlob(photoBase64);
-          formData.append('photos', blob, `photo_${index}_${i}.png`);
-        });
-      }
-  
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      });
-  
-      this.http.post(`http://192.168.1.121:8080/api/vehicules/${numeroChassis}/avarie`, formData, { headers }).subscribe({
-        next: () => {
-          avariesEnvoyees++;
-          if (avariesEnvoyees === this.avariesConfirmees.length) {
-            this.snackBar.open("✅ Toutes les avaries ont été enregistrées !", "Fermer", { duration: 3000 });
-            this.router.navigate(['/home']); // ✅ Redirection ici
-          }
-        },
-        error: (err) => {
-          console.error("❌ Erreur envoi avarie :", err);
-          this.snackBar.open("❌ Échec de l'enregistrement d'une avarie", "Fermer", { duration: 3000 });
-        }
-      });
-    });
-  }
   envoyerPhoto(avarieId: number, photoBase64: string, index: number) {
     if (!photoBase64.startsWith("data:image/")) {
       console.error("🚨 Erreur : format de l'image incorrect", photoBase64);
@@ -683,7 +686,7 @@ getParcIdDepuisUrl(): void {
     formData.append('avarieId', avarieId.toString());
   
     console.log(`📡 Envoi de la photo ${index + 1} pour l'avarie ${avarieId}`);
-    this.http.post(`http://192.168.1.121:8080/api/photos`, formData).subscribe({
+    this.http.post(`http://localhost:8080/api/photos`, formData).subscribe({
       next: () => console.log(`✅ Photo ${index + 1} envoyée`),
       error: (error) => console.error(`❌ Erreur lors de l'envoi de la photo ${index + 1} :`, error)
     });

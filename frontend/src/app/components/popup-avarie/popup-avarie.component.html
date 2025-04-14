@@ -1,89 +1,89 @@
 <mat-dialog-content class="popup-container">
-    <h2  style="color: #003366 ;" mat-dialog-title>🛠 Avaries à Réparer</h2>
-  
-    <!-- ✅ Liste des avaries existantes -->
-    <div *ngIf="avaries.length > 0">
-      <h3  style="color: #003366 ;">📋 Avaries détectées</h3>
-      <div *ngFor="let avarie of avaries; let i = index" class="avarie-container">
-  
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label  style="color: #003366 ;">Type</mat-label>
-          <input style="color: #fab940" matInput [value]="avarie.type" disabled />
-        </mat-form-field>
-  
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label  style="color: #003366 ;">Commentaire</mat-label>
-          <textarea style="color: #fab940" matInput [value]="avarie.commentaire" disabled></textarea>
-        </mat-form-field>
-  
-        <!-- 📷 Affichage des photos existantes -->
-        <div class="photo-preview" *ngIf="photoPreviews?.[i]">
-            <h4  style="color: #003366 ;">📷 Photos</h4>
-            <div class="photo-grid">
-              
-              <!-- ✅ Affichage de squelette pendant le chargement -->
-              <div class="photo-item loading" *ngIf="isLoadingPhotos"></div>
-          
-              <!-- ✅ Affichage réel des images -->
-              <div *ngFor="let photo of photoPreviews[i]; let j = index" class="photo-item">
-                <img [src]="photo" alt="Photo avarie" (click)="agrandirImage(photo)" />
-              
-                <button *ngIf="isExpert"
-                        mat-icon-button
-                        color="warn"
-                        class="delete-button"
-                        (click)="supprimerPhoto(i, j)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-          
+  <h2 mat-dialog-title style="color: #003366;">
+    🛠 Avaries à Réparer
+  </h2>
+
+  <form [formGroup]="form">
+    <div *ngIf="avariesForm.length > 0" style="color: #003366;">
+      <h3>📋 Avaries détectées</h3>
+
+      <div *ngFor="let avarie of avariesForm.controls; let i = index" class="avarie-section">
+        <mat-card>
+
+          <mat-form-field appearance="fill">
+            <mat-label style="color: #003366;">Type d'avarie</mat-label>
+            <input style="color: #fab940" matInput [formControl]="getFormControl(avarie, 'type')" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label style="color: #003366;">Commentaire</mat-label>
+            <textarea style="color: #fab940" matInput [formControl]="getFormControl(avarie, 'commentaire')"></textarea>
+          </mat-form-field>
+
+          <div class="photo-preview" *ngIf="getFormControl(avarie, 'photos')?.value?.length > 0">
+            <h4 style="color: #003366;">📷 Photos</h4>
+            <div class="preview-image-container">
+              <img
+                *ngFor="let photoUrl of getFormControl(avarie, 'photos').value"
+                [src]="photoUrl"
+                alt="Photo de l'avarie"
+                class="preview-image"
+                (click)="ouvrirImage(photoUrl)"
+              />
             </div>
           </div>
-          <div class="photo-empty" *ngIf="!photoPreviews?.[i]?.length">
+
+          <div class="photo-empty" *ngIf="!getFormControl(avarie, 'photos')?.value?.length">
             <mat-icon color="disabled">image_not_supported</mat-icon>
             <span style="color: #fab940">Aucune photo disponible</span>
           </div>
-        <!-- 📂 Ajout de photos depuis un fichier -->
-        <div class="add-photo-btn" *ngIf="isExpert">
-          <input type="file" hidden #fileInput (change)="ajouterPhoto($event, i)" accept="image/*">
-          <button mat-stroked-button color="primary" (click)="fileInput.click()">📂 Depuis l'Appareil</button>
-          <button mat-stroked-button color="accent" (click)="openCamera(i)">📷 Ouvrir la Caméra</button>
-        </div>
-  
-        <!-- ✅ Commentaire expert -->
-        <mat-form-field *ngIf="isExpert" appearance="fill" class="full-width">
-          <mat-label  style="color: #003366 ;">Commentaire de l'expert</mat-label>
-          <textarea matInput [(ngModel)]="commentaireExpert" (ngModelChange)="verifierFormulaire()"></textarea>
-        </mat-form-field>
+
+          <!-- Ajout photo expert -->
+          <div class="add-photo-btn" *ngIf="isExpert">
+            <input type="file" hidden #fileInput (change)="ajouterPhoto($event, i)" accept="image/*">
+            <button mat-stroked-button color="primary" (click)="fileInput.click()">📂 Depuis l'appareil</button>
+            <button mat-stroked-button color="accent" (click)="openCamera(i)">📷 Ouvrir la caméra</button>
+          </div>
+
+          <!-- Commentaire expert -->
+          <mat-form-field *ngIf="isExpert" appearance="fill" class="full-width">
+            <mat-label style="color: #003366;">Commentaire de l'expert</mat-label>
+            <textarea
+              matInput
+              formControlName="commentaireExpert"
+              (input)="verifierFormulaire()">
+            </textarea>
+          </mat-form-field>
+        </mat-card>
       </div>
     </div>
-  
-    <!-- ✅ Actions -->
-    <mat-dialog-actions>
-      <button *ngIf="isExpert" mat-raised-button color="primary" [disabled]="!peutReparer" (click)="reparerVehicule()">
-        ✅ Réparer
-      </button>
-      <button mat-button (click)="dialogRef.close()">❌ Annuler</button>
-    </mat-dialog-actions>
-  
-    <!-- ✅ Agrandissement de l'image sélectionnée -->
-    <div *ngIf="imageAgrandie" class="image-modal" (click)="fermerImage()">
-      <img [src]="imageAgrandie" />
-      <button mat-icon-button (click)="fermerImage()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-  
-    <!-- ✅ Modal de la caméra -->
-    <div *ngIf="isCameraOpen" class="camera-modal">
-      <div class="camera-content">
-        <video #videoElement autoplay></video>
-        <div class="camera-buttons">
-          <button mat-button (click)="capturePhoto(activeIndex || 0)">📸 Capturer</button>
-          <button mat-button color="warn" (click)="closeCamera()">❌ Fermer</button>
-          <button mat-button color="primary" (click)="toggleCamera(activeIndex || 0)">🔄 Changer Caméra</button>
-        </div>
+  </form>
+
+  <!-- Boutons actions -->
+  <mat-dialog-actions>
+    <button *ngIf="isExpert" mat-raised-button color="primary" [disabled]="!peutReparer" (click)="reparerVehicule()">
+      ✅ Réparer
+    </button>
+    <button mat-button (click)="dialogRef.close()">❌ Annuler</button>
+  </mat-dialog-actions>
+
+  <!-- Agrandissement image -->
+  <div *ngIf="imageAgrandie" class="image-modal" (click)="fermerImage()">
+    <img [src]="imageAgrandie" />
+    <button mat-icon-button class="close-button" (click)="fermerImage()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Caméra -->
+  <div *ngIf="isCameraOpen" class="camera-modal">
+    <div class="camera-content">
+      <video #videoElement autoplay></video>
+      <div class="camera-buttons">
+        <button mat-button (click)="capturePhoto(activeIndex || 0)">📸 Capturer</button>
+        <button mat-button color="warn" (click)="closeCamera()">❌ Fermer</button>
+        <button mat-button color="primary" (click)="toggleCamera(activeIndex || 0)">🔄 Changer caméra</button>
       </div>
     </div>
-  </mat-dialog-content>
-  
+  </div>
+</mat-dialog-content>

@@ -44,13 +44,24 @@
             <textarea style="color: #fab940"  matInput [formControl]="getFormControl(avarie, 'commentaire')"></textarea>
           </mat-form-field>
 
-          <div class="photo-preview" *ngIf="photosPreviews[i] && photosPreviews[i].length > 0">
-            <h4 style="color: #003366 ;">Photos</h4>
-            <img *ngFor="let photo of photosPreviews[i]" 
-            [src]="getPhotoUrl(photo)" 
-            alt="photo" 
-            class="preview-image" />
-              </div>
+          <div class="photo-preview" *ngIf="getFormControl(avarie, 'photos')?.value?.length > 0">
+            <h4>Photos</h4>
+            <div class="preview-image-container">
+              <img
+                *ngFor="let photoUrl of getFormControl(avarie, 'photos').value"
+                [src]="photoUrl"
+                alt="Photo de l'avarie"
+                class="preview-image"
+                (click)="ouvrirImage(photoUrl)"
+              />
+            </div>
+          </div>
+          
+          <!-- ✅ Modal image agrandie -->
+          <div class="image-modal" *ngIf="imageAgrandie" (click)="fermerImage()">
+            <img [src]="imageAgrandie" alt="Image agrandie">
+            <button (click)="fermerImage()">✖</button>
+          </div>
         </mat-card>
       </div>
     </div>

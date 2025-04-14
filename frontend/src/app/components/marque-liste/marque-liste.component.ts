@@ -41,7 +41,7 @@ export class MarqueListeComponent implements OnInit {
   }
 
   chargerMarques() {
-    this.http.get<any[]>('http://192.168.1.121:8080/api/marques').subscribe(data => {
+    this.http.get<any[]>('http://localhost:8080/api/marques').subscribe(data => {
       this.marques = data;
       this.filtrerMarques();
     });
@@ -64,7 +64,7 @@ export class MarqueListeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === 'add') {
-        this.http.post('http://192.168.1.121:8080/api/marques', result.data).subscribe(() => this.chargerMarques());
+        this.http.post('http://localhost:8080/api/marques', result.data).subscribe(() => this.chargerMarques());
       }
     });
   }
@@ -76,7 +76,7 @@ export class MarqueListeComponent implements OnInit {
   supprimerMarque(id: number, nom: string) {
     const confirmation = confirm(`Voulez-vous vraiment supprimer la marque "${nom}" ?`);
     if (confirmation) {
-      this.http.delete(`http://192.168.1.121:8080/api/marques/${id}`).subscribe(() => {
+      this.http.delete(`http://localhost:8080/api/marques/${id}`).subscribe(() => {
         this.chargerMarques();
       });
     }
