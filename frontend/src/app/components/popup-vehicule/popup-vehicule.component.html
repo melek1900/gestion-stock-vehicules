@@ -6,27 +6,27 @@
   <form [formGroup]="form">
     <mat-form-field appearance="fill">
       <mat-label style="color: #003366 ;">Marque</mat-label>
-      <input style="color: #fab940" matInput formControlName="shortDescription" />
+      <input style="color: #ee8610" matInput formControlName="shortDescription" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label style="color: #003366 ;">Modèle</mat-label>
-      <input style="color: #fab940"  matInput formControlName="modele" />
+      <input style="color: #ee8610"  matInput formControlName="modele" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label style="color: #003366 ;">Numéro de Châssis</mat-label>
-      <input style="color: #fab940"  matInput formControlName="numeroChassis" />
+      <input style="color: #ee8610"  matInput formControlName="numeroChassis" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label style="color: #003366 ;">Couleur</mat-label>
-      <input style="color: #fab940"  matInput formControlName="shortColor" />
+      <input style="color: #ee8610"  matInput formControlName="shortColor" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label style="color: #003366 ;">Date de production</mat-label>
-      <input style="color: #fab940"  matInput type="date" formControlName="productionDate"  />
+      <input style="color: #ee8610"  matInput type="date" formControlName="productionDate"  />
     </mat-form-field>
 
     <div *ngIf="avariesForm.length > 0" style="color: #003366 ;">
@@ -36,12 +36,12 @@
         <mat-card>
           <mat-form-field appearance="fill">
             <mat-label style="color: #003366 ;">Type d'avarie</mat-label>
-            <input style="color: #fab940"  matInput [formControl]="getFormControl(avarie, 'type')" />
+            <input style="color: #ee8610"  matInput [formControl]="getFormControl(avarie, 'type')" />
           </mat-form-field>
 
           <mat-form-field appearance="fill">
             <mat-label style="color: #003366 ;">Commentaire</mat-label>
-            <textarea style="color: #fab940"  matInput [formControl]="getFormControl(avarie, 'commentaire')"></textarea>
+            <textarea style="color: #ee8610"  matInput [formControl]="getFormControl(avarie, 'commentaire')"></textarea>
           </mat-form-field>
 
           <div class="photo-preview" *ngIf="getFormControl(avarie, 'photos')?.value?.length > 0">

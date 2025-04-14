@@ -46,7 +46,7 @@ export class VeiculeTransportComponent {
   }
 
   loadVehicules() {
-    this.http.get<any[]>('http://localhost:8080/api/vehicules-transport').subscribe({
+    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules-transport').subscribe({
       next: (data) => {
         this.vehicules = data;
         this.dataSource.data = data;
@@ -65,7 +65,7 @@ export class VeiculeTransportComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.post('http://localhost:8080/api/vehicules-transport', result).subscribe({
+        this.http.post('http://192.168.1.121:8080/api/vehicules-transport', result).subscribe({
           next: () => {
             this.snackBar.open('✅ Véhicule ajouté', 'Fermer', { duration: 3000 });
             this.loadVehicules();
@@ -84,7 +84,7 @@ export class VeiculeTransportComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.put(`http://localhost:8080/api/vehicules-transport/${vehicule.id}`, result).subscribe({
+        this.http.put(`http://192.168.1.121:8080/api/vehicules-transport/${vehicule.id}`, result).subscribe({
           next: () => {
             this.snackBar.open('✅ Véhicule modifié', 'Fermer', { duration: 3000 });
             this.loadVehicules();
@@ -104,7 +104,7 @@ export class VeiculeTransportComponent {
 
   deleteVehicule(id: number) {
     if (confirm('Voulez-vous vraiment supprimer ce véhicule ?')) {
-      this.http.delete(`http://localhost:8080/api/vehicules-transport/${id}`).subscribe({
+      this.http.delete(`http://192.168.1.121:8080/api/vehicules-transport/${id}`).subscribe({
         
         
         next: () => {

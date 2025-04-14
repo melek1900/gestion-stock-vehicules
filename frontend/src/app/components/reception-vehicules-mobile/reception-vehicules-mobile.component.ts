@@ -8,13 +8,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
 import { AutofocusDirective } from '../../../autofocus.directive';
 @Component({
   selector: 'app-reception-vehicules-mobile',
   templateUrl: './reception-vehicules-mobile.component.html',
   styleUrls: ['./reception-vehicules-mobile.component.scss'],
-  imports: [MatCardModule,AutofocusDirective, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule,ReactiveFormsModule,NgIf]
+  imports: [MatCardModule,AutofocusDirective, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule,ReactiveFormsModule]
 })
 export class ReceptionVehiculesMobileComponent {
   qrForm: FormGroup;
@@ -51,7 +50,7 @@ export class ReceptionVehiculesMobileComponent {
     const parcNom = decoded?.parcNom;
   
     // ✅ Vérification d'existence du véhicule
-    this.http.get(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}`).subscribe({
+    this.http.get(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}`).subscribe({
       next: () => {
         // ✅ Véhicule trouvé → on redirige
         this.router.navigate(['/enregistrer-vehicule'], {

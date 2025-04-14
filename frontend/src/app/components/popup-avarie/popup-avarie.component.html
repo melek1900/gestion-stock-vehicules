@@ -12,12 +12,12 @@
 
           <mat-form-field appearance="fill">
             <mat-label style="color: #003366;">Type d'avarie</mat-label>
-            <input style="color: #fab940" matInput [formControl]="getFormControl(avarie, 'type')" />
+            <input style="color: #ee8610" matInput [formControl]="getFormControl(avarie, 'type')" />
           </mat-form-field>
 
           <mat-form-field appearance="fill">
             <mat-label style="color: #003366;">Commentaire</mat-label>
-            <textarea style="color: #fab940" matInput [formControl]="getFormControl(avarie, 'commentaire')"></textarea>
+            <textarea style="color: #ee8610" matInput [formControl]="getFormControl(avarie, 'commentaire')"></textarea>
           </mat-form-field>
 
           <div class="photo-preview" *ngIf="getFormControl(avarie, 'photos')?.value?.length > 0">
@@ -35,7 +35,7 @@
 
           <div class="photo-empty" *ngIf="!getFormControl(avarie, 'photos')?.value?.length">
             <mat-icon color="disabled">image_not_supported</mat-icon>
-            <span style="color: #fab940">Aucune photo disponible</span>
+            <span style="color: #ee8610">Aucune photo disponible</span>
           </div>
 
           <!-- Ajout photo expert -->
