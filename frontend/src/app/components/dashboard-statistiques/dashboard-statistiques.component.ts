@@ -144,7 +144,7 @@ displaySelectedMarques = (): string => {
       return;
     }
   
-    this.http.get<any[]>(`http://192.168.1.121:8080/api/ventes-general/par-genre-par-marque?marques=${selected.join(',')}`, { headers })
+    this.http.get<any[]>(`http://localhost:8080/api/ventes-general/par-genre-par-marque?marques=${selected.join(',')}`, { headers })
       .subscribe(data => {
         const filtered = data.filter(d => selected.includes(d.marque));
         const genres = [...new Set(filtered.map(d => d.genre))];
@@ -203,7 +203,7 @@ displaySelectedMarques = (): string => {
     };
     const colors = this.selectedMarques.map(marque => colorMap[marque] || '#A4B0BE');
   
-    this.http.get<any[]>('http://192.168.1.121:8080/api/ventes-general/par-genre-par-marque?marques=' + this.selectedMarques.join(','), { headers })
+    this.http.get<any[]>('http://localhost:8080/api/ventes-general/par-genre-par-marque?marques=' + this.selectedMarques.join(','), { headers })
       .subscribe(data => {
         const filtered = data.filter(d => this.selectedMarques.includes(d.marque));
         const genres = [...new Set(filtered.map(d => d.genre))];
@@ -449,7 +449,7 @@ displaySelectedMarques = (): string => {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
   
-    this.http.get<any[]>(`http://192.168.1.121:8080/api/ventes/statistiques/par-modele?marque=${this.selectedMarque}`, { headers })
+    this.http.get<any[]>(`http://localhost:8080/api/ventes/statistiques/par-modele?marque=${this.selectedMarque}`, { headers })
       .subscribe(data => {
         if (data.length > 0) {
           this.venteParModelePieChartOptions = {
@@ -479,7 +479,7 @@ displaySelectedMarques = (): string => {
     this.onConcurMarquesChange();
     this.selectedMarquesConcur = [this.ALL_MARK, ...this.marquesConcurDisponibles];
 
-    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules/statistiques/par-parc', { headers })
+    this.http.get<any[]>('http://localhost:8080/api/vehicules/statistiques/par-parc', { headers })
       .subscribe(data => {
         this.stats = data;
         this.totalVehicules = data.reduce((sum, parc) => sum + parc.count, 0);
@@ -497,7 +497,7 @@ displaySelectedMarques = (): string => {
         };
       });
 
-    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules/statistiques/par-marque', { headers })
+    this.http.get<any[]>('http://localhost:8080/api/vehicules/statistiques/par-marque', { headers })
       .subscribe(data => {
         const colorsPerBar = data.map((_, i) => this.parcColors[i % this.parcColors.length]);
 
@@ -516,7 +516,7 @@ displaySelectedMarques = (): string => {
   }
 
   loadStatutVehiculeStats(headers: any) {
-    this.http.get<{ [key: string]: number }>('http://192.168.1.121:8080/api/vehicules/statistiques/par-statut', { headers })
+    this.http.get<{ [key: string]: number }>('http://localhost:8080/api/vehicules/statistiques/par-statut', { headers })
       .subscribe(data => {
         const mapping: Record<string, { label: string; color: string }> = {
           EN_ETAT: { label: 'En état', color: '#4CAF50' },
@@ -536,7 +536,7 @@ displaySelectedMarques = (): string => {
   }
 
   loadOrdreMissionStatuts(headers: any) {
-    this.http.get<{ [key: string]: number }>('http://192.168.1.121:8080/api/ordres-mission/statistiques/statut', { headers })
+    this.http.get<{ [key: string]: number }>('http://localhost:8080/api/ordres-mission/statistiques/statut', { headers })
       .subscribe(data => {
         const couleurs: Record<string, string> = {
           EN_COURS: '#0073A8',
@@ -553,7 +553,7 @@ displaySelectedMarques = (): string => {
   }
 
   loadStockParcParMarque(headers: any) {
-    this.http.get<StockParcParMarque[]>('http://192.168.1.121:8080/api/vehicules/statistiques/stock-parc-par-marque', { headers })
+    this.http.get<StockParcParMarque[]>('http://localhost:8080/api/vehicules/statistiques/stock-parc-par-marque', { headers })
       .subscribe(data => {
         const marques = [...new Set(data.map(d => d.marque))];
         const parcs = [...new Set(data.map(d => d.parc))];

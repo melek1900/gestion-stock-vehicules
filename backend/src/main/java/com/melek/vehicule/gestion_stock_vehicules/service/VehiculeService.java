@@ -1,11 +1,7 @@
 package com.melek.vehicule.gestion_stock_vehicules.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.melek.vehicule.gestion_stock_vehicules.dto.AvarieCreationDTO;
-import com.melek.vehicule.gestion_stock_vehicules.dto.AvarieWithPhotosDTO;
-import com.melek.vehicule.gestion_stock_vehicules.dto.PreparationDTO;
 import com.melek.vehicule.gestion_stock_vehicules.dto.VehiculeDTO;
 import com.melek.vehicule.gestion_stock_vehicules.model.*;
 import com.melek.vehicule.gestion_stock_vehicules.repository.*;
@@ -13,15 +9,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneId;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -308,68 +301,84 @@ public class VehiculeService {
         return vehicule;
     }
 
-    @Transactional
-    public Vehicule receptionnerVehicule(String numeroChassis, Long parcId, String avariesJson, List<MultipartFile> photos) {
+    public Vehicule receptionnerVehicule(String numeroChassis, Long parcId, String avarieJson, List<MultipartFile> photos) {
+
         Vehicule vehicule = vehiculeRepository.findByNumeroChassis(numeroChassis)
-                .orElseThrow(() -> new EntityNotFoundException("🚨 Véhicule non trouvé : " + numeroChassis));
+                .orElseThrow(() -> new IllegalStateException("🚨 Véhicule non trouvé"));
 
-        Parc nouveauParc = parcRepository.findById(parcId)
-                .orElseThrow(() -> new EntityNotFoundException("🚨 Parc introuvable : " + parcId));
+        // Modifier le parc
+        Parc parc = parcRepository.findById(parcId)
+                .orElseThrow(() -> new IllegalStateException("🚨 Parc introuvable"));
+        vehicule.setParc(parc);
 
-        if (vehicule.getParc().getId().equals(parcId)) {
-            throw new IllegalStateException("🚨 Ce véhicule est déjà dans le parc sélectionné");
-        }
+        // Map clé -> Avarie
+        Map<String, Avarie> avarieMap = new HashMap<>();
 
-        vehicule.setParc(nouveauParc);
-
-        boolean hasAvarie = false;
-
-        if (avariesJson != null && !avariesJson.isBlank()) {
+        if (avarieJson != null && !avarieJson.isEmpty()) {
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, String>> avariesList = new ArrayList<>();
             try {
-                // 🔁 Liste d’avaries
-                List<AvarieWithPhotosDTO> avaries = objectMapper.readValue(avariesJson, new TypeReference<>() {});
+                avariesList = mapper.readValue(avarieJson, List.class);
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException("❌ Erreur lors du parsing du JSON des avaries", e);
+            }
+            for (Map<String, String> avarieData : avariesList) {
+                String type = avarieData.get("type");
+                String commentaire = avarieData.get("commentaire");
+                String key = avarieData.get("key");
 
-                for (AvarieWithPhotosDTO dto : avaries) {
-                    Avarie avarie = new Avarie();
-                    avarie.setType(dto.getType());
-                    avarie.setCommentaire(dto.getCommentaire());
-                    avarie.setVehicule(vehicule);
+                Avarie avarie = new Avarie();
+                avarie.setType(type);
+                avarie.setCommentaire(commentaire);
+                avarie.setVehicule(vehicule);
 
-                    List<Photo> photoEntities = new ArrayList<>();
-                    if (photos != null) {
-                        for (MultipartFile file : photos) {
-                            // ✅ on suppose que les fichiers ont un nom sous forme `photo-{key}-...`
-                            if (file.getOriginalFilename() != null && file.getOriginalFilename().contains(dto.getKey())) {
-                                Photo photo = new Photo();
-                                photo.setFileName(file.getOriginalFilename());
-                                photo.setData(file.getBytes());
-                                photo.setAvarie(avarie);
-                                photoEntities.add(photo);
-                            }
-                        }
-                    }
-
-                    avarie.setPhotos(photoEntities);
-                    avarieRepository.save(avarie);
-                    if (!photoEntities.isEmpty()) {
-                        photoRepository.saveAll(photoEntities);
-                    }
-
-                    hasAvarie = true;
-                }
-
-            } catch (IOException e) {
-                throw new RuntimeException("❌ Erreur de parsing JSON des avaries : " + e.getMessage(), e);
+                avarieMap.put(key, avarie);
             }
         }
 
-        vehicule.setStatut(hasAvarie ? StatutVehicule.AVARIE : StatutVehicule.EN_ETAT);
-        vehiculeRepository.saveAndFlush(vehicule);
-        entityManager.clear();
+        // Associer les photos à la bonne avarie via leur nom : photo-av1234-0.png
+        if (photos != null) {
+            for (MultipartFile file : photos) {
+                String originalFileName = file.getOriginalFilename();
+                if (originalFileName == null || !originalFileName.contains("photo-")) continue;
 
-        return vehicule;
+                String key = extractKeyFromFileName(originalFileName);
+
+                Avarie avarie = avarieMap.get(key);
+                if (avarie != null) {
+                    try {
+                        byte[] data = file.getBytes();
+                        Photo photo = new Photo(originalFileName, data, avarie);
+                        avarie.getPhotos().add(photo);
+                    } catch (IOException e) {
+                        throw new IllegalStateException("❌ Erreur lecture fichier photo : " + originalFileName, e);
+                    }
+                }
+            }
+        }
+
+        // Statut en fonction de la présence d'avaries
+        if (!avarieMap.isEmpty()) {
+            vehicule.setStatut(StatutVehicule.AVARIE);
+        } else {
+            vehicule.setStatut(StatutVehicule.EN_ETAT);
+        }
+
+        // Associer les avaries au véhicule
+        List<Avarie> avariesToSave = new ArrayList<>(avarieMap.values());
+        vehicule.setAvaries(avariesToSave);
+
+        // Enregistrer le véhicule avec les nouvelles avaries/photos
+        return vehiculeRepository.save(vehicule);
     }
 
+
+    private String extractKeyFromFileName(String fileName) {
+        // ex: photo-av1679510923_0-0.png → renvoie "av1679510923_0"
+        int start = fileName.indexOf("photo-") + 6;
+        int end = fileName.lastIndexOf("-");
+        return fileName.substring(start, end);
+    }
 
 
     public Vehicule findByNumeroChassis(String numeroChassis) {

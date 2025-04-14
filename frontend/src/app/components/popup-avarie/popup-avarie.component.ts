@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, ElementRef, Inject, ViewChild, QueryList, ViewChildren } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -21,6 +21,7 @@ import { jwtDecode } from 'jwt-decode';
     CommonModule,
     MatCardModule,
     MatButtonModule,
+    ReactiveFormsModule,
     MatFormFieldModule,
     MatIconModule,
     FormsModule,
@@ -36,10 +37,13 @@ export class PopupAvarieComponent {
   isUsingFrontCamera = false;
   commentaireExpert: string = '';
   peutReparer: boolean = false;
-  photoPreviews: string[][] = [];
+  photoPreviews: { [key: number]: string[] } = {};
   photos: File[][] = [];
   isLoadingPhotos = false;
   isExpert: boolean = false;
+  form: FormGroup;
+  isReadonly = true;
+  photosExistantesASupprimer: { [index: number]: string[] } = {};
 
   @ViewChild('videoElement') videoElement!: ElementRef;
   @ViewChildren('fileInput') fileInputs!: QueryList<ElementRef>;
@@ -49,36 +53,99 @@ export class PopupAvarieComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private http: HttpClient,
     private snackBar: MatSnackBar,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private fb: FormBuilder
   ) {
     const token = localStorage.getItem('token');
     if (token) {
       const decoded: any = jwtDecode(token);
       this.isExpert = decoded.role === 'ROLE_EXPERT';
     }
-    this.avaries = data.vehicule.avaries || [];
+  
+    this.form = this.fb.group({
+      avaries: this.fb.array([]),
+      commentaireExpert: ['']  // Ajout du champ expert dans le formGroup si nécessaire
+    });
+  
+    this.avaries = data?.vehicule?.avaries || [];
+  
+    // ✅ Initialisation des photos
     this.photos = this.avaries.map(() => []);
-    this.photoPreviews = this.avaries.map(a => a.photoUrls || []);
-    const baseUrl = 'http://192.168.1.121:8080';
-    console.log("📸 URLs générées :", this.photoPreviews);
+    this.photoPreviews = {};
+  
+    // ✅ Chargement des avaries et photos existantes
+    this.avaries.forEach((av: any, index: number) => {
+      this.ajouterAvarieExistante(av);
+  
+      // 🟢 Si photoUrls présentes, les ajouter dans photoPreviews comme dans popup-vehicule
+      this.photoPreviews[index] = av.photoUrls || [];
+    });
+  }
+  
+  ajouterAvarieExistante(avarie: any) {
+    const avariesFormArray = this.form.get('avaries') as FormArray;
+    const avarieForm = this.fb.group({
+      id: [avarie.id || null],
+      type: [{ value: avarie.type, disabled: this.isReadonly }],
+      commentaire: [{ value: avarie.commentaire, disabled: this.isReadonly }],
+      photos: [avarie.photoUrls || []]
+    });
+    avariesFormArray.push(avarieForm);
+  }
+  get avariesForm(): FormArray {
+    return this.form.get('avaries') as FormArray;
+  }
+  supprimerPhotoExistante(avarieIndex: number, photoIndex: number) {
+    const removedPhoto = this.photoPreviews[avarieIndex][photoIndex];
+  
+    // Ajoute à la liste des photos à supprimer
+    if (!this.photosExistantesASupprimer[avarieIndex]) {
+      this.photosExistantesASupprimer[avarieIndex] = [];
+    }
+    this.photosExistantesASupprimer[avarieIndex].push(removedPhoto);
+  
+    // Supprime visuellement
+    this.photoPreviews[avarieIndex].splice(photoIndex, 1);
+  }
+  getFormControl(group: any, controlName: string) {
+    return group.get(controlName);
+  }
 
-    this.photoPreviews = this.avaries.map(avarie =>
-      (avarie.photoUrls || []).map((fileName: string) =>
-        `${baseUrl}/api/photos-by-name/${fileName}`
-      )
-    );
+  ouvrirImage(photoUrl: string) {
+    this.imageAgrandie = photoUrl;
   }
+  
   verifierFormulaire() {
-    this.peutReparer = this.commentaireExpert.trim().length > 0;
+    const commentaireCtrl = this.form.get('commentaireExpert');
+    this.peutReparer = !!commentaireCtrl?.value?.trim();
   }
-  agrandirImage(url: string) {
-    this.imageAgrandie = url;
-  }
+  
+  
 
   fermerImage() {
     this.imageAgrandie = null;
   }
-
+  toggleCamera(index: number) {
+    this.isUsingFrontCamera = !this.isUsingFrontCamera;
+    console.log("🔄 Caméra changée");
+  
+    // Optionnel : relancer la caméra avec la nouvelle contrainte
+    const constraints = {
+      video: {
+        facingMode: this.isUsingFrontCamera ? 'user' : 'environment'
+      }
+    };
+  
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then(stream => {
+        const video = this.videoElement?.nativeElement;
+        if (video) {
+          video.srcObject = stream;
+          video.play();
+        }
+      })
+      .catch(err => console.error("🚨 Erreur d'accès à la caméra :", err));
+  }
   /** ✅ Ouvrir la caméra */
   openCamera(index: number) {
     this.isCameraOpen = true;
@@ -186,7 +253,7 @@ export class PopupAvarieComponent {
       });
     });
 
-    this.http.put(`http://192.168.1.121:8080/api/vehicules/${this.data.vehicule.numeroChassis}/avaries`, formData, { headers }).subscribe({
+    this.http.put(`http://localhost:8080/api/vehicules/${this.data.vehicule.numeroChassis}/avaries`, formData, { headers }).subscribe({
       next: () => {
         this.snackBar.open('✅ Avarie mise à jour avec succès', 'Fermer', { duration: 3000 });
         this.dialogRef.close({ action: 'update', data: this.avaries });
@@ -197,52 +264,32 @@ export class PopupAvarieComponent {
     });
   }
 
-  /** ✅ Réparer le véhicule */
   reparerVehicule() {
     if (!this.peutReparer) return;
   
+    const commentaire = this.form.get('commentaireExpert')?.value || '';
+  
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-       'Content-Type': 'application/json'
+      'Content-Type': 'application/json'
     });
   
-    const body = { commentaire: this.commentaireExpert };
+    const body = { commentaire };
   
     this.http.patch(
-      `http://192.168.1.121:8080/api/vehicules/${this.data.vehicule.numeroChassis}/reparer`,
+      `http://localhost:8080/api/vehicules/${this.data.vehicule.numeroChassis}/reparer`,
       body,
       { headers }
     ).subscribe({
-      next: (res) => {
-        console.log('✅ Réponse backend reçue :', res);
+      next: () => {
         this.snackBar.open('✅ Véhicule réparé avec succès', 'Fermer', { duration: 3000 });
         this.dialogRef.close({ action: 'reparer' });
       },
-      error: (err) => {
-        console.error("❌ Erreur lors de la réparation :", err);
+      error: () => {
         this.snackBar.open('❌ Erreur lors de la réparation', 'Fermer', { duration: 3000 });
       }
     });
   }
-
-  /** ✅ Convertir une image en base64 vers un Blob */
-  dataURLtoBlob(dataUrl: string): Blob {
-    const arr = dataUrl.split(",");
-    const mime = arr[0].match(/:(.*?);/)![1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-
-    return new Blob([u8arr], { type: mime });
-  }
-
-  /** ✅ Changer de caméra */
-  toggleCamera(index: number) {
-    this.isUsingFrontCamera = !this.isUsingFrontCamera;
-    console.log("🔄 Caméra changée");
-  }
+  
 }
+

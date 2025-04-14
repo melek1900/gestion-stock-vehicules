@@ -43,7 +43,7 @@ export class LoginComponent {
     if (this.form.valid) {
       console.log("📡 Envoi de la requête de connexion...");
   
-      this.http.post<{ token: string }>('http://192.168.1.121:8080/auth/login', this.form.value).subscribe({
+      this.http.post<{ token: string }>('http://localhost:8080/auth/login', this.form.value).subscribe({
         next: (response) => {
           if (!response.token) {
             console.error("🚨 Aucun token reçu !");

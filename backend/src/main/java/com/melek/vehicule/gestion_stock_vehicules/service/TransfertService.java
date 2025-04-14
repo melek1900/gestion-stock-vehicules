@@ -1,7 +1,5 @@
 package com.melek.vehicule.gestion_stock_vehicules.service;
 
-import com.melek.vehicule.gestion_stock_vehicules.dto.PreparationRequest;
-import com.melek.vehicule.gestion_stock_vehicules.dto.TransfertRequest;
 import com.melek.vehicule.gestion_stock_vehicules.model.*;
 import com.melek.vehicule.gestion_stock_vehicules.repository.*;
 import jakarta.persistence.EntityNotFoundException;

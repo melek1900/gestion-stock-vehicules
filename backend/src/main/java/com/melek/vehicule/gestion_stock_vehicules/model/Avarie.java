@@ -14,31 +14,11 @@ public class Avarie {
 
     private String type;
 
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
 
     private String commentaire;
     private String photoUrl;
-    public void setId(Long id) {
-        this.id = id;
-    }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setCommentaire(String commentaire) {
-        this.commentaire = commentaire;
-    }
-
-    public void setVehicule(Vehicule vehicule) {
-        this.vehicule = vehicule;
-    }
 
 
     @ManyToOne
@@ -69,8 +49,27 @@ public class Avarie {
         }
     }
 
-    // ✅ Getters et Setters
-    public Long getId() { return id; }
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setCommentaire(String commentaire) {
+        this.commentaire = commentaire;
+    }
+
+    public void setVehicule(Vehicule vehicule) {
+        this.vehicule = vehicule;
+    }
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }    public Long getId() { return id; }
     public String getType() { return type; }
     public String getCommentaire() { return commentaire; }
     public Vehicule getVehicule() { return vehicule; }

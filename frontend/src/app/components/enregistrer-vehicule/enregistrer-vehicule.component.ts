@@ -12,7 +12,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { NgClass } from '@angular/common';
 
-// 📌 Scanner QR Code (ZXing)
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/browser';
 import { Vehicule } from '../../../services/vehicule.service';
@@ -180,7 +179,7 @@ export class EnregistrerVehiculeComponent {
     this.verifierVehicule(resultString);
   }
   verifierVehicule(numeroChassis: string) {
-    this.http.get<Vehicule>(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}`)
+    this.http.get<Vehicule>(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}`)
       .subscribe({
         next: (vehicule) => {
           console.log("📌 Véhicule trouvé :", vehicule);
@@ -236,7 +235,8 @@ export class EnregistrerVehiculeComponent {
     this.avariesConfirmees.push({
       type: avarie.type,
       commentaire: avarie.commentaire,
-      key: key
+      key: key,
+      photos: this.photoPreviews[index] || []  // 🟢 Ajoute les previews
     });
   
     // 🔥 Nettoyage
@@ -358,7 +358,7 @@ export class EnregistrerVehiculeComponent {
     const token = localStorage.getItem('token');
   
     this.http.post(
-      `http://192.168.1.121:8080/api/vehicules/${vehiculeId}/avaries/photos`,
+      `http://localhost:8080/api/vehicules/${vehiculeId}/avaries/photos`,
       formData,
       {
         headers: new HttpHeaders({
@@ -427,7 +427,7 @@ export class EnregistrerVehiculeComponent {
   
     // ✅ Appel backend
     this.http.post(
-      'http://192.168.1.121:8080/api/vehicules/reception',
+      'http://localhost:8080/api/vehicules/reception',
       formData,
       {
         headers: new HttpHeaders({
@@ -452,11 +452,11 @@ export class EnregistrerVehiculeComponent {
   
   
   getPhotoUrl(photoId: number): string {
-    return `http://192.168.1.121:8080/photos/${photoId}`;
+    return `http://localhost:8080/photos/${photoId}`;
   }
 /** ✅ Rafraîchir les données du véhicule après mise à jour */
 refreshVehiculeData(numeroChassis: string) {
-  this.http.get<Vehicule>(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}?nocache=${new Date().getTime()}`)
+  this.http.get<Vehicule>(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}?nocache=${new Date().getTime()}`)
     .subscribe({
       next: (updatedVehicule) => {
         console.log("✅ Véhicule mis à jour récupéré :", updatedVehicule);
@@ -539,7 +539,7 @@ getParcIdDepuisUrl(): void {
       })
     };
   
-    this.http.post(`http://192.168.1.121:8080/api/avaries`, avarieData, httpOptions).subscribe({
+    this.http.post(`http://localhost:8080/api/avaries`, avarieData, httpOptions).subscribe({
       next: (avarieEnregistree: any) => {
         
         // ✅ Si l'avarie a été enregistrée, envoyer les photos associées
@@ -584,7 +584,7 @@ getParcIdDepuisUrl(): void {
     formData.append('avarieId', avarieId.toString());
   
     console.log(`📡 Envoi de la photo ${index + 1} pour l'avarie ${avarieId}`);
-    this.http.post(`http://192.168.1.121:8080/api/photos`, formData).subscribe({
+    this.http.post(`http://localhost:8080/api/photos`, formData).subscribe({
       next: () => console.log(`✅ Photo ${index + 1} envoyée`),
       error: (error) => console.error(`❌ Erreur lors de l'envoi de la photo ${index + 1} :`, error)
     });

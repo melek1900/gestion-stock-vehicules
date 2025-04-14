@@ -98,21 +98,22 @@
     <h3>Avaries confirmées</h3>
     <div *ngFor="let avarie of avariesConfirmees; let i = index" class="confirmed-avarie">
       <p>🛠️ <b>{{ avarie.type }}</b> - {{ avarie.commentaire }}</p>
-
+    
       <div *ngIf="avarie.photos?.length" class="photo-preview">
         <div *ngFor="let photo of avarie.photos; let j = index" class="photo-preview-item">
           <img [src]="photo" alt="Photo avarie" (click)="ouvrirImage(photo)" />
         </div>
       </div>
-
+    
       <button mat-button color="warn" (click)="supprimerAvarieConfirmee(i)" type="button">
         ❌ Supprimer
       </button>
     </div>
 
     <div class="submit-container">
-      <button mat-raised-button color="primary" type="submit">Valider</button>
-    </div>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!avariesConfirmees.length">
+        Enregistrer les Avaries
+      </button>   </div>
   </form>
 </mat-card>
 

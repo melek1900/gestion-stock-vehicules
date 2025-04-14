@@ -18,9 +18,10 @@
           <mat-form-field class="full-width">
             <mat-label>Numéro de Châssis</mat-label>
             <input matInput
-                   placeholder="Saisir manuellement"
-                   [(ngModel)]="numeroChassisSaisi"
-                   (ngModelChange)="onNumeroChassisChange($event)">
+            placeholder="Saisir manuellement"
+            [(ngModel)]="numeroChassisSaisi"
+            (keyup.enter)="soumettreNumeroChassis()"
+            (ngModelChange)="onNumeroChassisChange($event)">
           </mat-form-field>
 
         <!-- ✅ Zone de scan -->

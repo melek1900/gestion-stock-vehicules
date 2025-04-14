@@ -200,7 +200,7 @@ public class VehiculeController {
             @RequestParam(value = "avarie", required = false) String avarieJson,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos) {
 
-        Long parcId = Long.parseLong(parcIdString); // ✅ Conversion explicite
+        Long parcId = Long.parseLong(parcIdString);
 
         System.out.println("📥 Requête reçue pour réception : numéroChassis=" + numeroChassis + ", parcId=" + parcId);
 
@@ -212,9 +212,12 @@ public class VehiculeController {
             Vehicule vehicule = vehiculeService.receptionnerVehicule(numeroChassis, parcId, avarieJson, photos);
             VehiculeDTO dto = new VehiculeDTO(vehicule);
             return ResponseEntity.ok(dto);
-
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("⛔ " + e.getMessage());
+        } catch (Exception e) {
+            // Autre exception non prévue
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Erreur interne lors de la réception du véhicule.");
         }
     }
     @GetMapping("/vehicules/{numeroChassis}/avaries")
