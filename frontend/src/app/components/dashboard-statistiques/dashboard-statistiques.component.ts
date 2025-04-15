@@ -309,10 +309,10 @@ displaySelectedMarques = (): string => {
       }
     },
     dataLabels: {
-      enabled: false  // <--- Désactive l'affichage des labels sur le graphique
+      enabled: true 
     },
     legend: {
-      show: false,     // <-- Assure-toi que la légende est visible pour avoir les noms des modèles
+      show: false,     
       position: 'bottom'
     },
     colors: ['#0073A8', '#F4A300', '#e74c3c', '#2ecc71', '#8e44ad']
