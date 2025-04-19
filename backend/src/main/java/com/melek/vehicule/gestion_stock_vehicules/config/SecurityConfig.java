@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/parcs").permitAll()
                         .requestMatchers("/api/utilisateurs/marques-accessibles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/photos-by-name/**").permitAll()
+                        .requestMatchers("/api/utilisateurs/admin-exists").permitAll()
                         .requestMatchers("/photos/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()

@@ -221,13 +221,15 @@ public class VehiculeController {
         }
     }
     @GetMapping("/vehicules/{numeroChassis}/avaries")
-    public List<AvarieDTO> getAvariesParVehicule(@PathVariable String numeroChassis) {
+    public ResponseEntity<List<AvarieDTO>> getAvariesParVehicule(@PathVariable String numeroChassis) {
         Vehicule vehicule = vehiculeRepository.findByNumeroChassis(numeroChassis)
                 .orElseThrow(() -> new EntityNotFoundException("🚨 Véhicule non trouvé"));
 
-        return vehicule.getAvaries().stream()
+        List<AvarieDTO> avariesDTO = vehicule.getAvaries().stream()
                 .map(AvarieDTO::new)
-                .collect(Collectors.toList());
+                .toList();
+
+        return ResponseEntity.ok(avariesDTO);
     }
     @PostMapping(value = "/{numeroChassis}/avarie", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> creerAvariePourVehicule(
@@ -237,11 +239,21 @@ public class VehiculeController {
 
         try {
             Vehicule vehicule = vehiculeService.creerAvarie(numeroChassis, avarieJson, photos);
-            return ResponseEntity.ok(vehicule);
+
+            // 🔁 Retourner les avaries à jour au format DTO (avec URLs des photos, statuts, etc.)
+            List<AvarieDTO> avarieDTOs = vehicule.getAvaries().stream()
+                    .map(AvarieDTO::new)
+                    .toList();
+
+            return ResponseEntity.ok(avarieDTOs);
+
         } catch (EntityNotFoundException | IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("⛔ " + e.getMessage());
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Erreur lors de la création de l'avarie.");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("❌ Erreur interne lors de la création de l'avarie.");
         }
     }
     @GetMapping("/parc/transfert")
@@ -257,8 +269,18 @@ public class VehiculeController {
 
         return ResponseEntity.ok(dtoList);
     }
+    @PatchMapping("/avaries/{id}/cloturer")
+    @PreAuthorize("hasAuthority('ROLE_EXPERT')") // ou pas, selon sécurité
+    public ResponseEntity<?> cloturerAvarie(@PathVariable Long id) {
+        try {
+            Avarie avarie = avarieService.cloturerAvarie(id); // à créer dans ton service
+            return ResponseEntity.ok(new AvarieDTO(avarie));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
     @PostMapping(value = "/{numeroChassis}/avaries", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<Vehicule> signalerAvarie(
+    public ResponseEntity<List<AvarieDTO>> signalerAvarie(
             @PathVariable String numeroChassis,
             @RequestPart("avarie") String avarieJson,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos) {
@@ -267,7 +289,10 @@ public class VehiculeController {
         System.out.println("📷 Photos reçues : " + (photos != null ? photos.size() : 0));
 
         Vehicule vehicule = vehiculeService.signalerAvarie(numeroChassis, avarieJson, photos);
-        return ResponseEntity.ok(vehicule);
+
+        // Retourner la liste mise à jour des avaries (DTO)
+        List<AvarieDTO> dtoList = vehicule.getAvaries().stream().map(AvarieDTO::new).toList();
+        return ResponseEntity.ok(dtoList);
     }
     @PatchMapping("/{numeroChassis}/reparer")
     //@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_GESTIONNAIRE_STOCK')")
@@ -288,26 +313,6 @@ public class VehiculeController {
         return ResponseEntity.ok().body(Map.of("message", "Véhicule réparé avec commentaire: " + commentaireExpert));
     }
 
-    // ✅ Changer le statut d'un véhicule
-    @PatchMapping("/{numeroChassis}/statut")
-    public ResponseEntity<Vehicule> changerStatut(@PathVariable String numeroChassis, @RequestBody Map<String, String> body) {
-        System.out.println("📡 PATCH reçu - Châssis: " + numeroChassis + ", Payload: " + body);
-
-        String statutStr = body.get("statut");
-        if (statutStr == null) {
-            System.out.println("🚨 Erreur : le statut est null !");
-            return ResponseEntity.badRequest().build();
-        }
-
-        try {
-            StatutVehicule statut = StatutVehicule.valueOf(statutStr.toUpperCase());
-            Vehicule vehicule = vehiculeService.changerStatutParChassis(numeroChassis, statut);
-            return ResponseEntity.ok(vehicule);
-        } catch (IllegalArgumentException e) {
-            System.out.println("🚨 Erreur : statut inconnu " + statutStr);
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
 
 
 
@@ -369,7 +374,14 @@ public class VehiculeController {
 
         return ResponseEntity.ok(vehiculeDTOs);
     }
-
+    @GetMapping("/avec-avaries")
+    public ResponseEntity<List<VehiculeDTO>> getVehiculesAvecAvaries() {
+        List<Vehicule> vehicules = vehiculeService.getVehiculesAvecAvaries();
+        List<VehiculeDTO> dtos = vehicules.stream()
+                .map(VehiculeDTO::new)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
     @GetMapping("/chassis/{numeroChassis}")
     public ResponseEntity<VehiculeDTO> getVehiculeByNumeroChassis(@PathVariable String numeroChassis) {
         Vehicule vehicule = vehiculeService.findByNumeroChassis(numeroChassis);

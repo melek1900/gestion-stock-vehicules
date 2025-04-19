@@ -113,11 +113,13 @@ tr:hover {
 .status.annule {
     color: #999;
     font-style: italic;
+    background-color: #0a0000 !important;
+
   }
   
   tr.mat-row td {
     &.annule {
-      background-color: #f9f9f9;
+      background-color: #0a0000 !important;
       color: #aaa;
     }
   }

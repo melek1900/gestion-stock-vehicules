@@ -7,27 +7,22 @@ import com.melek.vehicule.gestion_stock_vehicules.repository.ParcRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.StockRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.VehiculeRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
-import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 public class ExcelService {
+
     private static final Logger log = LoggerFactory.getLogger(ExcelService.class);
 
     private final VehiculeRepository vehiculeRepository;
@@ -35,7 +30,10 @@ public class ExcelService {
     private final StockRepository stockRepository;
     private final CompteurImportRepository compteurImportRepository;
 
-    public ExcelService(VehiculeRepository vehiculeRepository, ParcRepository parcRepository, StockRepository stockRepository,CompteurImportRepository compteurImportRepository) {
+    public ExcelService(VehiculeRepository vehiculeRepository,
+                        ParcRepository parcRepository,
+                        StockRepository stockRepository,
+                        CompteurImportRepository compteurImportRepository) {
         this.vehiculeRepository = vehiculeRepository;
         this.parcRepository = parcRepository;
         this.stockRepository = stockRepository;
@@ -45,6 +43,10 @@ public class ExcelService {
     public ImportResult lireVehiculesDepuisExcel(MultipartFile file) throws Exception {
         List<Vehicule> vehiculesAjoutes = new ArrayList<>();
         int ignores = 0;
+
+        // 🔍 Chercher dynamiquement le parc "AUPORT"
+        Parc parcAuport = parcRepository.findByNomIgnoreCase("AUPORT")
+                .orElseThrow(() -> new EntityNotFoundException("🚨 Parc 'AUPORT' introuvable dans la base."));
 
         try (InputStream is = file.getInputStream(); Workbook workbook = WorkbookFactory.create(is)) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -76,10 +78,7 @@ public class ExcelService {
                 vehicule.setShortColor(getStringCellValue(row.getCell(8)));
                 vehicule.setShortDescription(getStringCellValue(row.getCell(9)));
                 vehicule.setStatut(StatutVehicule.EN_ETAT);
-
-                Parc parcAuport = parcRepository.findById(4L)
-                        .orElseThrow(() -> new EntityNotFoundException("🚨 Parc AUPORT introuvable"));
-                vehicule.setParc(parcAuport);
+                vehicule.setParc(parcAuport); // 🆕 Affectation dynamique
 
                 vehiculesAjoutes.add(vehicule);
             }
@@ -87,6 +86,7 @@ public class ExcelService {
 
         vehiculeRepository.saveAll(vehiculesAjoutes);
 
+        // ✅ Gestion du compteur d'import
         String annee = String.valueOf(LocalDate.now().getYear());
         CompteurImport compteur = compteurImportRepository.findByAnnee(annee)
                 .orElseGet(() -> new CompteurImport(annee, 0));
@@ -100,8 +100,6 @@ public class ExcelService {
         return new ImportResult(vehiculesAjoutes, ignores, numeroImport);
     }
 
-
-
     private String getStringCellValue(Cell cell) {
         return (cell != null) ? cell.getStringCellValue().trim() : "";
     }
@@ -109,18 +107,14 @@ public class ExcelService {
     private Date getDateCellValue(Cell cell) {
         if (cell != null) {
             try {
-                // ✅ Si la cellule est de type NUMERIC et formatée en DATE
                 if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
                     return cell.getDateCellValue();
-                }
-                // ✅ Si la cellule est de type STRING (ex: "2024-03-01")
-                else if (cell.getCellType() == CellType.STRING) {
+                } else if (cell.getCellType() == CellType.STRING) {
                     String dateStr = cell.getStringCellValue().trim();
                     System.out.println("📌 Lecture date brute: " + dateStr);
 
-                    // ✅ Essaye différents formats possibles
                     SimpleDateFormat[] dateFormats = {
-                            new SimpleDateFormat("yyyy-MM-dd"), // Format détecté dans la console
+                            new SimpleDateFormat("yyyy-MM-dd"),
                             new SimpleDateFormat("dd/MM/yyyy"),
                             new SimpleDateFormat("MM/dd/yyyy")
                     };
@@ -138,4 +132,3 @@ public class ExcelService {
         return null;
     }
 }
-

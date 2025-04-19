@@ -8,8 +8,15 @@
       <h3>📋 Avaries détectées</h3>
 
       <div *ngFor="let avarie of avariesForm.controls; let i = index" class="avarie-section">
-        <mat-card>
-
+        <mat-card [ngClass]="{'grisee': avarie.value.statut === 'CLOTURE'}">
+          <div class="card-header">
+            <span class="statut-badge" [ngClass]="{
+              'badge-en-cours': avarie.value.statut === 'EN_COURS',
+              'badge-cloture': avarie.value.statut === 'CLOTURE'
+            }">
+              {{ avarie.value.statut === 'EN_COURS' ? '🟢 EN COURS' : '🔒 CLOTURÉE' }}
+            </span>
+          </div>
           <mat-form-field appearance="fill">
             <mat-label style="color: #003366;">Type d'avarie</mat-label>
             <input style="color: #ee8610" matInput [formControl]="getFormControl(avarie, 'type')" />
@@ -39,14 +46,14 @@
           </div>
 
           <!-- Ajout photo expert -->
-          <div class="add-photo-btn" *ngIf="isExpert">
+          <div class="add-photo-btn" *ngIf="isExpert && avarie.value.statut !== 'CLOTURE'">
             <input type="file" hidden #fileInput (change)="ajouterPhoto($event, i)" accept="image/*">
             <button mat-stroked-button color="primary" (click)="fileInput.click()">📂 Depuis l'appareil</button>
             <button mat-stroked-button color="accent" (click)="openCamera(i)">📷 Ouvrir la caméra</button>
           </div>
 
           <!-- Commentaire expert -->
-          <mat-form-field *ngIf="isExpert" appearance="fill" class="full-width">
+          <mat-form-field *ngIf="isExpert && hasAvarieEnCours()" appearance="fill" class="full-width">
             <mat-label style="color: #003366;">Commentaire de l'expert</mat-label>
             <textarea
               matInput
@@ -54,6 +61,7 @@
               (input)="verifierFormulaire()">
             </textarea>
           </mat-form-field>
+          
         </mat-card>
       </div>
     </div>
@@ -61,11 +69,12 @@
 
   <!-- Boutons actions -->
   <mat-dialog-actions>
-    <button *ngIf="isExpert" mat-raised-button color="primary" [disabled]="!peutReparer" (click)="reparerVehicule()">
+    <button *ngIf="isExpert && hasAvarieEnCours()" mat-raised-button color="primary"
+      [disabled]="!peutReparer" (click)="reparerVehicule()">
       ✅ Réparer
     </button>
     <button mat-button (click)="dialogRef.close()">❌ Annuler</button>
-  </mat-dialog-actions>
+  </mat-dialog-actions> 
 
   <!-- Agrandissement image -->
   <div *ngIf="imageAgrandie" class="image-modal" (click)="fermerImage()">

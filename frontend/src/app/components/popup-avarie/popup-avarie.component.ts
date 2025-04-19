@@ -81,15 +81,22 @@ export class PopupAvarieComponent {
       this.photoPreviews[index] = av.photoUrls || [];
     });
   }
+  hasAvarieEnCours(): boolean {
+    return this.avaries.some(av => av.statut === 'EN_COURS');
+  }
   
   ajouterAvarieExistante(avarie: any) {
     const avariesFormArray = this.form.get('avaries') as FormArray;
+    const isCloturee = avarie.statut === 'CLOTURE'; // 👈 On détecte si elle est clôturée
+  
     const avarieForm = this.fb.group({
       id: [avarie.id || null],
-      type: [{ value: avarie.type, disabled: this.isReadonly }],
-      commentaire: [{ value: avarie.commentaire, disabled: this.isReadonly }],
+      type: [{ value: avarie.type, disabled: true }], // toujours en readonly
+      commentaire: [{ value: avarie.commentaire, disabled: true }],
+      statut: [avarie.statut], // 👈 Ajouter le statut pour l'utiliser dans le template si besoin
       photos: [avarie.photoUrls || []]
     });
+  
     avariesFormArray.push(avarieForm);
   }
   get avariesForm(): FormArray {
@@ -253,7 +260,7 @@ export class PopupAvarieComponent {
       });
     });
 
-    this.http.put(`http://192.168.1.121:8080/api/vehicules/${this.data.vehicule.numeroChassis}/avaries`, formData, { headers }).subscribe({
+    this.http.put(`http://localhost:8080/api/vehicules/${this.data.vehicule.numeroChassis}/avaries`, formData, { headers }).subscribe({
       next: () => {
         this.snackBar.open('✅ Avarie mise à jour avec succès', 'Fermer', { duration: 3000 });
         this.dialogRef.close({ action: 'update', data: this.avaries });
@@ -277,13 +284,14 @@ export class PopupAvarieComponent {
     const body = { commentaire };
   
     this.http.patch(
-      `http://192.168.1.121:8080/api/vehicules/${this.data.vehicule.numeroChassis}/reparer`,
+      `http://localhost:8080/api/vehicules/${this.data.vehicule.numeroChassis}/reparer`,
       body,
       { headers }
     ).subscribe({
       next: () => {
         this.snackBar.open('✅ Véhicule réparé avec succès', 'Fermer', { duration: 3000 });
-        this.dialogRef.close({ action: 'reparer' });
+    
+        this.dialogRef.close({ action: 'reparer', vehicule: this.data.vehicule });
       },
       error: () => {
         this.snackBar.open('❌ Erreur lors de la réparation', 'Fermer', { duration: 3000 });

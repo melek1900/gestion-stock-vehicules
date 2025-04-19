@@ -1,6 +1,44 @@
 
 <!-- 📊 Grid des charts -->
 <div class="charts-grid">
+
+<!-- 📊 Taux rotation - Quantité -->
+<div class="chart-container" appScrollAnimate>
+  <div class="marque-filter-inline">
+    <select [(ngModel)]="selectedMarque" (change)="onMarqueChangeTaux()">
+      <option *ngFor="let marque of marquesDisponibles" [value]="marque">{{ marque }}</option>
+    </select>
+  </div>
+
+  <apx-chart
+    [series]="rotationTauxQuantiteChartOptions.series!"
+    [chart]="rotationTauxQuantiteChartOptions.chart!"
+    [xaxis]="rotationTauxQuantiteChartOptions.xaxis!"
+    [title]="rotationTauxQuantiteChartOptions.title!"
+    [dataLabels]="rotationTauxQuantiteChartOptions.dataLabels!"
+    [colors]="rotationTauxQuantiteChartOptions.colors!"
+    [plotOptions]="rotationTauxQuantiteChartOptions.plotOptions!"
+  ></apx-chart>
+</div>
+
+<!-- 📊 Taux rotation - Valeur -->
+<div class="chart-container" appScrollAnimate>
+  <div class="marque-filter-inline">
+    <select [(ngModel)]="selectedMarque" (change)="onMarqueChangeTaux()">
+      <option *ngFor="let marque of marquesDisponibles" [value]="marque">{{ marque }}</option>
+    </select>
+  </div>
+  <apx-chart
+    [series]="rotationTauxValeurChartOptions.series!"
+    [chart]="rotationTauxValeurChartOptions.chart!"
+    [xaxis]="rotationTauxValeurChartOptions.xaxis!"
+    [title]="rotationTauxValeurChartOptions.title!"
+    [dataLabels]="rotationTauxValeurChartOptions.dataLabels!"
+    [colors]="rotationTauxValeurChartOptions.colors!"
+    [plotOptions]="rotationTauxValeurChartOptions.plotOptions!"
+  ></apx-chart>
+</div>
+
   <div class="chart-container" appScrollAnimate>
     <div class="marque-filter-inline">
       <select id="marqueSelect" [(ngModel)]="selectedMarque" (change)="onMarqueChange()">
@@ -19,6 +57,53 @@
       [colors]="venteParModelePieChartOptions.colors!"
     ></apx-chart>
   </div>
+  <div class="chart-container" appScrollAnimate>
+    <div class="marque-filter-inline">
+      <select id="marqueSelectEnergie" [(ngModel)]="selectedMarque" (change)="onMarqueChangeEnergie()">
+        <option *ngFor="let marque of marquesDisponibles" [value]="marque">{{ marque }}</option>
+      </select>
+    </div>
+  
+    <apx-chart
+      *ngIf="venteParEnergiePieChartOptions?.series?.length"
+      [series]="venteParEnergiePieChartOptions.series!"
+      [chart]="venteParEnergiePieChartOptions.chart!"
+      [labels]="venteParEnergiePieChartOptions.labels!"
+      [title]="venteParEnergiePieChartOptions.title!"
+      [dataLabels]="venteParEnergiePieChartOptions.dataLabels!"
+      [legend]="venteParEnergiePieChartOptions.legend!"
+      [colors]="venteParEnergiePieChartOptions.colors!"
+    ></apx-chart>
+  </div>
+  <div class="chart-container" appScrollAnimate>
+    <div class="marque-filter-inline">
+      <select id="marqueSelectRegion" [(ngModel)]="selectedMarque" (change)="onMarqueChangeRegion()">
+        <option *ngFor="let marque of marquesDisponibles" [value]="marque">{{ marque }}</option>
+      </select>
+    </div>
+    <apx-chart
+    [series]="venteParRegionPieChartOptions.series!"
+    [chart]="venteParRegionPieChartOptions.chart!"
+    [labels]="venteParRegionPieChartOptions.labels!"
+    [title]="venteParRegionPieChartOptions.title!"
+    [dataLabels]="venteParRegionPieChartOptions.dataLabels!"
+    [legend]="venteParRegionPieChartOptions.legend!"
+    [colors]="venteParRegionPieChartOptions.colors!"
+  ></apx-chart>
+  </div>
+  
+  <div class="chart-container" appScrollAnimate *ngIf="rotationStockChartOptions.series?.length">
+    <apx-chart
+      [series]="rotationStockChartOptions.series!"
+      [chart]="rotationStockChartOptions.chart!"
+      [xaxis]="rotationStockChartOptions.xaxis!"
+      [title]="rotationStockChartOptions.title!"
+      [dataLabels]="rotationStockChartOptions.dataLabels!"
+      [colors]="rotationStockChartOptions.colors!"
+      [plotOptions]="rotationStockChartOptions.plotOptions!"
+    ></apx-chart>
+  </div>
+  
 <!-- 📊 Ventes par genre - Nos marques avec filtre -->
 <div class="chart-container" appScrollAnimate>
   <div class="marque-filter-inline">
@@ -151,7 +236,10 @@
       <div class="statut-item" *ngFor="let s of ordreStatuts">
         <span class="statut-dot" [ngStyle]="{ 'background-color': s.color }"></span>
         <span class="statut-label">
-          {{ s.statut === 'EN_COURS' ? 'En cours' : (s.statut === 'CLOTURE' ? 'Clôturé' : 'Partiel') }}
+          {{ s.statut === 'EN_COURS' ? 'En cours' :
+             s.statut === 'CLOTURE' ? 'Clôturé' :
+             s.statut === 'PARTIEL' ? 'Partiel' :
+             s.statut === 'ANNULE' ? 'Annulé' : s.statut }}
         </span>
         <span class="statut-count">{{ s.count }}</span>
       </div>

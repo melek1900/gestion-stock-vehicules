@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Service
 public class TransfertService {
-
+    private final ParcService parcService;
     private final TransfertRepository transfertRepository;
     private final ChauffeurRepository chauffeurRepository;
     private final VehiculeTransportRepository vehiculeTransportRepository;
@@ -25,7 +25,8 @@ public class TransfertService {
     private final UtilisateurRepository utilisateurRepository;
     private final OrdreMissionRepository ordreMissionRepository;
 
-    public TransfertService(VehiculeTransportRepository vehiculeTransportRepository,ChauffeurRepository chauffeurRepository,TransfertRepository transfertRepository, VehiculeRepository vehiculeRepository, ParcRepository parcRepository, StockRepository stockRepository,OrdreMissionRepository ordreMissionRepository,UtilisateurRepository utilisateurRepository) {
+    public TransfertService(VehiculeTransportRepository vehiculeTransportRepository,ParcService parcService
+,ChauffeurRepository chauffeurRepository,TransfertRepository transfertRepository, VehiculeRepository vehiculeRepository, ParcRepository parcRepository, StockRepository stockRepository,OrdreMissionRepository ordreMissionRepository,UtilisateurRepository utilisateurRepository) {
         this.transfertRepository = transfertRepository;
         this.vehiculeRepository = vehiculeRepository;
         this.parcRepository = parcRepository;
@@ -34,6 +35,7 @@ public class TransfertService {
         this.chauffeurRepository=chauffeurRepository;
         this.vehiculeTransportRepository=vehiculeTransportRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.parcService=parcService;
 
 
     }
@@ -51,8 +53,8 @@ public class TransfertService {
         VehiculeTransport vehiculeTransport = vehiculeTransportRepository.findById(vehiculeTransportId)
                 .orElseThrow(() -> new RuntimeException("🚨 Véhicule de transport introuvable"));
 
-        Parc parcArrivee = parcRepository.findById(parcArriveeId)
-                .orElseThrow(() -> new RuntimeException("🚨 Parc de destination introuvable"));
+        Parc parcArrivee = parcService.getParcById(parcArriveeId);
+
 
         Parc parcDepart = vehicules.get(0).getParc();
 

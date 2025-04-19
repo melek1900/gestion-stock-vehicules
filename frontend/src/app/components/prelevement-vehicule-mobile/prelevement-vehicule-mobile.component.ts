@@ -145,7 +145,7 @@ export class PrelevementVehiculeMobileComponent {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.get<any[]>(`http://192.168.1.121:8080/api/ordres-mission/${this.ordreMission}/vehicules`, { headers })
+    this.http.get<any[]>(`http://localhost:8080/api/ordres-mission/${this.ordreMission}/vehicules`, { headers })
       .subscribe({
         next: (data) => {
           console.log("📦 Véhicules reçus :", data);
@@ -195,7 +195,7 @@ export class PrelevementVehiculeMobileComponent {
     }
   
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    const url = `http://192.168.1.121:8080/api/ordres-mission/${encodeURIComponent(ordreNettoye)}/prelever/${encodeURIComponent(numeroChassisNettoye)}`;
+    const url = `http://localhost:8080/api/ordres-mission/${encodeURIComponent(ordreNettoye)}/prelever/${encodeURIComponent(numeroChassisNettoye)}`;
   
     this.isLoading = true;
   
@@ -262,7 +262,7 @@ export class PrelevementVehiculeMobileComponent {
       'Authorization': `Bearer ${token}`
     });
   
-    const url = `http://192.168.1.121:8080/api/ordres-mission/${encodeURIComponent(this.ordreMission)}/valider-prelevement`;
+    const url = `http://localhost:8080/api/ordres-mission/${encodeURIComponent(this.ordreMission)}/valider-prelevement`;
   
     this.http.patch(url, {}, { headers })
       .subscribe({

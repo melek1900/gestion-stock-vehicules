@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.melek.vehicule.gestion_stock_vehicules.dto.AvarieDTO;
 import com.melek.vehicule.gestion_stock_vehicules.model.Avarie;
 import com.melek.vehicule.gestion_stock_vehicules.model.Photo;
+import com.melek.vehicule.gestion_stock_vehicules.model.StatutAvarie;
 import com.melek.vehicule.gestion_stock_vehicules.model.Vehicule;
 import com.melek.vehicule.gestion_stock_vehicules.repository.AvarieRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.PhotoRepository;
@@ -39,6 +40,7 @@ public class AvarieService {
         avarie.setVehicule(vehicule);
         avarie.setType(type);
         avarie.setCommentaire(commentaire);
+        avarie.setStatut(StatutAvarie.EN_COURS);
 
         Avarie savedAvarie = avarieRepository.save(avarie);
 
@@ -58,7 +60,13 @@ public class AvarieService {
 
         return savedAvarie;
     }
-
+    @Transactional
+    public Avarie cloturerAvarie(Long id) {
+        Avarie avarie = avarieRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Avarie introuvable"));
+        avarie.setStatut(StatutAvarie.CLOTURE);
+        return avarieRepository.save(avarie);
+    }
     private Avarie convertAvarieDTOToEntity(String avarieJson, List<MultipartFile> photoFiles) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -66,13 +74,14 @@ public class AvarieService {
             Avarie avarie = new Avarie();
             avarie.setType(avarieDTO.getType());
             avarie.setCommentaire(avarieDTO.getCommentaire());
+            avarie.setStatut(StatutAvarie.EN_COURS);
 
             List<Photo> photos = new ArrayList<>();
             for (MultipartFile file : photoFiles) {
                 Photo photo = new Photo();
                 photo.setFileName(file.getOriginalFilename());
                 photo.setData(file.getBytes());
-                photo.setAvarie(avarie); // important pour la relation bidirectionnelle
+                photo.setAvarie(avarie);
                 photos.add(photo);
             }
             avarie.setPhotos(photos);

@@ -70,13 +70,23 @@
   }
   
   .statut-dispo {
-    color: green;
-    font-weight: bold;
+    color: #2e7d32; 
+    background-color: #e8f5e9;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-weight: 600;
+    display: inline-block;
+    font-size: 13px;
   }
   
   .statut-indispo {
-    color: red;
-    font-weight: bold;
+    color: #c62828;
+    background-color: #ffebee;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-weight: 600;
+    display: inline-block;
+    font-size: 13px;
   }
   
   @media (max-width: 768px) {
