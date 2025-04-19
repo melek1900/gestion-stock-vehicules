@@ -18,6 +18,21 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   margin-bottom: 10px;
 }
+.badge-en-cours {
+  background-color: #388e3c;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.badge-cloture {
+  background-color: #9e9e9e;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-weight: bold;
+}
 table {
   width: 100%;
   border-collapse: collapse;

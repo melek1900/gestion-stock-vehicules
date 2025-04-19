@@ -8,11 +8,12 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { PopupAvarieComponent } from '../popup-avarie/popup-avarie.component';
 import { MatIconModule } from '@angular/material/icon';
-import {jwtDecode} from 'jwt-decode';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatOption, MatSelect, MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-reparation',
@@ -28,38 +29,54 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
     MatFormFieldModule,
     FormsModule,
     MatInputModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatOptionModule,
+    MatSelectModule
+
   ],
 })
 export class ReparationComponent implements OnInit {
   vehiculesAvaries: any[] = [];
-  displayedColumns: string[] = ['numeroChassis','marque', 'modele', 'couleur', 'parcNom', 'actions'];
+  displayedColumns: string[] = ['numeroChassis','marque', 'modele', 'couleur', 'parcNom', 'statutAvaries', 'actions'];
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   recherche: string = '';
   vehiculesAvariesFiltres: any[] = [];
   vehiculesFiltres: any[] = [];
+  filtreStatut: 'TOUS' | 'EN_COURS' | 'CLOTURE' = 'TOUS';
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   dataSource = new MatTableDataSource<any>([]);
 
-
+  getStatutPrincipal(vehicule: any): string {
+    const avaries = vehicule.avaries || [];
+    if (avaries.length === 0) return 'Aucune';
+    if (avaries.some((a: any) => a.statut === 'EN_COURS')) return 'EN_COURS';
+    return 'CLOTURE';
+  }
   filtrerVehicules() {
     const query = this.recherche.toLowerCase().trim();
   
-    if (!query) {
-      this.vehiculesFiltres = [...this.vehiculesAvaries];
-    } else {
-      this.vehiculesFiltres = this.vehiculesAvaries.filter(v =>
+    this.vehiculesFiltres = this.vehiculesAvaries.filter(v => {
+      const matchTexte =
         v.numeroChassis?.toLowerCase().includes(query) ||
         v.shortDescription?.toLowerCase().includes(query) ||
-        v.modele?.toLowerCase().includes(query)
-      );
-    }
+        v.modele?.toLowerCase().includes(query);
+  
+      const matchStatut =
+        this.filtreStatut === 'TOUS' || v.avaries?.some((a: any) => a.statut === this.filtreStatut);
+  
+      return matchTexte && matchStatut;
+    });
+  
+    this.dataSource.data = this.vehiculesFiltres;
   }
   ngOnInit() {
   
     this.chargerVehiculesAvaries();
+    console.log("📦 Véhicules chargés :", this.vehiculesAvaries);
+
   
   }
   ngAfterViewInit() {
@@ -77,11 +94,12 @@ export class ReparationComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules/by-statut?statut=AVARIE', { headers }).subscribe({
+    this.http.get<any[]>('http://localhost:8080/api/vehicules/avec-avaries', { headers }).subscribe({
       next: (data) => {
         this.vehiculesAvaries = data;
         this.dataSource.data = data; 
         this.vehiculesFiltres = [...data];
+        console.log("📦 Véhicules chargés :", data);
       },
       error: () => {
         this.snackBar.open('❌ Erreur lors du chargement des véhicules avariés', 'Fermer', { duration: 3000 });
@@ -99,8 +117,17 @@ export class ReparationComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result && result.action === 'reparer') {
-        this.vehiculesAvaries = this.vehiculesAvaries.filter(v => v.numeroChassis !== vehicule.numeroChassis);
+      if (result?.action === 'reparer') {
+        const vehicule = result.vehicule;
+    
+        this.vehiculesAvaries = this.vehiculesAvaries.map(v =>
+          v.numeroChassis === vehicule.numeroChassis
+            ? { ...v, avaries: v.avaries.map((a: { statut: string }) => ({ ...a, statut: 'CLOTURE' })) }
+            : v
+        );
+    
+        // Re-filtrer pour forcer l'affichage
+        this.filtrerVehicules();
       }
     });
   }
@@ -113,7 +140,7 @@ export class ReparationComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.patch(`http://192.168.1.121:8080/api/vehicules/${numeroChassis}/reparer`, {}, { headers }).subscribe({
+    this.http.patch(`http://localhost:8080/api/vehicules/${numeroChassis}/reparer`, {}, { headers }).subscribe({
       next: () => {
         this.snackBar.open('✅ Véhicule réparé et remis en stock !', 'Fermer', { duration: 3000 });
   

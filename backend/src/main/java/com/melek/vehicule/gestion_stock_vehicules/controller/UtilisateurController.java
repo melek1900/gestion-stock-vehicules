@@ -47,6 +47,11 @@ public class UtilisateurController {
     public ResponseEntity<List<String>> getRoles() {
         return ResponseEntity.ok(Arrays.stream(RoleUtilisateur.values()).map(Enum::name).toList());
     }
+    @GetMapping("/admin-exists")
+    public boolean adminExists() {
+        return utilisateurRepository.existsByRole(RoleUtilisateur.ROLE_ADMINISTRATEUR);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Utilisateur> modifierUtilisateur(@PathVariable Long id, @RequestBody UtilisateurDTO dto) {
         return utilisateurRepository.findById(id)

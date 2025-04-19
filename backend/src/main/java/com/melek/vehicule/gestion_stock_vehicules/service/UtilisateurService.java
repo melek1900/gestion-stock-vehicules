@@ -51,6 +51,7 @@ public class UtilisateurService implements UserDetailsService {
 
         return utilisateur;
     }
+
     public List<Parc> getParcsByNoms(List<String> noms) {
         return parcRepository.findByNomIn(noms);
     }

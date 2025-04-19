@@ -2,6 +2,7 @@ package com.melek.vehicule.gestion_stock_vehicules.dto;
 
 import com.melek.vehicule.gestion_stock_vehicules.model.Avarie;
 import com.melek.vehicule.gestion_stock_vehicules.model.Photo;
+import com.melek.vehicule.gestion_stock_vehicules.model.StatutAvarie;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +14,13 @@ public class AvarieDTO {
     private String commentaire;
     private List<String> photoUrls;
     private List<Long> photoIds;
-
+    private StatutAvarie statut;
 
     public AvarieDTO(Avarie avarie) {
         this.id = avarie.getId();
         this.type = avarie.getType();
         this.commentaire = avarie.getCommentaire();
-
+        this.statut = avarie.getStatut();
         if (avarie.getPhotos() != null) {
             this.photoIds = avarie.getPhotos().stream()
                     .map(Photo::getId)
@@ -32,6 +33,14 @@ public class AvarieDTO {
             this.photoIds = List.of();
             this.photoUrls = List.of();
         }
+    }
+
+    public StatutAvarie getStatut() {
+        return statut;
+    }
+
+    public void setStatut(StatutAvarie statut) {
+        this.statut = statut;
     }
 
     public List<Long> getPhotoIds() {

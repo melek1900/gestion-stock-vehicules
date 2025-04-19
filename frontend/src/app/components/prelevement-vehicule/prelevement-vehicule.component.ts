@@ -59,7 +59,7 @@ export class PrelevementVehiculeComponent {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
 
-    this.http.get<any[]>(`http://192.168.1.121:8080/api/ordres-mission/${this.ordreMission}/vehicules`, { headers })
+    this.http.get<any[]>(`http://localhost:8080/api/ordres-mission/${this.ordreMission}/vehicules`, { headers })
     .subscribe({
         next: (data) => {
           this.vehicules = data.map(v => ({ ...v, preleve: false }));
@@ -82,7 +82,7 @@ export class PrelevementVehiculeComponent {
     });
   
     this.http.patch(
-      `http://192.168.1.121:8080/api/ordres-mission/${this.ordreMission}/prelever/${numeroChassis}`,
+      `http://localhost:8080/api/ordres-mission/${this.ordreMission}/prelever/${numeroChassis}`,
       {},
       { headers }
     ).subscribe({

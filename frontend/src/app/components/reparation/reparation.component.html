@@ -4,6 +4,14 @@
     <mat-label>🔍 Rechercher</mat-label>
     <input matInput placeholder="Rechercher par N° Châssis, modele , marque" [(ngModel)]="recherche" (ngModelChange)="filtrerVehicules()" />
   </mat-form-field>
+  <mat-form-field appearance="fill" class="search-field">
+    <mat-label>Filtrer par statut d’avarie</mat-label>
+    <mat-select [(ngModel)]="filtreStatut" (selectionChange)="filtrerVehicules()">
+      <mat-option value="TOUS">Toutes</mat-option>
+      <mat-option value="EN_COURS">En cours</mat-option>
+      <mat-option value="CLOTURE">Clôturées</mat-option>
+    </mat-select>
+  </mat-form-field>
   </div>
   <div class="pagination-container">
     <mat-paginator
@@ -40,7 +48,18 @@
       <th mat-header-cell *matHeaderCellDef> Emplacement </th>
       <td mat-cell *matCellDef="let vehicule"> {{ vehicule.parcNom }} </td>
     </ng-container>
-
+    
+    <ng-container matColumnDef="statutAvaries">
+      <th mat-header-cell *matHeaderCellDef> Statut Avaries </th>
+      <td mat-cell *matCellDef="let vehicule">
+        <span [ngClass]="{
+          'badge-en-cours': getStatutPrincipal(vehicule) === 'EN_COURS',
+          'badge-cloture': getStatutPrincipal(vehicule) === 'CLOTURE'
+        }">
+          {{ getStatutPrincipal(vehicule) }}
+        </span>
+      </td>
+    </ng-container>
     <!-- Actions -->
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef> Actions </th>

@@ -1,4 +1,4 @@
-<mat-card class="vehicule-form" [ngClass]="{ 'gestionnaire-theme': isGestionnaire }">
+<mat-card *ngIf="parcId" class="vehicule-form" [ngClass]="{ 'gestionnaire-theme': isGestionnaire }">
   <form [formGroup]="form" (ngSubmit)="enregistrerVehicule()" enctype="multipart/form-data">
     
     <!-- ✅ Scanner QR Code -->

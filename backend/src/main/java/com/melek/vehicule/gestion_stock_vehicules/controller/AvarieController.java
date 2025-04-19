@@ -1,5 +1,6 @@
 package com.melek.vehicule.gestion_stock_vehicules.controller;
 
+import com.melek.vehicule.gestion_stock_vehicules.dto.AvarieDTO;
 import com.melek.vehicule.gestion_stock_vehicules.model.Avarie;
 import com.melek.vehicule.gestion_stock_vehicules.service.AvarieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,26 +17,31 @@ public class AvarieController {
     @Autowired
     private AvarieService avarieService;
 
-    @PostMapping("/ajouter")
-    public ResponseEntity<Avarie> ajouterAvarieAvecPhotos(
-            @RequestParam Long vehiculeId,
+    // ✅ Ajouter une avarie avec photos
+    @PostMapping("/vehicule/{vehiculeId}")
+    public ResponseEntity<AvarieDTO> ajouterAvarieAvecPhotos(
+            @PathVariable Long vehiculeId,
             @RequestParam String type,
             @RequestParam String commentaire,
             @RequestParam(required = false) List<MultipartFile> photos) {
 
         Avarie avarie = avarieService.ajouterAvarie(vehiculeId, type, commentaire, photos);
-        return ResponseEntity.ok(avarie);
+        return ResponseEntity.ok(new AvarieDTO(avarie));
     }
 
-    @DeleteMapping("/supprimer/{id}")
+    // ✅ Supprimer une avarie
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> supprimerAvarie(@PathVariable Long id) {
         avarieService.supprimerAvarie(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
+    // ✅ Récupérer les avaries d’un véhicule
     @GetMapping("/vehicule/{vehiculeId}")
-    public ResponseEntity<List<Avarie>> getAvariesByVehicule(@PathVariable Long vehiculeId) {
-        List<Avarie> avaries = avarieService.getAvariesByVehicule(vehiculeId);
-        return ResponseEntity.ok(avaries);
+    public ResponseEntity<List<AvarieDTO>> getAvariesByVehicule(@PathVariable Long vehiculeId) {
+        List<AvarieDTO> dtos = avarieService.getAvariesByVehicule(vehiculeId).stream()
+                .map(AvarieDTO::new)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 }

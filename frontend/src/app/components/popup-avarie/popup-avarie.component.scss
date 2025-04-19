@@ -9,13 +9,37 @@
     flex-direction: column;
     gap: 25px;
   }
-  
+  .grisee {
+    background-color: #f1f1f1 !important;
+    opacity: 0.6;
+    pointer-events: none;
+  }
   /* ✅ Form fields */
   mat-form-field.full-width {
     width: 100%;
     margin-bottom: 20px;
   }
+  card-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
   
+  .statut-badge {
+    font-weight: bold;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    color: white;
+  }
+  
+  .badge-en-cours {
+    background-color: #388e3c; // Vert foncé
+  }
+  
+  .badge-cloture {
+    background-color: #9e9e9e; // Gris
+  }
   /* ✅ Conteneur d'une avarie */
   .avarie-container {
     background: #f3f4f6;

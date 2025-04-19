@@ -29,7 +29,8 @@ public class Avarie {
     @OneToMany(mappedBy = "avarie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Photo> photos = new ArrayList<>();
-
+    @Enumerated(EnumType.STRING)
+    private StatutAvarie statut = StatutAvarie.EN_COURS;
     public Avarie() {}
 
     public Avarie(String type, String commentaire, Vehicule vehicule) {
@@ -47,6 +48,14 @@ public class Avarie {
         for (Photo photo : photos) {
             addPhoto(photo);
         }
+    }
+
+    public StatutAvarie getStatut() {
+        return statut;
+    }
+
+    public void setStatut(StatutAvarie statut) {
+        this.statut = statut;
     }
 
     public String getPhotoUrl() {

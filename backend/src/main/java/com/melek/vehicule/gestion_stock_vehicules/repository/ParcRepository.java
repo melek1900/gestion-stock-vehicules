@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.Optional;
 @Repository
 public interface ParcRepository extends JpaRepository<Parc, Long> {
-    Optional<Parc> findByNom(String nom); // ✅ Ajout de la recherche par nom
-    List<Parc> findByTypeParc(TypeParc typeParc);  // ✅ Récupérer tous les parcs d'un type donné
+    Optional<Parc> findByNom(String nom);
+    List<Parc> findByTypeParc(TypeParc typeParc);
     List<Parc> findByNomIn(List<String> noms);
-
-
+    Optional<Parc> findByNomIgnoreCase(String nom);
 
 }

@@ -60,7 +60,7 @@ export class ImportVehiculesComponent {
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${localStorage.getItem('token')}` // Ajoute le token si nécessaire
       });
-      this.http.post<{ message: string; status: string }>('http://192.168.1.121:8080/api/vehicules/import-excel', formData, { headers })
+      this.http.post<{ message: string; status: string }>('http://localhost:8080/api/vehicules/import-excel', formData, { headers })
       .subscribe({
         next: (response) => {
           this.importStatus = response.message;

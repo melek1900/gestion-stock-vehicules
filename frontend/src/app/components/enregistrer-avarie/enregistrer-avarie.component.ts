@@ -36,7 +36,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
   styleUrl: './enregistrer-avarie.component.scss'
 })
 export class EnregistrerAvarieComponent {
-  @ViewChild('videoElement') videoElement!: ElementRef;
+  @ViewChild('videoElement', { static: false }) videoElement!: ElementRef;
   form: FormGroup;
   isScanning = false;
   qrResult: string = '';
@@ -57,36 +57,67 @@ export class EnregistrerAvarieComponent {
   parcId!: number; 
   photos: File[] = [];
   isGestionnaire = false;
-
+  listeParcs: any[] = [];
   ngOnInit() {
-    // 1. Initialisation du parc
-    this.getParcId();
+    const token = localStorage.getItem('token');
+    const helper = new JwtHelperService();
+    const decoded = token ? helper.decodeToken(token) : null;
   
-    // 2. Récupération des queryParams (scanner ou manuel)
-    this.route.queryParams.subscribe(params => {
-      const numeroChassis = params['numeroChassis'];
-      const parcNom = params['parc'];
+    // 1️⃣ Thème selon le rôle
+    this.isGestionnaire = decoded?.role === 'ROLE_GESTIONNAIRE_STOCK';
   
-      if (numeroChassis) {
-        this.form.controls['numeroChassis'].setValue(numeroChassis);
-        this.qrResult = numeroChassis;
-        this.verifierVehicule(numeroChassis);
-        this.snackBar.open("✅ Numéro de châssis détecté automatiquement", "Fermer", { duration: 2500 });
-      }
+    // 2️⃣ Charger tous les parcs dynamiquement (filtrés)
+    this.parcService.getParcs().subscribe({
+      next: (parcs) => {
+        this.listeParcs = parcs.filter(p => p.nom !== 'AUPORT' && p.nom !== 'TRANSFERT');
   
-      if (parcNom) {
-        const parcId = this.getParcIdDepuisUrl(); // synchronise bien le parc
-        this.form.controls['parc'].setValue({ id: parcId });
+        const parcNom = this.route.snapshot.queryParams['parc'];
+        const parcTrouve = parcNom
+          ? this.listeParcs.find(p => p.nom.toUpperCase() === parcNom.toUpperCase())
+          : null;
+  
+        if (parcTrouve) {
+          this.parcId = parcTrouve.id;
+          this.form.controls['parc'].setValue(this.parcId);
+          console.log("✅ Parc détecté depuis URL :", parcTrouve.nom);
+        } else if (decoded?.parcId) {
+          this.parcId = decoded.parcId;
+          this.form.controls['parc'].setValue(this.parcId);
+          console.log("✅ Parc détecté via token :", this.parcId);
+        } else {
+          const msg = "🚨 Aucun parc valide détecté ni dans l'URL, ni dans le token.";
+          console.error(msg);
+          this.snackBar.open(msg, "Fermer", { duration: 4000 });
+          throw new Error(msg);
+        }
+      },
+      error: (err) => {
+        const msg = "❌ Erreur lors du chargement des parcs.";
+        console.error(msg, err);
+        this.snackBar.open(msg, "Fermer", { duration: 4000 });
+        throw new Error(msg);
       }
     });
   
-    // 3. Pré-remplissage lors de la saisie manuelle du numéro de châssis
-    this.form.get('numeroChassis')?.valueChanges.subscribe(numeroChassis => {
-      if (numeroChassis && numeroChassis.length >= 5) { // évite les appels à chaque lettre
+    // 3️⃣ Pré-remplissage via queryParams pour le châssis
+    this.route.queryParams.subscribe(params => {
+      const numeroChassis = params['numeroChassis'];
+      if (numeroChassis) {
+        this.qrResult = numeroChassis;
+        this.form.controls['numeroChassis'].setValue(numeroChassis);
         this.verifierVehicule(numeroChassis);
+        this.snackBar.open("📦 Numéro de châssis détecté automatiquement", "Fermer", { duration: 2500 });
+      }
+    });
+  
+    // 4️⃣ Pré-remplissage dynamique lors de la saisie manuelle
+    this.form.get('numeroChassis')?.valueChanges.subscribe(numero => {
+      if (numero && numero.length >= 5) {
+        this.verifierVehicule(numero);
       }
     });
   }
+  
   
   constructor(
     private fb: FormBuilder,
@@ -109,57 +140,8 @@ export class EnregistrerAvarieComponent {
     });
   
     this.avaries = this.form.get('avaries') as FormArray;
-  
-    // ✅ 1. Détection du rôle pour thème dynamique
-    const token = localStorage.getItem('token');
-    if (token) {
-      const helper = new JwtHelperService();
-      const decoded = helper.decodeToken(token);
-      this.isGestionnaire = decoded.role === 'ROLE_GESTIONNAIRE_STOCK';
-    }
-  
-    // ✅ 2. Pré-remplissage via queryParams
-    this.route.queryParams.subscribe(params => {
-      const numeroChassis = params['numeroChassis'];
-      const parcNom = params['parc'];
-  
-      if (numeroChassis) {
-        this.form.controls['numeroChassis'].setValue(numeroChassis);
-        this.qrResult = numeroChassis;
-        this.verifierVehicule(numeroChassis);
-        this.snackBar.open("📦 Numéro de châssis détecté automatiquement", "Fermer", { duration: 2500 });
-      }
-  
-      if (parcNom) {
-        const mappingParc: Record<string, number> = {
-          'MEGRINE': 1, 'A': 1,
-          'CHARGUIA': 2, 'B': 2,
-          'AUPORT': 4, 'C': 4,
-        };
-  
-        const parcId = mappingParc[parcNom.toUpperCase()] || 1;
-        this.parcId = parcId;
-        this.form.controls['parc'].setValue(parcId);
-        console.log("✅ Parc ID détecté via URL :", parcId);
-      } else if (token) {
-        // ✅ Fallback : récupération depuis token si pas dans URL
-        const helper = new JwtHelperService();
-        const decoded = helper.decodeToken(token);
-        if (decoded.parcId) {
-          this.parcId = decoded.parcId;
-          this.form.controls['parc'].setValue(this.parcId);
-          console.log("✅ Parc ID détecté via token :", this.parcId);
-        }
-      }
-    });
-  
-    // ✅ Bonus : remplissage automatique en tapant manuellement un numéro
-    this.form.get('numeroChassis')?.valueChanges.subscribe(numero => {
-      if (numero) {
-        this.verifierVehicule(numero);
-      }
-    });
   }
+  
   envoyerAvarieDirectement(numeroChassis: string, avarie: any, index: number) {
     const formData = new FormData();
   
@@ -179,7 +161,7 @@ export class EnregistrerAvarieComponent {
       Authorization: `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.post(`http://192.168.1.121:8080/api/vehicules/${numeroChassis}/avarie`, formData, { headers }).subscribe({
+    this.http.post(`http://localhost:8080/api/vehicules/${numeroChassis}/avarie`, formData, { headers }).subscribe({
       next: () => {
         this.snackBar.open("✅ Avarie enregistrée avec succès", "Fermer", { duration: 3000 });
         if (index === this.avariesConfirmees.length - 1) {
@@ -193,54 +175,35 @@ export class EnregistrerAvarieComponent {
     });
   }
   
+  getParcId(): number {
+    const parcNomFromUrl = this.route.snapshot.queryParams['parc'];
+    const token = localStorage.getItem('token');
+    const helper = new JwtHelperService();
+    const decoded = token ? helper.decodeToken(token) : null;
   
-  /** ✅ Détection dynamique de l'ID du parc */
-  getParcId() {
-    const parcIdFromUrl = this.route.snapshot.queryParams['parc'];
-    console.log("🔍 Vérification brute de `parcIdFromUrl`:", parcIdFromUrl, "Type:", typeof parcIdFromUrl);
-
-    if (parcIdFromUrl) {
-        // 🔹 Vérifier si `parcIdFromUrl` est bien une chaîne
-        const mappingParcId: { [key: string]: number } = {
-            'MEGRINE': 1,
-            'A': 1,
-            'CHARGUIA': 2,
-            'B': 2,
-            'AUPORT': 4,
-            'C': 4,
-        };
-
-        // 🔹 Vérifier si la valeur existe dans le mapping
-        if (mappingParcId[parcIdFromUrl]) {
-            this.parcId = mappingParcId[parcIdFromUrl]; // 🔥 Récupération sûre
-        } else {
-            console.warn("⚠️ Parc non reconnu, utilisation de la valeur par défaut.");
-            this.parcId = 1;
-        }
-
-        console.log("📌 Parc ID attribué:", this.parcId);
-    } else {
-        console.warn("⚠️ `parcIdFromUrl` est NULL ou UNDEFINED, tentative récupération utilisateur...");
-        this.authService.getUser().subscribe(user => {
-            if (user && user.parcId) {
-                this.parcId = user.parcId;
-                console.log("🟢 Parc ID récupéré depuis l'utilisateur :", this.parcId);
-            } else {
-                this.parcId = 1;
-                console.log("⚠️ Parc ID non trouvé, valeur par défaut :", this.parcId);
-            }
-            this.form.controls['parc'].setValue(this.parcId);
-        });
+    if (!this.listeParcs.length) {
+      throw new Error("🚨 Liste des parcs non chargée !");
     }
-
-    // 🔹 Vérification finale et correction si `NaN`
-    if (isNaN(this.parcId)) {
-        console.error("🚨 ERREUR: `parcId` est NaN après attribution, correction en 1 !");
-        this.parcId = 1;
+  
+    if (parcNomFromUrl) {
+      const parcTrouve = this.listeParcs.find(
+        parc => parc.nom.toUpperCase() === parcNomFromUrl.toUpperCase()
+      );
+  
+      if (parcTrouve) {
+        return parcTrouve.id;
+      } else {
+        throw new Error(`🚨 Parc inconnu dans l'URL : ${parcNomFromUrl}`);
+      }
     }
-
-    this.form.controls['parc'].setValue(this.parcId);
-}
+  
+    if (decoded?.parcId) {
+      return decoded.parcId;
+    }
+  
+    throw new Error("🚨 Impossible de déterminer l'ID du parc (ni dans l'URL, ni dans le token)");
+  }
+  
 
   ajouterAvarie() {
     this.avaries.push(this.fb.group({
@@ -267,7 +230,7 @@ export class EnregistrerAvarieComponent {
     this.verifierVehicule(resultString);
   }
   verifierVehicule(numeroChassis: string) {
-    this.http.get<Vehicule>(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}`)
+    this.http.get<Vehicule>(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}`)
       .subscribe({
         next: (vehicule) => {
           console.log("📌 Véhicule trouvé :", vehicule);
@@ -280,7 +243,7 @@ export class EnregistrerAvarieComponent {
             keyCode: vehicule.keyCode || '',
             production: vehicule.production || '',
             statut: vehicule.statut || '',
-            parc: vehicule.parc?.id || this.getParcIdDepuisUrl(),
+            parc: vehicule.parc?.id ?? this.parcId
           });
   
           this.form.updateValueAndValidity();  // ✅ Force la réévaluation
@@ -473,8 +436,11 @@ export class EnregistrerAvarieComponent {
   
     const formData = new FormData();
     formData.append('numeroChassis', numeroChassis);
-    formData.append('parcId', this.parcId?.toString() || '1');
-  
+    if (!this.parcId) {
+      throw new Error("🚨 Parc ID manquant pour l'enregistrement !");
+    }
+    formData.append('parcId', this.parcId.toString());
+      
     const avariesPayload = this.avariesConfirmees.map((av, index) => ({
       type: av.type,
       commentaire: av.commentaire,
@@ -494,7 +460,7 @@ export class EnregistrerAvarieComponent {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.post(`http://192.168.1.121:8080/api/vehicules/reception`, formData, { headers }).subscribe({
+    this.http.post(`http://localhost:8080/api/vehicules/reception`, formData, { headers }).subscribe({
       next: () => {
         this.snackBar.open("✅ Véhicule + avaries enregistrés avec succès !", "Fermer", { duration: 3000 });
         this.router.navigate(['/creer-avarie']);
@@ -519,8 +485,11 @@ export class EnregistrerAvarieComponent {
   
     const formData = new FormData();
     formData.append('numeroChassis', this.form.value.numeroChassis);
-    formData.append('parcId', this.parcId?.toString() || '1');
-  
+    if (!this.parcId) {
+      throw new Error("🚨 Parc ID manquant pour l'enregistrement !");
+    }
+    formData.append('parcId', this.parcId.toString());
+      
     // Ajouter la première avarie confirmée sans les photos
     if (this.avariesConfirmees.length > 0) {
       const avarie = { ...this.avariesConfirmees[0] };
@@ -548,7 +517,7 @@ export class EnregistrerAvarieComponent {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    this.http.post(`http://192.168.1.121:8080/api/vehicules/reception`, formData, { headers }).subscribe({
+    this.http.post(`http://localhost:8080/api/vehicules/reception`, formData, { headers }).subscribe({
       next: () => {
         this.snackBar.open("🚗 Véhicule réceptionné avec succès !", "Fermer", { duration: 3000 });
   
@@ -569,11 +538,11 @@ export class EnregistrerAvarieComponent {
   }
   
   getPhotoUrl(photoId: number): string {
-    return `http://192.168.1.121:8080/photos/${photoId}`;
+    return `http://localhost:8080/photos/${photoId}`;
   }
 /** ✅ Rafraîchir les données du véhicule après mise à jour */
 refreshVehiculeData(numeroChassis: string) {
-  this.http.get<Vehicule>(`http://192.168.1.121:8080/api/vehicules/chassis/${numeroChassis}?nocache=${new Date().getTime()}`)
+  this.http.get<Vehicule>(`http://localhost:8080/api/vehicules/chassis/${numeroChassis}?nocache=${new Date().getTime()}`)
     .subscribe({
       next: (updatedVehicule) => {
         console.log("✅ Véhicule mis à jour récupéré :", updatedVehicule);
@@ -614,29 +583,29 @@ getParcIdDepuisUrl(): void {
   console.log("🔍 Parc détecté depuis l'URL :", parcNom);
 
   if (!parcNom) {
-    console.warn("⚠️ Aucun parc trouvé dans l'URL, utilisation de la valeur par défaut.");
-    this.parcId = 1; // Valeur par défaut si aucun parc n'est trouvé
-    return;
+    throw new Error("🚨 Aucun parc détecté dans l'URL.");
   }
 
-  this.parcService.getParcs().subscribe(parcs => {
-    const parcTrouve = parcs.find(parc => parc.nom.toUpperCase() === parcNom.toUpperCase());
+  this.parcService.getParcs().subscribe({
+    next: (parcs) => {
+      this.listeParcs = parcs.filter(p => p.nom !== 'AUPORT' && p.nom !== 'TRANSFERT');
 
-    if (parcTrouve) {
-      this.parcId = parcTrouve.id;
-      console.log("✅ Parc ID attribué dynamiquement:", this.parcId);
-    } else {
-      console.warn(`⚠️ Parc '${parcNom}' non trouvé en base, utilisation de la valeur par défaut.`);
-      this.parcId = 1;
+      const parcTrouve = this.listeParcs.find(parc => parc.nom.toUpperCase() === parcNom.toUpperCase());
+      if (parcTrouve) {
+        this.parcId = parcTrouve.id;
+        this.form.controls['parc'].setValue(this.parcId);
+        console.log("✅ Parc ID trouvé dynamiquement :", this.parcId);
+      } else {
+        throw new Error(`🚨 Parc inconnu : ${parcNom}`);
+      }
+    },
+    error: (err) => {
+      console.error("❌ Erreur lors du chargement des parcs :", err);
+      throw new Error("❌ Impossible de charger les parcs !");
     }
-
-    // ✅ Mise à jour du formulaire avec l'ID du parc
-    this.form.controls['parc'].setValue(this.parcId);
-  }, error => {
-    console.error("🚨 Erreur lors de la récupération des parcs :", error);
-    this.parcId = 1; // Valeur de secours
   });
 }
+
 
 
   envoyerAvarieEtPhotos(vehiculeId: number, avarie: any, index: number) {
@@ -656,7 +625,7 @@ getParcIdDepuisUrl(): void {
       })
     };
   
-    this.http.post(`http://192.168.1.121:8080/api/avaries`, avarieData, httpOptions).subscribe({
+    this.http.post(`http://localhost:8080/api/avaries`, avarieData, httpOptions).subscribe({
       next: (avarieEnregistree: any) => {
         console.log("✅ Avarie enregistrée :", avarieEnregistree);
         
@@ -686,7 +655,7 @@ getParcIdDepuisUrl(): void {
     formData.append('avarieId', avarieId.toString());
   
     console.log(`📡 Envoi de la photo ${index + 1} pour l'avarie ${avarieId}`);
-    this.http.post(`http://192.168.1.121:8080/api/photos`, formData).subscribe({
+    this.http.post(`http://localhost:8080/api/photos`, formData).subscribe({
       next: () => console.log(`✅ Photo ${index + 1} envoyée`),
       error: (error) => console.error(`❌ Erreur lors de l'envoi de la photo ${index + 1} :`, error)
     });

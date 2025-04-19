@@ -15,7 +15,16 @@ interface StockParcParMarque {
   parc: string;
   count: number;
 }
-
+interface RotationStat {
+  mois: string;
+  marque: string;
+  quantiteVendue: number;
+}
+interface RotationTaux {
+  mois: string;
+  marque: string;
+  taux: number;
+}
 @Component({
   selector: 'app-dashboard-statistiques',
   standalone: true,
@@ -36,6 +45,7 @@ export class DashboardStatistiquesComponent implements OnInit {
   statutVehiculeStats: { statut: string, label: string, color: string, count: number }[] = [];
   ordreStatuts: { statut: string, count: number, color: string }[] = [];
   selectedMarque: string = 'ISUZU'; 
+  
   marquesDisponibles: string[] = ['GM', 'ISUZU', 'CHEVROLET'];
   selectedMarques: string[] = ['GM', 'ISUZU','CHEVROLET']; 
   marquesConcurDisponibles: string[] = ['ASTRA', 'BMW', 'CHANA', 'FORD', 'MERCEDES', 'TOYOTA']; // à adapter
@@ -51,6 +61,34 @@ export class DashboardStatistiquesComponent implements OnInit {
     'TOYOTA': '#AAB7B8'
   };
   readonly ALL_MARK = 'ALL';
+
+  rotationTauxQuantiteChartOptions: ApexOptions = {
+    series: [],
+    chart: { type: 'bar', height: 350 },
+    plotOptions: { bar: { columnWidth: '60%' } },
+    xaxis: { categories: [] },
+    title: {
+      text: 'Taux de rotation (Quantité)',
+      align: 'left',
+      style: { fontSize: '18px', fontWeight: '600', color: '#003366' }
+    },
+    dataLabels: { enabled: true },
+    colors: ['#0073A8', '#F4A300', '#e74c3c']
+  };
+  
+  rotationTauxValeurChartOptions: ApexOptions = {
+    series: [],
+    chart: { type: 'bar', height: 350 },
+    plotOptions: { bar: { columnWidth: '60%' } },
+    xaxis: { categories: [] },
+    title: {
+      text: 'Taux de rotation (Valeur)',
+      align: 'left',
+      style: { fontSize: '18px', fontWeight: '600', color: '#003366' }
+    },
+    dataLabels: { enabled: true },
+    colors: ['#0073A8', '#F4A300', '#e74c3c']
+  };
 
   genreNosChartOptions: ApexOptions = {
     series: [],
@@ -144,7 +182,7 @@ displaySelectedMarques = (): string => {
       return;
     }
   
-    this.http.get<any[]>(`http://192.168.1.121:8080/api/ventes-general/par-genre-par-marque?marques=${selected.join(',')}`, { headers })
+    this.http.get<any[]>(`http://localhost:8080/api/ventes-general/par-genre-par-marque?marques=${selected.join(',')}`, { headers })
       .subscribe(data => {
         const filtered = data.filter(d => selected.includes(d.marque));
         const genres = [...new Set(filtered.map(d => d.genre))];
@@ -191,6 +229,78 @@ displaySelectedMarques = (): string => {
         };
       });
   }
+  onMarqueChangeTaux(): void {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+  
+    const moisList = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    const moisTraduit: { [key: string]: string } = {
+      January: 'Janvier',
+      February: 'Février',
+      March: 'Mars',
+      April: 'Avril',
+      May: 'Mai',
+      June: 'Juin',
+      July: 'Juillet',
+      August: 'Août',
+      September: 'Septembre',
+      October: 'Octobre',
+      November: 'Novembre',
+      December: 'Décembre',
+    };
+  
+    // 📊 Quantité
+    this.http.get<RotationTaux[]>(`http://localhost:8080/api/rotation-stock/taux/quantite?marque=${this.selectedMarque}`, { headers })
+      .subscribe(data => {
+        console.log('Data quantité reçue :', data);
+  
+        // ✅ Traduction des mois
+        const translatedData = data.map(d => ({
+          ...d,
+          mois: moisTraduit[d.mois] || d.mois
+        }));
+  
+        const serieQuantite = [{
+          name: this.selectedMarque,
+          data: moisList.map(mois => {
+            const match = translatedData.find(d => d.mois === mois);
+            return match ? match.taux : 0;
+          })
+        }];
+  
+        this.rotationTauxQuantiteChartOptions = {
+          ...this.rotationTauxQuantiteChartOptions,
+          series: serieQuantite,
+          xaxis: { categories: moisList }
+        };
+      });
+  
+    // 📊 Valeur
+    this.http.get<RotationTaux[]>(`http://localhost:8080/api/rotation-stock/taux/valeur?marque=${this.selectedMarque}`, { headers })
+      .subscribe(data => {
+        console.log('Data valeur reçue :', data);
+  
+        // ✅ Traduction des mois
+        const translatedData = data.map(d => ({
+          ...d,
+          mois: moisTraduit[d.mois] || d.mois
+        }));
+  
+        const serieValeur = [{
+          name: this.selectedMarque,
+          data: moisList.map(mois => {
+            const match = translatedData.find(d => d.mois === mois);
+            return match ? match.taux : 0;
+          })
+        }];
+  
+        this.rotationTauxValeurChartOptions = {
+          ...this.rotationTauxValeurChartOptions,
+          series: serieValeur,
+          xaxis: { categories: moisList }
+        };
+      });
+  }
   
   onNosMarquesChange(): void {
     const token = localStorage.getItem('token');
@@ -203,7 +313,7 @@ displaySelectedMarques = (): string => {
     };
     const colors = this.selectedMarques.map(marque => colorMap[marque] || '#A4B0BE');
   
-    this.http.get<any[]>('http://192.168.1.121:8080/api/ventes-general/par-genre-par-marque?marques=' + this.selectedMarques.join(','), { headers })
+    this.http.get<any[]>('http://localhost:8080/api/ventes-general/par-genre-par-marque?marques=' + this.selectedMarques.join(','), { headers })
       .subscribe(data => {
         const filtered = data.filter(d => this.selectedMarques.includes(d.marque));
         const genres = [...new Set(filtered.map(d => d.genre))];
@@ -443,13 +553,119 @@ displaySelectedMarques = (): string => {
       labels: { colors: '#003366' }
     }
   };
-
+  rotationStockChartOptions: ApexOptions = {
+    series: [],
+    chart: {
+      type: 'bar',
+      height: 400,
+      stacked: true
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '50%'
+      }
+    },
+    xaxis: {
+      categories: []
+    },
+    title: {
+      text: 'Quantité vendue par marque/mois',
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
+    },
+    dataLabels: {
+      enabled: true
+    },
+    colors: ['#0073A8', '#F4A300', '#e74c3c']
+  };
+  venteParRegionPieChartOptions: ApexOptions = {
+    series: [],
+    chart: {
+      type: 'pie',
+      width: 400
+    },
+    labels: [],
+    title: {
+      text: 'Répartition des ventes par région',
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
+    },
+    dataLabels: { enabled: true },
+    legend: { show: false, position: 'bottom' },
+    colors: ['#0073A8', '#F4A300', '#e74c3c', '#2ecc71', '#8e44ad']
+  };
+  venteParEnergiePieChartOptions: ApexOptions = {
+    series: [],
+    chart: {
+      type: 'pie',
+      width: 400
+    },
+    labels: [],
+    title: {
+      text: 'Répartition des ventes par énergie',
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#003366'
+      }
+    },
+    dataLabels: {
+      enabled: true
+    },
+    legend: {
+      show: false,
+      position: 'bottom'
+    },
+    colors: ['#0073A8', '#F4A300', '#e74c3c', '#2ecc71', '#8e44ad']
+  };
   constructor(private http: HttpClient) {}
+  onMarqueChangeRegion(): void {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+  
+    this.http.get<any[]>(`http://localhost:8080/api/ventes-region/statistiques/par-region?marque=${this.selectedMarque}`, { headers })
+      .subscribe(data => {
+        const hasData = data && data.length > 0;
+  
+        this.venteParRegionPieChartOptions = {
+          ...this.venteParRegionPieChartOptions,
+          series: hasData ? data.map(item => item.total) : [],
+          labels: hasData ? data.map(item => item.region) : [],
+          colors: hasData ? ['#0073A8', '#F4A300', '#e74c3c', '#2ecc71', '#8e44ad'] : []
+        };
+      });
+  }
+  onMarqueChangeEnergie(): void {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+  
+    this.http.get<any[]>(`http://localhost:8080/api/ventes-energie/statistiques/par-energie?marque=${this.selectedMarque}`, { headers })
+      .subscribe(data => {
+        const hasData = data && data.length > 0;
+  
+        this.venteParEnergiePieChartOptions = {
+          ...this.venteParEnergiePieChartOptions,
+          series: hasData ? data.map(item => item.total) : [],
+          labels: hasData ? data.map(item => item.energie) : [],
+          colors: hasData ? ['#0073A8', '#F4A300', '#e74c3c', '#2ecc71', '#8e44ad'] : []
+        };
+      });
+  }
   onMarqueChange(): void {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
   
-    this.http.get<any[]>(`http://192.168.1.121:8080/api/ventes/statistiques/par-modele?marque=${this.selectedMarque}`, { headers })
+    this.http.get<any[]>(`http://localhost:8080/api/ventes/statistiques/par-modele?marque=${this.selectedMarque}`, { headers })
       .subscribe(data => {
         if (data.length > 0) {
           this.venteParModelePieChartOptions = {
@@ -470,6 +686,7 @@ displaySelectedMarques = (): string => {
   ngOnInit(): void {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
+    this.selectedMarquesConcur = [this.ALL_MARK, ...this.marquesConcurDisponibles];
 
     this.onMarqueChange();
     this.loadStatutVehiculeStats(headers);
@@ -477,9 +694,12 @@ displaySelectedMarques = (): string => {
     this.loadStockParcParMarque(headers);
     this.onNosMarquesChange();
     this.onConcurMarquesChange();
-    this.selectedMarquesConcur = [this.ALL_MARK, ...this.marquesConcurDisponibles];
+    this.loadRotationStockStats();
+    this.onMarqueChangeRegion();
+    this.onMarqueChangeEnergie();
+    this.onMarqueChangeTaux();
 
-    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules/statistiques/par-parc', { headers })
+    this.http.get<any[]>('http://localhost:8080/api/vehicules/statistiques/par-parc', { headers })
       .subscribe(data => {
         this.stats = data;
         this.totalVehicules = data.reduce((sum, parc) => sum + parc.count, 0);
@@ -497,7 +717,7 @@ displaySelectedMarques = (): string => {
         };
       });
 
-    this.http.get<any[]>('http://192.168.1.121:8080/api/vehicules/statistiques/par-marque', { headers })
+    this.http.get<any[]>('http://localhost:8080/api/vehicules/statistiques/par-marque', { headers })
       .subscribe(data => {
         const colorsPerBar = data.map((_, i) => this.parcColors[i % this.parcColors.length]);
 
@@ -514,9 +734,62 @@ displaySelectedMarques = (): string => {
 
       
   }
-
+  loadRotationStockStats(): void {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+  
+    this.http.get<RotationStat[]>('http://localhost:8080/api/rotation-stock/statistiques/quantite-vendue', { headers })
+      .subscribe(data => {
+        const moisList = [
+          'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+          'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+        ];
+  
+        const moisTraduit: { [key: string]: string } = {
+          January: 'Janvier',
+          February: 'Février',
+          March: 'Mars',
+          April: 'Avril',
+          May: 'Mai',
+          June: 'Juin',
+          July: 'Juillet',
+          August: 'Août',
+          September: 'Septembre',
+          October: 'Octobre',
+          November: 'Novembre',
+          December: 'Décembre'
+        };
+  
+        // ✅ Traduction des mois dans les données
+        const translatedData = data.map(d => ({
+          ...d,
+          mois: moisTraduit[d.mois] || d.mois
+        }));
+  
+        const marques = ['GM', 'ISUZU', 'CHEVROLET'];
+  
+        const series = marques.map(marque => ({
+          name: marque,
+          data: moisList.map(mois => {
+            const entry = translatedData.find(d =>
+              d.marque === marque && d.mois === mois
+            );
+            return entry ? entry.quantiteVendue : 0;
+          })
+        }));
+  
+        this.rotationStockChartOptions = {
+          ...this.rotationStockChartOptions,
+          series,
+          xaxis: { categories: moisList }
+        };
+      }, error => {
+        console.error("Erreur chargement statistiques :", error);
+      });
+  }
+  
   loadStatutVehiculeStats(headers: any) {
-    this.http.get<{ [key: string]: number }>('http://192.168.1.121:8080/api/vehicules/statistiques/par-statut', { headers })
+    this.http.get<{ [key: string]: number }>('http://localhost:8080/api/vehicules/statistiques/par-statut', { headers })
       .subscribe(data => {
         const mapping: Record<string, { label: string; color: string }> = {
           EN_ETAT: { label: 'En état', color: '#4CAF50' },
@@ -536,12 +809,13 @@ displaySelectedMarques = (): string => {
   }
 
   loadOrdreMissionStatuts(headers: any) {
-    this.http.get<{ [key: string]: number }>('http://192.168.1.121:8080/api/ordres-mission/statistiques/statut', { headers })
+    this.http.get<{ [key: string]: number }>('http://localhost:8080/api/ordres-mission/statistiques/statut', { headers })
       .subscribe(data => {
         const couleurs: Record<string, string> = {
           EN_COURS: '#0073A8',
           CLOTURE: '#A4B0BE',
-          PARTIEL: '#9E9E9E'
+          PARTIEL: '#9E9E9E',
+          ANNULE: '#e74c3c'
         };
 
         this.ordreStatuts = Object.entries(data).map(([statut, count]) => ({
@@ -553,7 +827,7 @@ displaySelectedMarques = (): string => {
   }
 
   loadStockParcParMarque(headers: any) {
-    this.http.get<StockParcParMarque[]>('http://192.168.1.121:8080/api/vehicules/statistiques/stock-parc-par-marque', { headers })
+    this.http.get<StockParcParMarque[]>('http://localhost:8080/api/vehicules/statistiques/stock-parc-par-marque', { headers })
       .subscribe(data => {
         const marques = [...new Set(data.map(d => d.marque))];
         const parcs = [...new Set(data.map(d => d.parc))];
