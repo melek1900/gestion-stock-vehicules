@@ -54,7 +54,9 @@ export class NavbarComponent {
   updateScreenSize() {
     this.isMobile = window.innerWidth <= 768;
   }
-
+  goToProfile() {
+    this.router.navigate(['/profil']);
+  }
   getRoleLabel(): string {
     switch (this.role) {
       case 'ADMINISTRATEUR':

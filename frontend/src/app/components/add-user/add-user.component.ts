@@ -29,6 +29,7 @@ export class AddUserComponent {
   parcs: any[] = [];
   parcsAcces: any[] = [];
   loadingParcs: boolean = false;
+  marquesDisponibles: string[] = [];
 
   roles = [
     { label: 'Administrateur', value: 'ROLE_ADMINISTRATEUR' },
@@ -57,8 +58,21 @@ export class AddUserComponent {
 
   ngOnInit(): void {
     this.chargerParcs();
-  }
+    this.chargerMarques();
 
+  }
+  chargerMarques() {
+    this.http.get<string[]>('http://localhost:8080/api/utilisateurs/marques-accessibles')
+      .subscribe({
+        next: (data) => {
+          this.marquesDisponibles = data;
+          console.log("✅ Marques chargées :", data);
+        },
+        error: (err) => {
+          console.error("❌ Erreur chargement marques:", err);
+        }
+      });
+  }
   chargerParcs() {
     this.loadingParcs = true;
     this.http.get<any[]>('http://localhost:8080/api/parcs')

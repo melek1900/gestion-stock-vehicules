@@ -97,16 +97,30 @@
     </table>
     <mat-divider class="ligne-separation"></mat-divider>
 
-    <mat-form-field appearance="fill">
-      <mat-label>Choisir un parc de destination</mat-label>
-      <mat-select [(ngModel)]="parcDestination" required>
-        <mat-option *ngFor="let parc of parcs" [value]="parc.id">{{ parc.nom }}</mat-option>
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Parc destination</mat-label>
+      <mat-select [(ngModel)]="parcDestination" (selectionChange)="onParcDestinationChange($event.value)">
+        <mat-option *ngFor="let parc of parcs" [value]="parc.id">
+          {{ parc.nom }}
+        </mat-option>
       </mat-select>
     </mat-form-field>
+    
+  <!-- Sélecteur des sous-parcs, visible uniquement si on est dans CARROSSERIE -->
+  <div *ngIf="sousParcs.length > 0">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Sous-parc destination</mat-label>
+      <mat-select [(ngModel)]="sousParcSelectionne">
+        <mat-option *ngFor="let sp of sousParcs" [value]="sp.id">
+          {{ sp.nom }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
     <mat-form-field appearance="fill">
-      <mat-label>Choisir un chauffeur</mat-label>
-      <mat-select [(ngModel)]="chauffeurSelectionne" required>
+      <mat-label>Choisir un ou plusieurs chauffeurs</mat-label>
+      <mat-select [(ngModel)]="chauffeursSelectionnes" multiple required>
         <mat-option *ngFor="let chauffeur of chauffeurs" [value]="chauffeur.id">
           {{ chauffeur.nom }} {{ chauffeur.prenom }}
         </mat-option>
@@ -121,11 +135,36 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-
+    <mat-form-field appearance="fill">
+      <mat-label>Date de départ</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="dateDepart" [matDatepickerFilter]="filterDates" required>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    
+    <!-- Heure de départ -->
+    <mat-form-field appearance="fill">
+      <mat-label>Heure de départ</mat-label>
+      <mat-select [(ngModel)]="heureDepart" required>
+        <mat-option *ngFor="let heure of heuresDisponibles" [value]="heure">
+          {{ heure }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    
+    <!-- Motif de déplacement -->
+    <mat-form-field appearance="fill">
+      <mat-label>Motif de déplacement</mat-label>
+      <mat-select [(ngModel)]="motifSelectionne" required>
+        <mat-option *ngFor="let motif of motifs" [value]="motif.id">
+          {{ motif.libelle }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
     <!-- Bouton de validation -->
     <div class="action-buttons">
       <button mat-raised-button color="primary" (click)="initierTransfert()" 
-        [disabled]="vehiculesSelectionnes.length === 0 || !parcDestination || !chauffeurSelectionne || !vehiculeTransportSelectionne">
+      [disabled]="vehiculesSelectionnes.length === 0 || !parcDestination || chauffeursSelectionnes.length === 0 || !vehiculeTransportSelectionne">
         Générer Ordre Mission
       </button>
     </div>

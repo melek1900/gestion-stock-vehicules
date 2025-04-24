@@ -58,7 +58,14 @@
   display: flex;
   align-items: center;
 }
+button[mat-menu-item] mat-icon {
+  margin-right: 8px;
+  color: #0073A8; 
+}
 
+.user-menu-icon {
+  margin-left: 1rem;
+}
 .role {
   margin-left: 4px;
   margin-right: 5px;

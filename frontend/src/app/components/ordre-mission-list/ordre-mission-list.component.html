@@ -45,10 +45,20 @@
       </ng-container>
   
       <!-- Chauffeur -->
-      <ng-container matColumnDef="chauffeur">
-        <th mat-header-cell *matHeaderCellDef> Chauffeur </th>
-        <td mat-cell *matCellDef="let ordre"> {{ ordre.chauffeur.nom }} {{ ordre.chauffeur.prenom }} </td>
-      </ng-container>
+    <!-- Chauffeur -->
+<ng-container matColumnDef="chauffeur">
+  <th mat-header-cell *matHeaderCellDef> Chauffeur </th>
+  <td mat-cell *matCellDef="let ordre">
+    <ng-container *ngIf="ordre.chauffeurs?.length > 0; else pasChauffeur">
+      <div *ngFor="let chauffeur of ordre.chauffeurs">
+        {{ chauffeur.nom }} {{ chauffeur.prenom }}
+      </div>
+    </ng-container>
+    <ng-template #pasChauffeur>
+      Non défini
+    </ng-template>
+  </td>
+</ng-container>
   
       <!-- Véhicule Transport -->
       <ng-container matColumnDef="vehicule">
@@ -59,13 +69,13 @@
       <!-- Parc Départ -->
       <ng-container matColumnDef="parcDepart">
         <th mat-header-cell *matHeaderCellDef> Parc Départ </th>
-        <td mat-cell *matCellDef="let ordre"> {{ ordre.parcDepart.nom }} </td>
+        <td mat-cell *matCellDef="let ordre"> {{ ordre.parcDepart?.nom || 'Parc inconnu' }} </td>
       </ng-container>
   
       <!-- Parc Arrivée -->
       <ng-container matColumnDef="parcArrivee">
         <th mat-header-cell *matHeaderCellDef> Parc Arrivée </th>
-        <td mat-cell *matCellDef="let ordre"> {{ ordre.parcArrivee.nom }} </td>
+        <td mat-cell *matCellDef="let ordre"> {{ ordre.parcArrivee?.nom || 'Parc inconnu' }} </td>
       </ng-container>
   
       <!-- Statut -->
@@ -96,6 +106,14 @@
               <mat-icon>cancel</mat-icon>
               <span>Annuler</span>
             </button>
+            <button
+              mat-menu-item
+              *ngIf="ordre.statut === 'EN_COURS'"
+              (click)="ouvrirPopupTransfert(ordre)">
+              <mat-icon>swap_horiz</mat-icon>
+              <mat-option *ngIf="ordre.statut === 'EN_COURS'">Transfert Carrosserie</mat-option>
+              
+          </button>
           </mat-menu>
         </td>
       </ng-container>

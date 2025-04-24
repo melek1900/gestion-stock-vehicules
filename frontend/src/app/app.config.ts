@@ -36,6 +36,7 @@ import { UtilisateurListComponent } from './components/utilisateur-list/utilisat
 import { ReparationMobileComponent } from './components/reparation-mobile/reparation-mobile.component';
 import { MarqueListeComponent } from './components/marque-liste/marque-liste.component';
 import { DashboardStatistiquesComponent } from './components/dashboard-statistiques/dashboard-statistiques.component';
+import { ProfilUtilisateurComponent } from './components/profil-utilisateur/profil-utilisateur.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -67,6 +68,9 @@ const appRoutes: Routes = [
   { path: 'avarie-list-mobile', component: ReparationMobileComponent},
   { path: 'list-marque', component: MarqueListeComponent},
   { path: 'dashbord-stats', component: DashboardStatistiquesComponent},
+  { path: 'profil', component: ProfilUtilisateurComponent},
+  { path: 'List-users', component: UtilisateurListComponent},
+
 
 
 

@@ -9,6 +9,7 @@ import {
 import { ScrollAnimateDirective } from './scroll-animate.directive';
 import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
+import { Router, RouterModule } from '@angular/router';
 
 interface StockParcParMarque {
   marque: string;
@@ -34,7 +35,8 @@ interface RotationTaux {
     NgApexchartsModule,
     ScrollAnimateDirective,
     FormsModule,
-    MatSelectModule
+    MatSelectModule,
+    RouterModule 
   ],
   templateUrl: './dashboard-statistiques.component.html',
   styleUrls: ['./dashboard-statistiques.component.scss']
@@ -628,7 +630,7 @@ displaySelectedMarques = (): string => {
     },
     colors: ['#0073A8', '#F4A300', '#e74c3c', '#2ecc71', '#8e44ad']
   };
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,private router: Router) {}
   onMarqueChangeRegion(): void {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -870,5 +872,8 @@ displaySelectedMarques = (): string => {
       typeof this.marqueChartOptions.series[0] === 'object' &&
       'data' in this.marqueChartOptions.series[0] &&
       Array.isArray((this.marqueChartOptions.series[0] as any).data);
+  }
+  goToOrdresMission(statut: string) {
+    this.router.navigate(['/ordre-mission'], { queryParams: { statut } });
   }
 }

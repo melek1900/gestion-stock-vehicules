@@ -49,7 +49,14 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-  
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Marques accessibles</mat-label>
+        <mat-select formControlName="marquesAccessibles" multiple>
+          <mat-option *ngFor="let marque of marquesDisponibles" [value]="marque">
+            {{ marque }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
       <!-- Indicateur de chargement -->
       <mat-progress-spinner *ngIf="loadingParcs" mode="indeterminate"></mat-progress-spinner>
   

@@ -56,7 +56,7 @@ export class VehiculeListComponent implements OnInit {
     'modele',
     'shortColor',
     'numeroChassis',
-    'productionDate',
+    'pegCode',
     'parcNom',
     'statut',
     'actions'
@@ -85,6 +85,15 @@ export class VehiculeListComponent implements OnInit {
   searchChassis = '';
   searchColor = '';
   searchBrand = '';
+
+  modeleOptions: string[] = [];
+  pegCodeOptions: string[] = [];
+  colorOptions: string[] = [];
+
+  selectedModel: string = '';
+  selectedType: string = '';
+  selectedColor: string = '';
+
   parcMapping: Record<number, string> = {};
   constructor(private cdr: ChangeDetectorRef, private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
 
@@ -293,8 +302,11 @@ export class VehiculeListComponent implements OnInit {
   /** ✅ Vérifie si le bouton "Transférer" doit être désactivé */
   isTransfertDisabled(): boolean {
     return this.selection.selected.length === 0 || 
-           this.selection.selected.some(v => v.statut !== 'EN_ETAT');
+           this.selection.selected.some(v => 
+             v.statut !== 'EN_ETAT' && v.statut !== 'AVARIE'
+           );
   }
+  
   
   toggleAllRows() {
     if (this.isAllSelected()) {
@@ -316,14 +328,9 @@ async chargerVehicules() {
 
   const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-  console.log("📌 Parcs sélectionnés :", this.selectedParcs);
-  console.log("📌 Marques accessibles :", this.marquesAccessibles);
-
   const vehiculesAutorisés = await this.http
     .get<Vehicule[]>('http://localhost:8080/api/vehicules', { headers })
     .toPromise();
-
-  console.log("✅ Véhicules autorisés récupérés :", vehiculesAutorisés?.length);
 
   let vehiculesTransfert: Vehicule[] = [];
   if (this.selectedParcs.includes('TRANSFERT')) {
@@ -333,9 +340,8 @@ async chargerVehicules() {
         .toPromise();
 
       vehiculesTransfert = data || [];
-      console.log("📦 Véhicules TRANSFERT récupérés :", vehiculesTransfert.length);
     } catch (error) {
-      console.error("❌ Erreur chargement véhicules TRANSFERT :", error);
+      console.error("Erreur chargement véhicules TRANSFERT :", error);
     }
   }
 
@@ -351,7 +357,7 @@ async chargerVehicules() {
       return {
         ...v,
         parcNom: this.parcMapping[v.parcId] || 'Parc Inconnu',
-        productionDate: v.productionDate ? new Date(v.productionDate) : null,
+        pegCode: v.pegCode || 'Non défini',
         shortColor: v.shortColor || 'Non défini',
         shortDescription: (v.shortDescription || 'Non défini').toUpperCase(),
         enUtilisation
@@ -359,11 +365,25 @@ async chargerVehicules() {
     })
   );
 
-  this.vehicules = vehiculesAvecUtilisation;
-  this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription))];
+  this.vehicules = vehiculesAvecUtilisation.filter(v =>
+    !v.enUtilisation &&
+    !['VENDU', 'RESERVE', 'LIVREE'].includes(v.statut)
+  );
 
-  this.filtrerVehicules(); // 🧠 Mise à jour avec les nouveaux véhicules filtrés
+  this.marquesDisponibles = [...new Set(this.vehicules.map(v => v.shortDescription))];
+  const parcsDansVehicules = [...new Set(this.vehicules.map(v => v.parcNom))];
+  this.selectedParcs = parcsDansVehicules.filter(p =>
+    this.parcsAccessibles.some(pa => pa.nom === p) || p === 'TRANSFERT'
+  );
+
+  this.modeleOptions = [...new Set(this.vehicules.map(v => v.modele).filter(Boolean))];
+  this.pegCodeOptions = [...new Set(this.vehicules.map(v => v.pegCode).filter(Boolean))];
+  this.colorOptions = [...new Set(this.vehicules.map(v => v.shortColor).filter(Boolean))];
+
+  this.filtrerVehicules();
 }
+
+
 
 
 obtenirParcAssocie(): string | null {
@@ -371,7 +391,6 @@ obtenirParcAssocie(): string | null {
   if (token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      console.log("🔍 Payload du token :", payload);
       return payload.parcNom || null; // ✅ Retourne null si non défini
     } catch (error) {
       console.error("❌ Erreur lors du décodage du token :", error);
@@ -416,28 +435,28 @@ filtrerVehicules() {
 
     const matchStatut = this.selectedStatut === 'all' || vehicule.statut?.toUpperCase() === this.selectedStatut.toUpperCase();
     const matchMarque = this.selectedMarques.length === 0 || this.selectedMarques.includes(vehicule.shortDescription);
-
+    const matchModele = !this.selectedModel || vehicule.modele === this.selectedModel;
+    const matchPegCode = !this.selectedType || vehicule.pegCode === this.selectedType;
+    const matchCouleur = !this.selectedColor || vehicule.shortColor === this.selectedColor;
+    
     let matchSearch = true;
     if (searchLower) {
       const matchChassis = vehicule.numeroChassis?.toLowerCase().includes(searchLower);
       const matchModele = vehicule.modele?.toLowerCase().includes(searchLower);
       const matchCouleur = vehicule.shortColor?.toLowerCase().includes(searchLower);
-      const matchDate = vehicule.productionDate instanceof Date && !isNaN(vehicule.productionDate)
-        ? new Intl.DateTimeFormat('fr-FR').format(vehicule.productionDate).toLowerCase().includes(searchLower)
-        : false;
       const matchShortDesc = vehicule.shortDescription?.toLowerCase().includes(searchLower);
 
-      matchSearch = matchChassis || matchModele || matchCouleur || matchShortDesc || matchDate;
+      matchSearch = matchChassis || matchModele || matchCouleur || matchShortDesc;
     }
 
-    return matchStatut && matchMarque && matchSearch;
+    return matchStatut && matchMarque && matchSearch && matchModele && matchPegCode && matchCouleur;
   });
 
-  // ✅ Mise à jour de la dataSource avec pagination
   this.dataSource = new MatTableDataSource(this.vehiculesFiltres);
   this.dataSource.paginator = this.paginator;
   if (this.paginator) this.paginator.firstPage();
 }
+
 
 
 

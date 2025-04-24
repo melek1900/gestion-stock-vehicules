@@ -98,20 +98,51 @@
       <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortDescription || 'Non défini' }}</td>
     </ng-container>
     <ng-container matColumnDef="modele">
-      <th mat-header-cell *matHeaderCellDef>Modèle</th>
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-select
+        [(ngModel)]="selectedModel"
+        (selectionChange)="filtrerVehicules()"
+        class="column-filter"
+      >
+        <mat-option value="">Modèle</mat-option>
+        <mat-option *ngFor="let m of modeleOptions" [value]="m">{{ m }}</mat-option>
+      </mat-select>
+      </th>
       <td mat-cell *matCellDef="let vehicule">{{ vehicule.modele }}</td>
     </ng-container>
     <ng-container matColumnDef="shortColor">
-      <th mat-header-cell *matHeaderCellDef>Couleur</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortColor || 'Non défini' }}</td>
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-select
+        [(ngModel)]="selectedColor"
+        (selectionChange)="filtrerVehicules()"
+        disableOptionCentering
+        panelClass="header-select-panel"
+        class="column-filter"
+      >
+        <mat-option value="">Couleur</mat-option>
+        <mat-option *ngFor="let c of colorOptions" [value]="c">{{ c }}</mat-option>
+      </mat-select>
+      </th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.shortColor }}</td>
     </ng-container>
+    
     <ng-container matColumnDef="numeroChassis">
       <th mat-header-cell *matHeaderCellDef>N° Châssis</th>
       <td mat-cell *matCellDef="let vehicule">{{ vehicule.numeroChassis }}</td>
     </ng-container>
-    <ng-container matColumnDef="productionDate">
-      <th mat-header-cell *matHeaderCellDef>Date de production</th>
-      <td mat-cell *matCellDef="let vehicule">{{ vehicule.productionDate | date:'dd/MM/yyyy' }}</td>
+    <ng-container matColumnDef="pegCode">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-select
+        [(ngModel)]="selectedType"
+        (selectionChange)="filtrerVehicules()"
+        class="column-filter"
+        disableOptionCentering
+      >
+        <mat-option value="">Type</mat-option>
+        <mat-option *ngFor="let type of pegCodeOptions" [value]="type">{{ type }}</mat-option>
+      </mat-select>
+      </th>
+      <td mat-cell *matCellDef="let vehicule">{{ vehicule.pegCode }}</td>
     </ng-container>
 
     <ng-container matColumnDef="parcNom">

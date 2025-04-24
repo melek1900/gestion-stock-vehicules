@@ -12,7 +12,11 @@ $dark-color: #003366;
   font-weight: bold;
   color: $dark-color;
 }
-
+.clickable {
+  cursor: pointer;
+  text-decoration: none;
+ 
+}
 .subtitle {
   margin-top: 2rem;
   font-size: 18px;
