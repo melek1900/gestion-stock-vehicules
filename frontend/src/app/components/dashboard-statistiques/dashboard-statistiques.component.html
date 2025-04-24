@@ -223,8 +223,15 @@
     <div class="statut-list">
       <div *ngFor="let item of statutVehiculeStats" class="statut-item">
         <span class="statut-dot" [style.backgroundColor]="item.color"></span>
-        <span class="statut-label">{{ item.label }}</span>
-        <span class="statut-count">{{ item.count }}</span>
+        <a *ngIf="item.statut === 'AVARIE'" 
+        [routerLink]="['/reparation']" 
+        class="statut-label clickable"
+        matTooltip="Voir les véhicules en avarie">
+        {{ item.label }}
+     </a>
+     <span *ngIf="item.statut !== 'AVARIE'" class="statut-label">
+       {{ item.label }}
+     </span>        <span class="statut-count">{{ item.count }}</span>
       </div>
     </div>
   </mat-card>
@@ -233,7 +240,9 @@
   <div class="ordres-mission-status-card" *ngIf="ordreStatuts.length > 0" appScrollAnimate>
     <h3 class="section-title">📦 Statuts des Ordres de Mission</h3>
     <div class="statut-list">
-      <div class="statut-item" *ngFor="let s of ordreStatuts">
+      <div class="statut-item" *ngFor="let s of ordreStatuts" 
+           (click)="goToOrdresMission(s.statut)" 
+           style="cursor: pointer;">
         <span class="statut-dot" [ngStyle]="{ 'background-color': s.color }"></span>
         <span class="statut-label">
           {{ s.statut === 'EN_COURS' ? 'En cours' :

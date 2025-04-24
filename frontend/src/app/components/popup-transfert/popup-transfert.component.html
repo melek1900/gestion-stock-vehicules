@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>Transfert vers Carrosserie</h2>
+
+<mat-dialog-content>
+  <div *ngFor="let v of data.vehicules" class="vehicule-item">
+    <div class="vehicule-info">
+      {{ v.shortDescription }} - {{ v.numeroChassis }} ({{ v.shortColor }})
+      <span *ngIf="v.transfere" class="badge">✅ Transféré</span>
+    </div>
+
+    <p class="sous-parc-label">Sous-parc : <strong>{{ data.sousParc?.nom || 'Non défini' }}</strong></p>
+
+    <button
+    mat-button
+    color="primary"
+    (click)="validerTransfert(v)">
+    Valider Transfert
+  </button>
+
+    <hr>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Fermer</button>
+</mat-dialog-actions>

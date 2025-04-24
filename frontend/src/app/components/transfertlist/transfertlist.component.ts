@@ -13,6 +13,13 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+export interface SousParc {
+  id: number;
+  nom: string;
+  parcId: number;
+}
 
 @Component({
   selector: 'app-transfert-list',
@@ -31,7 +38,9 @@ import { MatDividerModule } from '@angular/material/divider';
     MatCheckboxModule,
     ReactiveFormsModule,
     MatInputModule,
-    MatDividerModule
+    MatDividerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ]
 })
 export class TransfertListComponent implements OnInit {
@@ -47,7 +56,7 @@ export class TransfertListComponent implements OnInit {
   selectedStatut: string = 'all';
 
   parcDestination: string | null = null;
-  chauffeurSelectionne: string | null = null;
+  chauffeursSelectionnes: string[] = [];
   vehiculeTransportSelectionne: string | null = null;
 
   userParc: string | null = null;
@@ -56,14 +65,26 @@ export class TransfertListComponent implements OnInit {
 
   modeSelection: 'selection_initiale' | 'ajout_vehicules' = 'ajout_vehicules';
   selection = new SelectionModel<any>(true, []);
-
+  dateDepart: Date = new Date();
+  motifs: any[] = [];
+  motifSelectionne: number | null = null;
+  heureDepart: string = '';
+  heuresDisponibles: string[] = [];
   private http = inject(HttpClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
+  sousParcs: any[] = [];
+  sousParcSelectionne: string | null = null;
+  
   ngOnInit(): void {
     this.recupererRoleUtilisateur();
-  
+    this.http.get<any[]>('http://localhost:8080/api/motifs').subscribe(data => {
+      this.motifs = data;
+    });
+    this.heuresDisponibles = Array.from({ length: 10 }, (_, i) => {
+      const heure = i + 8;
+      return `${heure.toString().padStart(2, '0')}:00`;
+    });
     this.route.queryParams.subscribe(params => {
       if (params['vehicules']) {
         this.modeSelection = 'selection_initiale';
@@ -83,7 +104,26 @@ export class TransfertListComponent implements OnInit {
   isAllSelected(): boolean {
     return this.selection.selected.length === this.vehiculesFiltres.length;
   }
-
+  onParcDestinationChange(parcId: string) {
+    console.log("🚩 Parc sélectionné :", parcId); // DEBUG
+  
+    this.parcDestination = parcId;
+  
+    this.http.get<any>(`http://localhost:8080/api/parcs/${parcId}`).subscribe(parc => {
+      console.log("ℹ️ Parc reçu :", parc); // DEBUG
+  
+      if (parc.nom === 'CARROSSERIE') {
+        this.http.get<SousParc[]>(`http://localhost:8080/api/sous-parcs/parc/${parcId}`).subscribe(data => {
+          console.log("✅ Sous-parcs reçus :", data); // DEBUG
+          this.sousParcs = data;
+        });
+      } else {
+        this.sousParcs = [];
+        this.sousParcSelectionne = null;
+      }
+    });
+  }
+  
   toggleAllRows() {
     if (this.isAllSelected()) {
       this.selection.clear();
@@ -110,10 +150,13 @@ export class TransfertListComponent implements OnInit {
       );
   
       Promise.all(vehiculesPromises).then(resultats => {
-        this.vehicules = resultats.filter(v =>
+        this.vehicules = resultats.map(v => ({
+          ...v,
+          parcId: v.parcId ?? v.parc?.id
+        })).filter(v =>
           !v.enUtilisation &&
           v.parcNom === this.userParc &&
-          !['AVARIE', 'VENDU', 'RESERVE', 'LIVREE'].includes(v.statut)
+          !['VENDU', 'RESERVE', 'LIVREE'].includes(v.statut)
         );
       });
     });
@@ -127,8 +170,10 @@ export class TransfertListComponent implements OnInit {
     const ids = vehiculesIds.split(',').map(id => parseInt(id, 10));
     this.http.get<any[]>('http://localhost:8080/api/vehicules')
       .subscribe(data => {
-        this.vehiculesSelectionnes = data.filter(v => ids.includes(v.id));
-        this.vehicules = data.filter(v => !ids.includes(v.id));
+        this.vehiculesSelectionnes = data.filter(v => ids.includes(v.id)).map(v => ({
+          ...v,
+          parcId: v.parcId ?? v.parc?.id // <-- s'il vient d'un objet imbriqué
+        }));        this.vehicules = data.filter(v => !ids.includes(v.id));
         this.vehiculesFiltres = [];
       });
   }
@@ -144,19 +189,16 @@ export class TransfertListComponent implements OnInit {
     const vehiculesDisponibles = this.vehicules.filter(v =>
       v.numeroChassis.toLowerCase().includes(query) &&
       !this.vehiculesSelectionnes.some(sel => sel.id === v.id) &&
-      v.statut !== 'AVARIE' && v.statut !== 'VENDU' &&
-      v.statut !== 'RESERVE' && v.statut !== 'LIVREE' &&
+      v.statut !== 'VENDU' && v.statut !== 'RESERVE' && v.statut !== 'LIVREE' &&
       v.parcNom === this.userParc
     );
   
-    // Vérifier en parallèle ceux qui sont déjà utilisés
     const verifications = await Promise.all(
       vehiculesDisponibles.map(v =>
         this.verifierVehiculeUtilise(v.id).then(utilise => ({ vehicule: v, utilise }))
       )
     );
   
-    // Garder uniquement ceux qui ne sont pas utilisés
     this.vehiculesFiltres = verifications
       .filter(result => !result.utilise)
       .map(result => result.vehicule);
@@ -240,9 +282,15 @@ export class TransfertListComponent implements OnInit {
     const payload = JSON.parse(atob(token.split('.')[1]));
     return payload.id || null;
   }
+    // Méthode de filtre pour désactiver les dates antérieures à aujourd'hui
+    filterDates = (date: Date | null): boolean => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Ignore l'heure
+      return date ? date >= today : false;
+    };
 
   async initierTransfert() {
-    if (!this.chauffeurSelectionne || !this.vehiculeTransportSelectionne || this.vehiculesSelectionnes.length === 0) {
+    if (!this.chauffeursSelectionnes || !this.vehiculeTransportSelectionne || this.vehiculesSelectionnes.length === 0) {
       return;
     }
   
@@ -254,7 +302,11 @@ export class TransfertListComponent implements OnInit {
         return;
       }
     }
-  
+    if (!this.dateDepart || !this.heureDepart || !this.motifSelectionne) {
+      alert('Veuillez remplir la date, l’heure et le motif de déplacement.');
+      return;
+    }
+    
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
       'Content-Type': 'application/json'
@@ -262,13 +314,18 @@ export class TransfertListComponent implements OnInit {
   
     const payload = {
       vehiculeIds: this.vehiculesSelectionnes.map(v => v.id),
-      chauffeurId: parseInt(this.chauffeurSelectionne ?? '0', 10),
+      chauffeurIds: this.chauffeursSelectionnes.map(id => parseInt(id, 10)),
       vehiculeTransportId: parseInt(this.vehiculeTransportSelectionne ?? '0', 10),
       parcDepartId: this.vehiculesSelectionnes[0]?.parcId || 0,
       parcArriveeId: this.parcDestination ? parseInt(this.parcDestination, 10) : 0,
-      utilisateurId: this.getUtilisateurIdFromToken() ?? 0
+      utilisateurId: this.getUtilisateurIdFromToken() ?? 0,
+      dateDepart: this.dateDepart?.toISOString().split('T')[0],
+      heureDepart: this.heureDepart,
+      motifDeplacementId: this.motifSelectionne,
+      sousParcId: this.sousParcSelectionne ? parseInt(this.sousParcSelectionne, 10) : null,
+
     };
-  
+    
     this.http.post<{ ordreMissionId: number, numeroOrdre: string, pdfUrl: string }>(
       'http://localhost:8080/api/ordres-mission/creer',
       payload,

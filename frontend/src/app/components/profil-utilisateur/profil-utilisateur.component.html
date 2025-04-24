@@ -1,0 +1,69 @@
+<mat-card class="profil-card">
+  <mat-card-title>👤 Mon profil</mat-card-title>
+
+  <form *ngIf="profilForm" [formGroup]="profilForm" (ngSubmit)="onSubmit()">
+    <!-- Nom -->
+    <mat-form-field appearance="fill">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="nom" />
+    </mat-form-field>
+
+    <!-- Prénom -->
+    <mat-form-field appearance="fill">
+      <mat-label>Prénom</mat-label>
+      <input matInput formControlName="prenom" />
+    </mat-form-field>
+
+    <!-- Email -->
+    <mat-form-field appearance="fill">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" type="email" />
+    </mat-form-field>
+
+    <!-- Mot de passe -->
+    <mat-form-field appearance="fill">
+      <mat-label>Nouveau mot de passe</mat-label>
+      <input matInput formControlName="motDePasse" type="password" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Confirmer le mot de passe</mat-label>
+      <input matInput formControlName="confirmationMotDePasse" type="password" />
+      <mat-error *ngIf="profilForm.get('motDePasse')?.value && profilForm.get('confirmationMotDePasse')?.value && profilForm.get('motDePasse')?.value !== profilForm.get('confirmationMotDePasse')?.value">
+        Les mots de passe ne correspondent pas.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Role (lecture seule) -->
+    <mat-form-field appearance="fill" disabled>
+      <mat-label>Rôle</mat-label>
+      <input matInput [value]="roleLabel(profilForm.get('role')?.value)" disabled />
+    </mat-form-field>
+
+    <!-- Parc de travail (lecture seule) -->
+    <mat-form-field appearance="fill" disabled>
+      <mat-label>Parc de travail</mat-label>
+      <input matInput [value]="profilForm.get('parcNom')?.value" disabled />
+    </mat-form-field>
+
+    <!-- Parcs accessibles -->
+    <div class="section-label">Parcs accessibles</div>
+    <div class="badge-list">
+      <span *ngFor="let parc of profilForm.get('parcsAccessibles')?.value" class="badge primary">
+        {{ parc }}
+      </span>
+    </div>
+
+    <!-- Marques accessibles -->
+    <div class="section-label">Marques accessibles</div>
+    <div class="badge-list">
+      <span *ngFor="let marque of profilForm.get('marquesAccessibles')?.value" class="badge accent">
+        {{ marque }}
+      </span>
+    </div>
+
+    <button mat-raised-button color="primary" type="submit"
+    [disabled]="profilForm.invalid || (profilForm.get('motDePasse')?.value && profilForm.get('motDePasse')?.value !== profilForm.get('confirmationMotDePasse')?.value)">
+💾 Enregistrer
+</button>  </form>
+</mat-card>

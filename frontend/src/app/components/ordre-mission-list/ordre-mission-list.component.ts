@@ -12,6 +12,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
+import { PopupTransfertComponent } from '../popup-transfert/popup-transfert.component';
 
 @Component({
   selector: 'app-ordre-mission-list',
@@ -44,8 +46,19 @@ dataSource = new MatTableDataSource<any>([]);
   statutFiltre: string = ''; 
   ordresMissionFiltres: any[] = []; 
   recherche: string = '';  
-  
-  
+  constructor(private dialog: MatDialog) {}
+
+  ouvrirPopupTransfert(ordre: any) {
+    this.dialog.open(PopupTransfertComponent, {
+      width: '600px',
+      data: {
+        vehicules: ordre.vehicules,
+        sousParc: ordre.sousParc // 👈 doit être présent
+      }
+    }).afterClosed().subscribe(reload => {
+      if (reload) this.chargerOrdresMission();
+    });
+  }
   
   filtrerOrdres() {
     const rechercheLower = this.recherche.trim().toLowerCase();
@@ -56,8 +69,10 @@ dataSource = new MatTableDataSource<any>([]);
       const numeroMatch = ordre.numeroOrdre?.toLowerCase().includes(rechercheLower);
   
       const chauffeurMatch =
-        ordre.chauffeur?.nom?.toLowerCase().includes(rechercheLower) ||
-        ordre.chauffeur?.prenom?.toLowerCase().includes(rechercheLower);
+    ordre.chauffeurs?.some((ch: { nom?: string; prenom?: string }) =>
+    ch.nom?.toLowerCase().includes(rechercheLower) || ch.prenom?.toLowerCase().includes(rechercheLower)
+  );
+
   
       const vehiculeMatch =
         ordre.vehiculeTransport?.matricule?.toLowerCase().includes(rechercheLower) ||
@@ -80,6 +95,8 @@ dataSource = new MatTableDataSource<any>([]);
   
   ngOnInit() {
     this.chargerOrdresMission();
+    console.log("🧾 Ordres mission chargés :", this.ordresMission);
+
   }
 
   /** 🔄 Charger la liste des ordres de mission */

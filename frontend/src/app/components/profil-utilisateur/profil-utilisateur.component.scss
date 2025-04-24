@@ -1,0 +1,99 @@
+.profil-card {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  
+    mat-card-title {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #003366; // bleu foncé Poulina
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+  
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+  
+      mat-form-field {
+        width: 100%;
+      }
+  
+      .section-label {
+        font-weight: 600;
+        color: #003366;
+        margin-top: 1rem;
+        margin-bottom: 0.3rem;
+        font-size: 0.95rem;
+      }
+  
+      .badge-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 1rem;
+  
+        .badge {
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 500;
+          background-color: #e0e0e0;
+          color: #333;
+  
+          &.primary {
+            background-color: #0073A8; // bleu clair
+            color: #fff;
+          }
+  
+          &.accent {
+            background-color: #A58D7F; // brun doré
+            color: #fff;
+          }
+        }
+      }
+  
+      button[type='submit'] {
+        align-self: flex-end;
+        margin-top: 1rem;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        background-color: #0073A8;
+        color: #fff;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+  
+        &:hover {
+          background-color: #005c85;
+        }
+      }
+    }
+  }
+  
+  // ✅ Responsive Mobile / Tablette
+  @media screen and (max-width: 768px) {
+    .profil-card {
+      margin: 1rem;
+      padding: 1.5rem;
+  
+      mat-card-title {
+        font-size: 1.4rem;
+      }
+  
+      form {
+        button[type='submit'] {
+          width: 100%;
+          align-self: stretch;
+        }
+      }
+    }
+  }
+  
