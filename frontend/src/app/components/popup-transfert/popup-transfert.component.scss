@@ -1,40 +1,66 @@
-.vehicule-item {
-    margin-bottom: 20px;
-  
-    .vehicule-info {
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-  
-    .sous-parc-select {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-  
-    .badge {
-      margin-left: 10px;
-      color: green;
-      font-weight: bold;
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.dialog-content {
+  padding-top: 0;
+}
+
+.vehicule-card {
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+
+  mat-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  mat-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+
+    button {
+      margin-left: auto;
     }
   }
+
+  .sous-parc-info {
+    font-size: 14px;
+    color: #666;
+
+    strong {
+      color: #1976d2;
+    }
+  }
+
   .badge {
     background-color: #4caf50;
     color: white;
-    padding: 2px 6px;
-    margin-left: 10px;
-    border-radius: 4px;
+    padding: 3px 8px;
     font-size: 12px;
+    border-radius: 4px;
+    margin-left: 10px;
   }
-
-  .sous-parc-label {
-    margin: 8px 0 16px;
-    font-size: 14px;
-    color: #444;
-    font-weight: 500;
-  
-    strong {
-      color: #1976d2;
-      font-weight: bold;
-    }
-  }
-  
+}
+::ng-deep .snackbar-success {
+  background-color: #4caf50; // vert
+  color: white;
+}
+::ng-deep .snackbar-info {
+  background-color: #2196f3; // bleu
+  color: white;
+}
+::ng-deep .snackbar-error {
+  background-color: #f44336; // rouge
+  color: white;
+}

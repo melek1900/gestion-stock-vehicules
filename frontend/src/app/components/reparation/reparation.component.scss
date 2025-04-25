@@ -7,6 +7,18 @@
   max-width: 95%;
   overflow-x: auto;
 }
+.mat-mdc-table th,
+.mat-mdc-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  white-space: normal; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word; 
+  font-size: 13px;
+  font-weight: 500;
+}
 .filters {
   display: flex;
   align-items: center;

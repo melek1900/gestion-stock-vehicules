@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-popup-transfert',
@@ -21,7 +22,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatFormFieldModule,
     MatSelectModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatCardModule
   ]
 })
 export class PopupTransfertComponent {
@@ -46,19 +48,22 @@ export class PopupTransfertComponent {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
   
-    const sousParcId = this.data.sousParc?.id;
-    if (!sousParcId) {
-      alert("❌ Aucun sous-parc défini pour cet ordre de mission !");
-      return;
-    }
-  
-    this.http.patch(`http://localhost:8080/api/vehicules/${vehicule.numeroChassis}/transfert-carrosserie`, {
-      sousParcId
-    }, { headers }).subscribe({
-      next: () => {
+    this.http.patch<{ ordreCloture: boolean }>(
+      `http://localhost:8080/api/vehicules/${encodeURIComponent(vehicule.numeroChassis)}/transfert-carrosserie`,
+      { sousParcId: this.data.sousParc.id },
+      { headers }
+    ).subscribe({
+      next: (response) => {
         vehicule.transfere = true;
+  
+        // ✅ Si c'était le dernier à transférer
+        if (response.ordreCloture) {
+          this.dialogRef.close({ ordreCloture: true }); // On envoie un signal au parent
+        }
       },
       error: () => alert('❌ Erreur lors du transfert')
     });
   }
+  
+  
 }

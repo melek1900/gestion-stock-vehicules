@@ -51,12 +51,14 @@ dataSource = new MatTableDataSource<any>([]);
   ouvrirPopupTransfert(ordre: any) {
     this.dialog.open(PopupTransfertComponent, {
       width: '600px',
-      data: {
-        vehicules: ordre.vehicules,
-        sousParc: ordre.sousParc // 👈 doit être présent
+      data: ordre
+    }).afterClosed().subscribe((result) => {
+      if (result?.ordreCloture) {
+        ordre.statut = 'CLOTURE'; // ✅ Mise à jour du statut dans le tableau
+        this.snackBar.open('✅ Ordre de mission clôturé automatiquement !', 'Fermer', {
+          duration: 3000
+        });
       }
-    }).afterClosed().subscribe(reload => {
-      if (reload) this.chargerOrdresMission();
     });
   }
   
