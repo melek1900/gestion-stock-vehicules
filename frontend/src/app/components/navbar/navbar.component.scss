@@ -107,3 +107,6 @@ button[mat-menu-item] mat-icon {
     display: block;
   }
 }
+.custom-navbar button[mat-icon-button] mat-icon {
+  color: white !important;
+}

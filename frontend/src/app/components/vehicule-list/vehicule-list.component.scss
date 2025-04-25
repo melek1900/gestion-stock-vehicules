@@ -16,7 +16,8 @@ table.mat-mdc-table {
   overflow: hidden;
   text-overflow: ellipsis;
   word-wrap: break-word; 
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
 }
 .mat-mdc-table th.mat-mdc-header-cell,
 .mat-mdc-table td.mat-mdc-cell {
@@ -271,7 +272,7 @@ html, body {
 
 /* ✅ Uniformise l’icône du select */
 ::ng-deep .mat-mdc-select-arrow {
-  color: white !important;
+  color: black !important;
 }
 
 

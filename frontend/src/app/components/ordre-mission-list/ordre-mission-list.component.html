@@ -107,13 +107,13 @@
               <span>Annuler</span>
             </button>
             <button
-              mat-menu-item
-              *ngIf="ordre.statut === 'EN_COURS'"
-              (click)="ouvrirPopupTransfert(ordre)">
-              <mat-icon>swap_horiz</mat-icon>
-              <mat-option *ngIf="ordre.statut === 'EN_COURS'">Transfert Carrosserie</mat-option>
-              
+            mat-menu-item
+            *ngIf="ordre.statut === 'EN_COURS' && ordre.parcArrivee?.nom?.toUpperCase() === 'CARROSSERIE'"
+            (click)="ouvrirPopupTransfert(ordre)">
+            <mat-icon>swap_horiz</mat-icon>
+            <span>Transfert Carrosserie</span>
           </button>
+          
           </mat-menu>
         </td>
       </ng-container>
