@@ -5,18 +5,25 @@ import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.*;
+import com.melek.vehicule.gestion_stock_vehicules.model.MotifDeplacement;
 import com.melek.vehicule.gestion_stock_vehicules.model.OrdreMission;
 import com.melek.vehicule.gestion_stock_vehicules.model.Vehicule;
+import com.melek.vehicule.gestion_stock_vehicules.repository.MotifDeplacementRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
+import java.text.Normalizer;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class OrdreMissionPDFService {
-
+    @Autowired
+    private MotifDeplacementRepository motifDeplacementRepository;
     public byte[] generateOrdreMissionPDF(OrdreMission ordreMission) throws Exception {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Document document = new Document();
@@ -77,17 +84,60 @@ public class OrdreMissionPDFService {
         // ✅ ESPACE supplémentaire
         document.add(new Paragraph("\n"));
 
-        // ✅ Date de création (alignement strictement à gauche)
-        String now = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date());
-        Paragraph dateCreation = new Paragraph("Date de création : " + now,
-                FontFactory.getFont(FontFactory.HELVETICA, 10, Color.GRAY));
-        dateCreation.setAlignment(Element.ALIGN_LEFT);
-        dateCreation.setIndentationLeft(40);
-        dateCreation.setSpacingAfter(20);
-        document.add(dateCreation);
+        // ✅ Date et Heure de départ
+        // ✅ Conversion LocalDate + LocalTime vers java.util.Date
+        LocalDateTime dateTimeDepart = LocalDateTime.of(ordreMission.getDateDepart(), ordreMission.getHeureDepart());
+        Date dateHeureDepart = Date.from(dateTimeDepart.atZone(ZoneId.systemDefault()).toInstant());
 
+        // ✅ Formatage en String
+        String dateDepartStr = new SimpleDateFormat("dd/MM/yyyy").format(dateHeureDepart);
+        String heureDepartStr = new SimpleDateFormat("HH:mm").format(dateHeureDepart);
+
+        // ✅ Ajout au document
+        Paragraph dateHeureDepartParagraph = new Paragraph(
+                "Départ prévu le : " + dateDepartStr + " à " + heureDepartStr,
+                FontFactory.getFont(FontFactory.HELVETICA, 11, Color.DARK_GRAY)
+        );
+        dateHeureDepartParagraph.setIndentationLeft(40);
+        dateHeureDepartParagraph.setSpacingAfter(20);
+        document.add(dateHeureDepartParagraph);
+
+        document.add(new Paragraph("📍 Informations sur les parcs", getSectionFont()));
+        document.add(new Paragraph("\n"));
+
+        PdfPTable parcTable = new PdfPTable(2);
+        parcTable.setWidthPercentage(100);
+        parcTable.setWidths(new float[]{2, 2});
+
+        parcTable.addCell(getHeaderCell("Parc Départ"));
+        parcTable.addCell(getHeaderCell("Parc Arrivée"));
+
+        parcTable.addCell(getCell(
+                ordreMission.getParcDepart() != null ? ordreMission.getParcDepart().getNom() : "Non renseigné"));
+        parcTable.addCell(getCell(
+                ordreMission.getParcArrivee() != null ? ordreMission.getParcArrivee().getNom() : "Non renseigné"));
+
+        document.add(parcTable);
+        if (ordreMission.getParcArrivee() != null
+                && "CARROSSERIE".equalsIgnoreCase(ordreMission.getParcArrivee().getNom())
+                && ordreMission.getSousParc() != null) {
+
+            document.add(new Paragraph("🅿️ Sous-parc de destination (CARROSSERIE)", getSectionFont()));
+            document.add(new Paragraph("\n"));
+
+            PdfPTable sousParcTable = new PdfPTable(1);
+            sousParcTable.setWidthPercentage(100);
+            sousParcTable.setSpacingBefore(10);
+
+            sousParcTable.addCell(getHeaderCell("Nom du Sous-Parc"));
+            sousParcTable.addCell(getCell(ordreMission.getSousParc().getNom()));
+
+            document.add(sousParcTable);
+            document.add(new Paragraph("\n"));
+        }
+        document.add(new Paragraph("\n"));
         // ✅ Tableau Chauffeur
-        document.add(new Paragraph("🚗 Informations Chauffeur", getSectionFont()));
+        document.add(new Paragraph("🚗 Informations Chauffeurs", getSectionFont()));
         document.add(new Paragraph("\n"));
 
         PdfPTable chauffeurTable = new PdfPTable(5);
@@ -100,12 +150,22 @@ public class OrdreMissionPDFService {
         chauffeurTable.addCell(getHeaderCell("Délivré le"));
         chauffeurTable.addCell(getHeaderCell("Permis N°"));
 
-        chauffeurTable.addCell(getCell(ordreMission.getChauffeur().getNom()));
-        chauffeurTable.addCell(getCell(ordreMission.getChauffeur().getPrenom()));
-        chauffeurTable.addCell(getCell(ordreMission.getChauffeur().getCIN()));
-        chauffeurTable.addCell(getCell(new SimpleDateFormat("dd/MM/yyyy")
-                .format(ordreMission.getChauffeur().getDateDelivrance())));
-        chauffeurTable.addCell(getCell(String.valueOf(ordreMission.getChauffeur().getNumeroPermis())));
+        if (ordreMission.getChauffeurs() != null && !ordreMission.getChauffeurs().isEmpty()) {
+            for (var chauffeur : ordreMission.getChauffeurs()) {
+                chauffeurTable.addCell(getCell(chauffeur.getNom()));
+                chauffeurTable.addCell(getCell(chauffeur.getPrenom()));
+                chauffeurTable.addCell(getCell(chauffeur.getCIN()));
+                chauffeurTable.addCell(getCell(new SimpleDateFormat("dd/MM/yyyy")
+                        .format(chauffeur.getDateDelivrance())));
+                chauffeurTable.addCell(getCell(String.valueOf(chauffeur.getNumeroPermis())));
+            }
+        } else {
+            PdfPCell emptyCell = new PdfPCell(new Phrase("Aucun chauffeur attribué"));
+            emptyCell.setColspan(5);
+            emptyCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            emptyCell.setPadding(10);
+            chauffeurTable.addCell(emptyCell);
+        }
 
         document.add(chauffeurTable);
         document.add(new Paragraph("\n"));
@@ -146,6 +206,34 @@ public class OrdreMissionPDFService {
 
         document.add(vehiculeTable);
         document.add(new Paragraph("\n\n"));
+        // ✅ Motif de déplacement
+        document.add(new Paragraph("📌 Motif de déplacement", getSectionFont()));
+        document.add(new Paragraph("\n"));
+        PdfPTable motifTable = new PdfPTable(2);
+        motifTable.setWidthPercentage(60);
+        motifTable.setHorizontalAlignment(Element.ALIGN_LEFT);
+        motifTable.setWidths(new float[]{3, 1});
+
+        List<MotifDeplacement> motifsPossibles = motifDeplacementRepository.findAll();
+        String motifActuel = ordreMission.getMotifDeplacement() != null ? ordreMission.getMotifDeplacement().getLibelle() : "";
+
+        for (MotifDeplacement motif : motifsPossibles) {
+            PdfPCell libelleCell = new PdfPCell(new Phrase(motif.getLibelle(), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11)));
+            libelleCell.setPadding(6);
+            motifTable.addCell(libelleCell);
+
+            PdfPCell caseCochee = new PdfPCell(new Phrase(
+                    matchMotif(motif.getLibelle(), motifActuel) ? "X" : " "
+            ));
+            caseCochee.setHorizontalAlignment(Element.ALIGN_CENTER);
+            caseCochee.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            caseCochee.setPadding(6);
+            motifTable.addCell(caseCochee);
+        }
+
+        document.add(motifTable);
+        document.add(new Paragraph("\n"));
+
 
         // ✅ Cadre Signature
         PdfPTable signatureTable = new PdfPTable(1);
@@ -185,6 +273,17 @@ public class OrdreMissionPDFService {
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         return cell;
+    }
+    private boolean matchMotif(String motifLibelle, String attendu) {
+        if (motifLibelle == null || attendu == null) return false;
+        return normalize(motifLibelle).equals(normalize(attendu));
+    }
+
+    private String normalize(String input) {
+        return java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "") // Supprime les accents
+                .toLowerCase()
+                .trim();
     }
 
     private PdfPCell getHeaderCell(String text) {

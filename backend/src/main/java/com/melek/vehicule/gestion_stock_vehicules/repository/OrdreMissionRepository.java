@@ -16,5 +16,6 @@ public interface OrdreMissionRepository extends JpaRepository<OrdreMission, Long
     @Query("SELECT o.statut, COUNT(o) FROM OrdreMission o GROUP BY o.statut")
     List<Object[]> countByStatut();
     boolean existsByVehiculesContainingAndStatutNot(Vehicule vehicule, StatutOrdreMission statut);
+    Optional<OrdreMission> findByVehiculesContaining(Vehicule vehicule);
 
 }

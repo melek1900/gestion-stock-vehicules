@@ -2,10 +2,14 @@ package com.melek.vehicule.gestion_stock_vehicules.model;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Getter
 @Entity
 public class Vehicule {
     @Id
@@ -40,6 +44,7 @@ public class Vehicule {
     @JsonIgnore
     private Parc parc;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "stock_id")
     @JsonIgnore
@@ -49,91 +54,53 @@ public class Vehicule {
     @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Avarie> avaries = new ArrayList<>();
-
+    @ManyToOne
+    @JoinColumn(name = "sous_parc_id")
+    private SousParc sousParc;
     public Vehicule() {}
 
-    public Long getId() {
-        return id;
+    public void setSousParc(SousParc sousParc) {
+        this.sousParc = sousParc;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public String getNumeroChassis() {
-        return numeroChassis;
-    }
-
     public void setNumeroChassis(String numeroChassis) {
         this.numeroChassis = numeroChassis;
-    }
-
-    public String getModele() {
-        return modele;
     }
 
     public void setModele(String modele) {
         this.modele = modele;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getEngine() {
-        return engine;
     }
 
     public void setEngine(String engine) {
         this.engine = engine;
     }
 
-    public String getKeyCode() {
-        return keyCode;
-    }
-
     public void setKeyCode(String keyCode) {
         this.keyCode = keyCode;
-    }
-
-    public String getCouleur() {
-        return couleur;
     }
 
     public void setCouleur(String couleur) {
         this.couleur = couleur;
     }
 
-    public String getPegCode() {
-        return pegCode;
-    }
-
     public void setPegCode(String pegCode) {
         this.pegCode = pegCode;
-    }
-
-    public String getShortDescription() {
-        return shortDescription;
     }
 
     public void setShortDescription(String shortDescription) {
         this.shortDescription = shortDescription;
     }
 
-    public String getShortColor() {
-        return shortColor;
-    }
-
     public void setShortColor(String shortColor) {
         this.shortColor = shortColor;
-    }
-
-    public Date getProductionDate() {
-        return productionDate;
     }
 
     public void setProductionDate(Date productionDate) {
@@ -141,40 +108,16 @@ public class Vehicule {
     }
 
 
-    public StatutVehicule getStatut() {
-        return statut;
-    }
-
     public void setStatut(StatutVehicule statut) {
         this.statut = statut;
-    }
-
-    public Utilisateur getUtilisateur() {
-        return utilisateur;
     }
 
     public void setUtilisateur(Utilisateur utilisateur) {
         this.utilisateur = utilisateur;
     }
 
-    public Parc getParc() {
-        return parc;
-    }
-
     public void setParc(Parc parc) {
         this.parc = parc;
-    }
-
-    public Stock getStock() {
-        return stock;
-    }
-
-    public void setStock(Stock stock) {
-        this.stock = stock;
-    }
-
-    public List<Avarie> getAvaries() {
-        return avaries;
     }
 
     @PostUpdate

@@ -1,8 +1,13 @@
 package com.melek.vehicule.gestion_stock_vehicules.model;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class OrdreMission {
@@ -29,9 +34,13 @@ public class OrdreMission {
     private Parc parcArrivee;
     @OneToMany(mappedBy = "ordreMission", cascade = CascadeType.ALL)
     private List<Transfert> transferts;
-    @ManyToOne
-    @JoinColumn(name = "chauffeur_id")
-    private Chauffeur chauffeur;
+    @ManyToMany
+    @JoinTable(
+            name = "ordre_mission_chauffeurs",
+            joinColumns = @JoinColumn(name = "ordre_mission_id"),
+            inverseJoinColumns = @JoinColumn(name = "chauffeur_id")
+    )
+    private Set<Chauffeur> chauffeurs = new HashSet<>();
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
@@ -41,17 +50,60 @@ public class OrdreMission {
     @ManyToOne
     @JoinColumn(name = "parc_depart_id", nullable = false)
     private Parc parcDepart;
+    @ManyToOne
+    @JoinColumn(name = "motif_deplacement_id", nullable = false)
+    private MotifDeplacement motifDeplacement;
+    @Column(name = "date_depart")
+    private LocalDate dateDepart;
+
+    @Column(name = "heure_depart")
+    private LocalTime heureDepart;
+    @ManyToOne
+    @JoinColumn(name = "sous_parc_id")
+    private SousParc sousParc;
     public OrdreMission() {
     }
-    public OrdreMission(String numeroOrdre, Date dateCreation, List<Vehicule> vehicules, Chauffeur chauffeur, VehiculeTransport vehiculeTransport, Parc parcDepart, Parc parcArrivee) {
+    public OrdreMission(String numeroOrdre, Date dateCreation, List<Vehicule> vehicules,
+                        Set<Chauffeur> chauffeurs, VehiculeTransport vehiculeTransport,
+                        Parc parcDepart, Parc parcArrivee) {
         this.numeroOrdre = numeroOrdre;
         this.dateCreation = dateCreation;
         this.statut = StatutOrdreMission.EN_COURS;
         this.vehicules = vehicules;
-        this.chauffeur = chauffeur;
+        this.chauffeurs = chauffeurs;
         this.vehiculeTransport = vehiculeTransport;
         this.parcDepart = parcDepart;
         this.parcArrivee = parcArrivee;
+    }
+    public SousParc getSousParc() {
+        return sousParc;
+    }
+
+    public void setSousParc(SousParc sousParc) {
+        this.sousParc = sousParc;
+    }
+    public MotifDeplacement getMotifDeplacement() {
+        return motifDeplacement;
+    }
+
+    public void setMotifDeplacement(MotifDeplacement motifDeplacement) {
+        this.motifDeplacement = motifDeplacement;
+    }
+
+    public LocalDate getDateDepart() {
+        return dateDepart;
+    }
+
+    public void setDateDepart(LocalDate dateDepart) {
+        this.dateDepart = dateDepart;
+    }
+
+    public LocalTime getHeureDepart() {
+        return heureDepart;
+    }
+
+    public void setHeureDepart(LocalTime heureDepart) {
+        this.heureDepart = heureDepart;
     }
 
     public Utilisateur getUtilisateur() {
@@ -98,12 +150,13 @@ public class OrdreMission {
         this.vehicules = vehicules;
     }
 
-    public Chauffeur getChauffeur() {
-        return chauffeur;
+
+    public Set<Chauffeur> getChauffeurs() {
+        return chauffeurs;
     }
 
-    public void setChauffeur(Chauffeur chauffeur) {
-        this.chauffeur = chauffeur;
+    public void setChauffeurs(Set<Chauffeur> chauffeurs) {
+        this.chauffeurs = chauffeurs;
     }
 
     public VehiculeTransport getVehiculeTransport() {

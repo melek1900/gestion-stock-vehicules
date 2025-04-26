@@ -1,5 +1,6 @@
 package com.melek.vehicule.gestion_stock_vehicules.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
@@ -14,6 +15,24 @@ public class Parc {
     private String localisation;
     @Enumerated(EnumType.STRING) // ✅ Stocke le type de parc en texte (ex: STOCK, VENTE)
     private TypeParc typeParc;
+
+    @OneToMany(mappedBy = "parc", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Vehicule> vehicules;
+
+  
+
+    @OneToMany(mappedBy = "parc", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<SousParc> sousParcs;
+
+    public List<SousParc> getSousParcs() {
+        return sousParcs;
+    }
+
+    public void setSousParcs(List<SousParc> sousParcs) {
+        this.sousParcs = sousParcs;
+    }
     public List<Vehicule> getVehicules() {
         return vehicules;
     }
@@ -30,13 +49,8 @@ public class Parc {
         this.vehicules = vehicules;
     }
 
-    public List<HistoriqueMouvements> getHistoriques() {
-        return historiques;
-    }
 
-    public void setHistoriques(List<HistoriqueMouvements> historiques) {
-        this.historiques = historiques;
-    }
+
 
     public String getLocalisation() {
         return localisation;
@@ -62,11 +76,6 @@ public class Parc {
         this.id = id;
     }
 
-    @OneToMany(mappedBy = "parc")
-    @JsonManagedReference // ✅ Gère la relation avec Vehicule
-    private List<Vehicule> vehicules;
 
-    @OneToMany(mappedBy = "parc")
-    private List<HistoriqueMouvements> historiques;
 
 }

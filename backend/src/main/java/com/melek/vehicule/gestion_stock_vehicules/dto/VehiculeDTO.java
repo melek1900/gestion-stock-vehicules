@@ -23,6 +23,7 @@ public class VehiculeDTO {
     private Long parcId; // ✅ Ajout de l'ID du parc
     private String parcNom;
     private List<AvarieDTO> avaries;
+    private String sousParcNom;
 
 
 
@@ -33,6 +34,8 @@ public class VehiculeDTO {
         this.couleur = vehicule.getCouleur();
         this.statut = vehicule.getStatut();
         this.parcNom = vehicule.getParc() != null ? vehicule.getParc().getNom() : "AUPORT";
+        this.sousParcNom = vehicule.getSousParc() != null ? vehicule.getSousParc().getNom() : null;
+
         this.parcId = vehicule.getParc() != null ? vehicule.getParc().getId() : null;
 
         this.productionDate = vehicule.getProductionDate();
@@ -50,6 +53,13 @@ public class VehiculeDTO {
     // Getters et Setters
 
 
+    public String getSousParcNom() {
+        return sousParcNom;
+    }
+
+    public void setSousParcNom(String sousParcNom) {
+        this.sousParcNom = sousParcNom;
+    }
 
     public String getDescription() {
         return description;
