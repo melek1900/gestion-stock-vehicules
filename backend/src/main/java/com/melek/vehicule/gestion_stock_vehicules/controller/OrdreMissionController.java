@@ -15,6 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,21 +100,37 @@ public class OrdreMissionController {
     public ResponseEntity<List<OrdreMission>> getAllOrdresMission() {
         return ResponseEntity.ok(ordreMissionService.getAllOrdresMission());
     }
+
     @PostMapping("/creer")
     public ResponseEntity<?> creerOrdreMission(@RequestBody Map<String, Object> request) {
         try {
             List<Integer> vehiculeIds = (List<Integer>) request.get("vehiculeIds");
-            Integer chauffeurId = (Integer) request.get("chauffeurId");
+            List<Integer> chauffeurIds = (List<Integer>) request.get("chauffeurIds");
             Integer vehiculeTransportId = (Integer) request.get("vehiculeTransportId");
-            Integer parcDepartId = (Integer) request.get("parcDepartId"); // ✅ Récupération du parc de départ
-            Integer parcArriveeId = (Integer) request.get("parcArriveeId"); // ✅ Récupération du parc d'arrivée
+            Integer parcDepartId = (Integer) request.get("parcDepartId");
+            Integer parcArriveeId = (Integer) request.get("parcArriveeId");
 
-            System.out.println("📌 Création d'un Ordre de Mission avec : " +
-                    "Chauffeur: " + chauffeurId + ", Véhicule de Transport: " + vehiculeTransportId +
-                    ", Véhicules: " + vehiculeIds + ", Parc Départ: " + parcDepartId + ", Parc Arrivée: " + parcArriveeId);
+            String dateDepartStr = (String) request.get("dateDepart");
+            String heureDepartStr = (String) request.get("heureDepart");
+            Integer motifDeplacementId = (Integer) request.get("motifDeplacementId");
 
-            // ✅ Logique pour enregistrer en base avec les parcs
-            OrdreMission ordreMission = ordreMissionService.creerOrdreMission(vehiculeIds, chauffeurId, vehiculeTransportId, parcDepartId, parcArriveeId);
+            Long sousParcId = request.containsKey("sousParcId") ? ((Integer) request.get("sousParcId")).longValue() : null;
+
+            LocalDate dateDepart = LocalDate.parse(dateDepartStr);
+            LocalTime heureDepart = LocalTime.parse(heureDepartStr);
+            Long motifId = motifDeplacementId.longValue();
+
+            OrdreMission ordreMission = ordreMissionService.creerOrdreMission(
+                    vehiculeIds,
+                    chauffeurIds,
+                    vehiculeTransportId,
+                    parcDepartId,
+                    parcArriveeId,
+                    motifId,
+                    dateDepart,
+                    heureDepart,
+                    sousParcId
+            );
 
             return ResponseEntity.ok(Map.of(
                     "ordreMissionId", ordreMission.getId(),
@@ -120,9 +139,11 @@ public class OrdreMissionController {
             ));
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(400).body("Erreur lors de la création de l'ordre de mission");
         }
     }
+
 
     @GetMapping("/vehicule/{vehiculeId}/en-utilisation")
     public ResponseEntity<Boolean> verifierVehiculeUtilise(@PathVariable Long vehiculeId) {

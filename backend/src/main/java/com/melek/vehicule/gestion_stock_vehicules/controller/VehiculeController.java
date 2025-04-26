@@ -72,6 +72,18 @@ public class VehiculeController {
             return ResponseEntity.status(400).body("Erreur : " + e.getMessage());
         }
     }
+    @PatchMapping("/{numeroChassis}/transfert-carrosserie")
+    public ResponseEntity<Map<String, Boolean>> transfertCarrosserie(
+            @PathVariable String numeroChassis,
+            @RequestBody Map<String, Long> body) {
+        Long sousParcId = body.get("sousParcId");
+        boolean ordreCloture = vehiculeService.transfertVersCarrosserie(numeroChassis, sousParcId);
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("ordreCloture", ordreCloture);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/statistiques/par-parc")
     public List<Map<String, Object>> countVehiculesParParc() {
         return vehiculeRepository.countVehiculesGroupedByParc();

@@ -8,12 +8,20 @@ public class UtilisateurDTO {
     private Long id;
     private String nom;
     private String prenom;
+    private String motDePasse;
     private String email;
     private RoleUtilisateur role;
     private String parcNom;
     private List<String> parcsAccessibles;
     private Set<String> marquesAccessibles;
 
+    public String getMotDePasse() {
+        return motDePasse;
+    }
+
+    public void setMotDePasse(String motDePasse) {
+        this.motDePasse = motDePasse;
+    }
 
     public Long getId() {
         return id;

@@ -29,6 +29,11 @@ public class VehiculeService {
     private final ObjectMapper objectMapper;
     private final UtilisateurRepository utilisateurRepository;
     private final ParcService parcService;
+    private final SousParcRepository sousParcRepository;
+    private final OrdreMissionRepository ordreMissionRepository;
+    private final VehiculeTransportRepository vehiculeTransportRepository;
+    private final ChauffeurRepository chauffeurRepository;
+    private final OrdreMissionService ordreMissionService;
 
     public VehiculeService(
             VehiculeRepository vehiculeRepository,
@@ -38,7 +43,12 @@ public class VehiculeService {
             PhotoRepository photoRepository,
             ObjectMapper objectMapper,
             ParcService parcService,
-            UtilisateurRepository utilisateurRepository) {
+            UtilisateurRepository utilisateurRepository,
+            SousParcRepository sousParcRepository,
+            OrdreMissionRepository ordreMissionRepository,
+            VehiculeTransportRepository vehiculeTransportRepository,
+            ChauffeurRepository chauffeurRepository,
+            OrdreMissionService ordreMissionService) {
         this.vehiculeRepository = vehiculeRepository;
         this.avarieRepository = avarieRepository;
         this.parcRepository = parcRepository;
@@ -47,6 +57,11 @@ public class VehiculeService {
         this.objectMapper = objectMapper;
         this.parcService = parcService;
         this.utilisateurRepository = utilisateurRepository;
+        this.sousParcRepository = sousParcRepository;
+        this.ordreMissionRepository= ordreMissionRepository;
+        this.vehiculeTransportRepository = vehiculeTransportRepository;
+        this.chauffeurRepository = chauffeurRepository;
+        this.ordreMissionService = ordreMissionService;
     }
     @PersistenceContext
     private EntityManager entityManager;
@@ -88,6 +103,55 @@ public class VehiculeService {
 
         return saved;
     }
+    @Transactional
+    public boolean transfertVersCarrosserie(String numeroChassis, Long sousParcId) {
+        Vehicule vehicule = vehiculeRepository.findByNumeroChassis(numeroChassis)
+                .orElseThrow(() -> new RuntimeException("Véhicule introuvable"));
+
+        Parc carrosserie = parcRepository.findByNomIgnoreCase("CARROSSERIE")
+                .orElseThrow(() -> new RuntimeException("Parc Carrosserie introuvable"));
+
+        SousParc sousParc = sousParcRepository.findById(sousParcId)
+                .orElseThrow(() -> new RuntimeException("Sous-parc introuvable"));
+
+        // Mise à jour du véhicule
+        vehicule.setParc(carrosserie);
+        vehicule.setSousParc(sousParc);
+        vehiculeRepository.save(vehicule);
+
+        // 🧠 Vérification de l’ordre de mission associé
+        OrdreMission ordre = ordreMissionRepository.findByVehiculesContaining(vehicule)
+                .orElse(null);
+
+        if (ordre != null) {
+            boolean tousTransferes = ordre.getVehicules().stream()
+                    .allMatch(v -> "CARROSSERIE".equalsIgnoreCase(v.getParc().getNom()));
+
+            if (tousTransferes) {
+                ordre.setStatut(StatutOrdreMission.CLOTURE);
+
+                // Rendre les chauffeurs et véhicule transport dispo
+                if (ordre.getChauffeurs() != null) {
+                    ordre.getChauffeurs().forEach(ch -> ch.setDisponible(true));
+                    chauffeurRepository.saveAll(ordre.getChauffeurs());
+                }
+
+                if (ordre.getVehiculeTransport() != null) {
+                    ordre.getVehiculeTransport().setDisponible(true);
+                    vehiculeTransportRepository.save(ordre.getVehiculeTransport());
+                }
+
+                ordre.getVehicules().clear(); // Libère les véhicules
+                ordreMissionRepository.save(ordre);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     public List<Vehicule> getVehiculesAvecAvaries() {
         return vehiculeRepository.findAll().stream()
                 .filter(v -> v.getAvaries() != null && !v.getAvaries().isEmpty())
