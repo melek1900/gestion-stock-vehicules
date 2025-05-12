@@ -77,10 +77,22 @@ export class NavbarComponent {
   }
 
   logout() {
-    localStorage.removeItem('token');
-    this.router.navigate(['/login']);
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('http://localhost:8080/auth/logout', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      }).finally(() => {
+        localStorage.clear();
+        this.router.navigate(['/login']);
+      });
+    } else {
+      localStorage.clear();
+      this.router.navigate(['/login']);
+    }
   }
-
   redirectToHome() {
     this.router.navigate(['/home']);
   }

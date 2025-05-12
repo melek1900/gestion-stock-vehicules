@@ -48,8 +48,8 @@ export class DashboardStatistiquesComponent implements OnInit {
   ordreStatuts: { statut: string, count: number, color: string }[] = [];
   selectedMarque: string = 'ISUZU'; 
   
-  marquesDisponibles: string[] = ['GM', 'ISUZU', 'CHEVROLET'];
-  selectedMarques: string[] = ['GM', 'ISUZU','CHEVROLET']; 
+  marquesDisponibles: string[] = ['ISUZU', 'CHEVROLET'];
+  selectedMarques: string[] = ['ISUZU','CHEVROLET']; 
   marquesConcurDisponibles: string[] = ['ASTRA', 'BMW', 'CHANA', 'FORD', 'MERCEDES', 'TOYOTA']; // à adapter
   selectedMarquesConcur: string[] = [...this.marquesConcurDisponibles];
   readonly parcColors = ['#0073A8', '#003366', '#F4A300', '#e74c3c', '#8e44ad', '#A4B0BE'];
@@ -311,7 +311,6 @@ displaySelectedMarques = (): string => {
     const colorMap: Record<string, string> = {
       'CHEVROLET': '#9E9E9E',
       'ISUZU': '#0073A8',  
-      'GM': '#000000'     
     };
     const colors = this.selectedMarques.map(marque => colorMap[marque] || '#A4B0BE');
   
@@ -768,7 +767,7 @@ displaySelectedMarques = (): string => {
           mois: moisTraduit[d.mois] || d.mois
         }));
   
-        const marques = ['GM', 'ISUZU', 'CHEVROLET'];
+        const marques = ['ISUZU', 'CHEVROLET'];
   
         const series = marques.map(marque => ({
           name: marque,

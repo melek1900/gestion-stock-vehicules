@@ -13,6 +13,7 @@ import { RouterModule } from '@angular/router';
 export class SidebarComponent {
   stockMenuOpen = false;
   CompteurOpen=false;
+  SousParcOpen=false;
   ordreMissionMenuOpen = false;
   adminMenuOpen = false;
   parametresMenuOpen = false;
@@ -27,6 +28,9 @@ export class SidebarComponent {
     }
   }
   
+  toggleSousParcMenu() {
+    this.SousParcOpen = !this.SousParcOpen;
+  }
   toggleCompteurMenu() {
     this.CompteurOpen = !this.CompteurOpen;
   }

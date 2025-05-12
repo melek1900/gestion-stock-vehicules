@@ -17,7 +17,8 @@ public class Utilisateur implements UserDetails {
     private String prenom;
     private String email;
     private String motDePasse;
-
+    @OneToMany(mappedBy = "utilisateur")
+    private List<Session> sessions = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "parc_id", nullable = true) // ✅ Le parc de travail
     private Parc parc;

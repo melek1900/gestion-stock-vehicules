@@ -114,7 +114,10 @@ public class OrdreMissionController {
             String heureDepartStr = (String) request.get("heureDepart");
             Integer motifDeplacementId = (Integer) request.get("motifDeplacementId");
 
-            Long sousParcId = request.containsKey("sousParcId") ? ((Integer) request.get("sousParcId")).longValue() : null;
+            Long sousParcId = null;
+            if (request.containsKey("sousParcId") && request.get("sousParcId") != null) {
+                sousParcId = ((Integer) request.get("sousParcId")).longValue();
+            }
 
             LocalDate dateDepart = LocalDate.parse(dateDepartStr);
             LocalTime heureDepart = LocalTime.parse(heureDepartStr);

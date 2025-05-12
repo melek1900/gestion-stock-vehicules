@@ -35,7 +35,7 @@ export class PopupUtilisateurComponent {
   ];
 
   parcsDisponibles: any[] = [];
-  marquesDisponibles: string[] = ['GM', 'ISUZU', 'CHEVROLET'];
+  marquesDisponibles: string[] = ['ISUZU', 'CHEVROLET'];
 
   constructor(
     private fb: FormBuilder,

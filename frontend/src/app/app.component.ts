@@ -43,7 +43,22 @@ export class AppComponent {
     setTimeout(() => {
       document.querySelector('.page-container')?.classList.add('visible');
     }, 0);
+  
+    // 🔐 Déconnexion automatique lors de la fermeture de l'onglet ou navigateur
+    window.addEventListener('beforeunload', () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        fetch('http://localhost:8080/auth/logout', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          keepalive: true, // ✅ Permet à la requête de s’exécuter même à la fermeture
+        });
+      }
+    });
   }
+  
   checkUserRole() {
     const token = localStorage.getItem('token');
     if (token) {

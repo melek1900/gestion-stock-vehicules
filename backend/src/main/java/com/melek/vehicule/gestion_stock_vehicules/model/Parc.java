@@ -20,9 +20,9 @@ public class Parc {
     @JsonIgnore
     private List<Vehicule> vehicules;
 
-  
 
-    @OneToMany(mappedBy = "parc", cascade = CascadeType.ALL)
+
+    @OneToMany(mappedBy = "parc", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<SousParc> sousParcs;
 

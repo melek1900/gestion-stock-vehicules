@@ -17,7 +17,7 @@ public interface VenteGeneralRepository extends JpaRepository<VenteGeneral, Long
     @Query("SELECT new com.melek.vehicule.gestion_stock_vehicules.dto.StatVenteParGenreParMarqueDTO(" +
             "vg.Genre, vg.marque, SUM(vg.TotalVendu)) " +
             "FROM VenteGeneral vg " +
-            "WHERE vg.marque NOT IN ('GM', 'ISUZU', 'CHEVROLET') AND vg.marque IN :marques " +
+            "WHERE vg.marque NOT IN ('ISUZU', 'CHEVROLET') AND vg.marque IN :marques " +
             "GROUP BY vg.Genre, vg.marque")
     List<StatVenteParGenreParMarqueDTO> findVentesParGenrePourConcurrence(@Param("marques") List<String> marques);
 
