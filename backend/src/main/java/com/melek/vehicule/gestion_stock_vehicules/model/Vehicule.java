@@ -57,6 +57,7 @@ public class Vehicule {
     @ManyToOne
     @JoinColumn(name = "sous_parc_id")
     private SousParc sousParc;
+
     public Vehicule() {}
 
     public void setSousParc(SousParc sousParc) {

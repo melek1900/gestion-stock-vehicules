@@ -1,0 +1,65 @@
+<!-- 🔍 Barre de recherche -->
+<div class="filters">
+    <mat-form-field appearance="fill" class="search-field">
+      <mat-label>Recherche</mat-label>
+      <input
+        matInput
+        [(ngModel)]="searchQuery"
+        (input)="filtrer()"
+        placeholder="Rechercher par N° châssis, marque, modèle ou couleur"
+      />
+    </mat-form-field>
+  </div>
+  
+  <!-- 📄 Pagination -->
+  <mat-paginator [pageSize]="10" [pageSizeOptions]="[10, 20, 50]" showFirstLastButtons></mat-paginator>
+  <!-- 📋 Tableau des véhicules -->
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 table-style">
+  
+    <!-- ✅ Sélection -->
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox (change)="toggleAllRows()" [checked]="isAllSelected()"></mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox (click)="$event.stopPropagation()" [checked]="selection.isSelected(row)"
+          (change)="selection.toggle(row)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+  
+    <!-- 📌 Colonnes principales -->
+    <ng-container matColumnDef="numeroChassis">
+      <th mat-header-cell *matHeaderCellDef>N° Châssis</th>
+      <td mat-cell *matCellDef="let v">{{ v.numeroChassis }}</td>
+    </ng-container>
+  
+    <ng-container matColumnDef="shortDescription">
+      <th mat-header-cell *matHeaderCellDef>Marque</th>
+      <td mat-cell *matCellDef="let v">{{ v.shortDescription }}</td>
+    </ng-container>
+  
+    <ng-container matColumnDef="modele">
+      <th mat-header-cell *matHeaderCellDef>Modèle</th>
+      <td mat-cell *matCellDef="let v">{{ v.modele }}</td>
+    </ng-container>
+  
+    <ng-container matColumnDef="shortColor">
+      <th mat-header-cell *matHeaderCellDef>Couleur</th>
+      <td mat-cell *matCellDef="let v">{{ v.shortColor }}</td>
+    </ng-container>
+  
+    <ng-container matColumnDef="statut">
+      <th mat-header-cell *matHeaderCellDef>Statut</th>
+      <td mat-cell *matCellDef="let v">
+        <span class="status" [ngClass]="v.statut?.toLowerCase()">{{ v.statut }}</span>
+      </td>
+    </ng-container>
+  
+    <!-- ✅ Lignes -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  
+  </table>
+  
+  

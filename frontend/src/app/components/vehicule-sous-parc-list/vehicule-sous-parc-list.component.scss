@@ -1,0 +1,28 @@
+.filters {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .search-field {
+    width: 400px;
+  }
+  
+  .table-style {
+    width: 100%;
+  }
+  
+  .status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  
+  .status.en_etat { background-color: #4CAF50; }
+  .status.avarie { background-color: #D32F2F; }
+  .status.reserve { background-color: #FF9800; }
+  .status.vendu { background-color: #3F51B5; }
+  .status.livre { background-color: #009688; }
+  

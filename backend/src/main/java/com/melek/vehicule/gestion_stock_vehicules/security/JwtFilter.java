@@ -1,8 +1,10 @@
 package com.melek.vehicule.gestion_stock_vehicules.security;
 
+import com.melek.vehicule.gestion_stock_vehicules.repository.SessionRepository;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,52 +20,51 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final SessionRepository sessionRepository;
 
-    public JwtFilter(JwtUtil jwtUtil) {
+    public JwtFilter(JwtUtil jwtUtil, SessionRepository sessionRepository) {
         this.jwtUtil = jwtUtil;
+        this.sessionRepository = sessionRepository;
     }
-
-
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain)
-            throws ServletException, IOException{
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain chain) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
 
-        final String token = jwtUtil.getTokenFromRequest(request); // Récupérer le token JWT
-        System.out.println("🔍 Token reçu : " + token);
+        // ✅ Ne pas filtrer les routes publiques
+        if (path.startsWith("/auth") || path.startsWith("/photos") || path.equals("/error")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        final String token = jwtUtil.getTokenFromRequest(request);
+
         if (token != null && jwtUtil.isTokenValid(token)) {
-            // Extraire l'email et les rôles du token
+            var sessionOpt = sessionRepository.findByToken(token);
+            if (sessionOpt.isEmpty() || !sessionOpt.get().isActive()) {
+                System.out.println("⛔ Session expirée ou invalide pour ce token");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Session expirée ou désactivée.");
+                return;
+            }
+
             String email = jwtUtil.getUsernameFromToken(token);
             List<GrantedAuthority> authorities = jwtUtil.getAuthorities(token);
-            System.out.println("🔍 Utilisateur extrait : " + email);
-            System.out.println("🔍 Rôles attribués : " + authorities);
-            // Créer un objet Authentication avec l'email et les rôles
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    email, null, authorities);  // Associer les rôles (authorities)
-
-            // Ajouter les détails d'authentification pour Spring Security
+                    email, null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            System.out.println("🔍 Token reçu : " + token);
-            System.out.println("🔍 Utilisateur extrait : " + email);
-            System.out.println("🔍 Rôles attribués : " + authorities);
-            System.out.println("🔎 Final context auth avant set : " + SecurityContextHolder.getContext().getAuthentication());
-
-            // Placer l'authentification dans le contexte de sécurité
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            System.out.println("✅ Authentification injectée dans le contexte Spring Security pour : " + email);
-            System.out.println("🔍 Token reçu : " + token);
-            System.out.println("🔍 Rôles extraits du token : " + authorities);
+
+            System.out.println("✅ Session valide - Authentification injectée pour : " + email);
         }
-        System.out.println("📌 Token reçu : " + token);
-        System.out.println("📌 Rôles extraits : " + jwtUtil.getAuthorities(token));
-        System.out.println("🔎 Final context auth : " + SecurityContextHolder.getContext().getAuthentication());
 
-        // Passer au filtre suivant
         chain.doFilter(request, response);
+    }
 
-    }
-    }
+}
 
 
 

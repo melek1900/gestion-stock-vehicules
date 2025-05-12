@@ -2,15 +2,14 @@ package com.melek.vehicule.gestion_stock_vehicules.controller;
 
 import com.melek.vehicule.gestion_stock_vehicules.dto.JwtResponse;
 import com.melek.vehicule.gestion_stock_vehicules.dto.LoginRequest;
-import com.melek.vehicule.gestion_stock_vehicules.model.Marque;
-import com.melek.vehicule.gestion_stock_vehicules.model.Parc;
-import com.melek.vehicule.gestion_stock_vehicules.model.RoleUtilisateur;
-import com.melek.vehicule.gestion_stock_vehicules.model.Utilisateur;
+import com.melek.vehicule.gestion_stock_vehicules.model.*;
 import com.melek.vehicule.gestion_stock_vehicules.repository.MarqueRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.ParcRepository;
+import com.melek.vehicule.gestion_stock_vehicules.repository.SessionRepository;
 import com.melek.vehicule.gestion_stock_vehicules.repository.UtilisateurRepository;
 import com.melek.vehicule.gestion_stock_vehicules.security.JwtUtil;
 import com.melek.vehicule.gestion_stock_vehicules.service.UtilisateurService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,12 +34,11 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final MarqueRepository marqueRepository;
+    private final SessionRepository sessionRepository;
 
-
-    // Ajoute AuthenticationManager dans le constructeur
     public AuthController(UtilisateurService utilisateurService, JwtUtil jwtUtil,
                           UtilisateurRepository utilisateurRepository, ParcRepository parcRepository,PasswordEncoder passwordEncoder,
-                          AuthenticationManager authenticationManager,MarqueRepository marqueRepository) {
+                          AuthenticationManager authenticationManager,MarqueRepository marqueRepository,SessionRepository sessionRepository) {
         this.utilisateurService = utilisateurService;
         this.jwtUtil = jwtUtil;
         this.utilisateurRepository = utilisateurRepository;
@@ -48,9 +46,23 @@ public class AuthController {
         this.authenticationManager = authenticationManager;  // Injecte AuthenticationManager
         this.parcRepository=parcRepository;
         this.marqueRepository=marqueRepository;
+        this.sessionRepository=sessionRepository;
 
     }
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String token = jwtUtil.getTokenFromRequest(request);
 
+        if (token != null) {
+            sessionRepository.findByToken(token).ifPresent(session -> {
+                session.setActive(false);
+                session.setDateDeconnexion(new Date());
+                sessionRepository.save(session);
+            });
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Déconnexion réussie"));
+    }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
@@ -65,33 +77,42 @@ public class AuthController {
 
             // ✅ Récupération du parc de travail
             String parcNom = utilisateur.getParc() != null ? utilisateur.getParc().getNom() : null;
-            System.out.println("🔍 Parc récupéré depuis la base : " + parcNom);
 
             // ✅ Récupération des noms des parcs accessibles
             List<String> parcsAccesNoms = utilisateur.getParcsAcces().stream()
                     .map(Parc::getNom)
                     .collect(Collectors.toList());
-            System.out.println("🔍 Parcs accessibles récupérés : " + parcsAccesNoms);
 
             // ✅ Récupération des marques accessibles dynamiques
             List<String> marquesAccessibles = utilisateur.getMarquesAccessibles().stream()
                     .map(Marque::getNom)
                     .collect(Collectors.toList());
-            System.out.println("🎯 Marques accessibles depuis la BDD : " + marquesAccessibles);
 
-            // ✅ Génération du token avec parc, parcsAcces et marquesAccessibles
+            // ✅ Génération du token
             String token = jwtUtil.generateToken(authentication, parcNom, parcsAccesNoms, marquesAccessibles);
 
-            System.out.println("✅ Token généré avec succès !");
+            // 🔁 Rechercher une session existante
+            Optional<Session> existingSession = sessionRepository.findByUtilisateur(utilisateur);
+
+            Session session = existingSession.orElseGet(Session::new);
+
+            session.setDateConnexion(new Date());
+            session.setActive(true);
+            session.setUtilisateur(utilisateur);
+            session.setToken(token);
+            session.setDateDeconnexion(null); // remettre à null si nouvelle connexion
+
+            sessionRepository.save(session);
+
+            System.out.println("✅ Nouvelle session créée pour : " + utilisateur.getEmail());
+
             return ResponseEntity.ok(new JwtResponse(token));
 
         } catch (Exception e) {
-            System.out.println("❌ ERREUR : Échec de connexion - " + e.getMessage());
+            System.out.println("❌ Échec de connexion - " + e.getMessage());
             return ResponseEntity.status(401).body(Map.of("message", "⚠️ Identifiants incorrects."));
         }
     }
-
-
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, Object> request) {

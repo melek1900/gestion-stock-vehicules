@@ -81,7 +81,27 @@
         </ul>
       </li>
 
-      
+        <!-- SOUS PARC -->
+        <li *ngIf="userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_ADMINISTRATEUR' && userRole !== 'ROLE_MANAGER'">
+          <button class="menu-item" (click)="toggleSousParcMenu()">
+            <mat-icon>park</mat-icon>
+            <span>Sous Parc</span>
+            <mat-icon class="chevron" [class.rotate]="SousParcOpen">chevron_right</mat-icon>
+          </button>
+          <ul *ngIf="SousParcOpen" class="submenu">
+            <li  [routerLink]="['/vehicule-sous-parc-list']" class="submenu-link">
+              <mat-icon>directions_car</mat-icon>
+              <span>Stock</span>
+            </li>
+            <li [routerLink]="['/List-sous-parc']" class="submenu-link">
+              <mat-icon>category</mat-icon>
+              <span>Gestion</span>
+            </li>
+          </ul>
+        </li>
+    
+
+
       <!-- Administration -->
    <li>
     <button   *ngIf="userRole !== 'ROLE_MANAGER' && userRole !== 'ROLE_COMMERCIAL' && userRole !== 'ROLE_GESTIONNAIRE_APPLICATION'" class="menu-item" (click)="toggleAdminMenu()">

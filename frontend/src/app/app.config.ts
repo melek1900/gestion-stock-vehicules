@@ -37,6 +37,8 @@ import { ReparationMobileComponent } from './components/reparation-mobile/repara
 import { MarqueListeComponent } from './components/marque-liste/marque-liste.component';
 import { DashboardStatistiquesComponent } from './components/dashboard-statistiques/dashboard-statistiques.component';
 import { ProfilUtilisateurComponent } from './components/profil-utilisateur/profil-utilisateur.component';
+import { SousParcListComponent } from './components/sous-parc-list/sous-parc-list.component';
+import { VehiculeSousParcListComponent } from './components/vehicule-sous-parc-list/vehicule-sous-parc-list.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -70,6 +72,8 @@ const appRoutes: Routes = [
   { path: 'dashbord-stats', component: DashboardStatistiquesComponent},
   { path: 'profil', component: ProfilUtilisateurComponent},
   { path: 'List-users', component: UtilisateurListComponent},
+  { path: 'List-sous-parc', component: SousParcListComponent},
+  { path: 'vehicule-sous-parc-list', component: VehiculeSousParcListComponent},
 
 
 

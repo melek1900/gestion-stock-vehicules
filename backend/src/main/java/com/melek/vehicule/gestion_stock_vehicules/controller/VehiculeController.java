@@ -72,6 +72,12 @@ public class VehiculeController {
             return ResponseEntity.status(400).body("Erreur : " + e.getMessage());
         }
     }
+    @GetMapping("/parc-nom/{nom}")
+    public ResponseEntity<List<Vehicule>> getVehiculesByParcNom(@PathVariable String nom) {
+        List<Vehicule> vehicules = vehiculeRepository.findBySousParc_Parc_NomIgnoreCase(nom);
+        return ResponseEntity.ok(vehicules);
+    }
+
     @PatchMapping("/{numeroChassis}/transfert-carrosserie")
     public ResponseEntity<Map<String, Boolean>> transfertCarrosserie(
             @PathVariable String numeroChassis,

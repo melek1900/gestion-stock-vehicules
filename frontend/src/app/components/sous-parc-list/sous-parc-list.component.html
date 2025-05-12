@@ -1,0 +1,34 @@
+<mat-card class="sousparc-container">
+    <h2>🚘 Gestion des Sous-parcs (Carrosserie)</h2>
+  
+    <!-- ✅ Barre d'actions -->
+    <div class="actions-bar">
+      <button mat-raised-button color="primary" (click)="openAddDialog()">
+        ➕ Ajouter un sous-parc
+      </button>
+    </div>
+  
+    <mat-divider class="my-4"></mat-divider>
+  
+    <!-- ✅ Tableau des sous-parcs -->
+    <table mat-table [dataSource]="sousParcs" class="mat-elevation-z8">
+  
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef>Nom</th>
+        <td mat-cell *matCellDef="let sp">{{ sp.nom }}</td>
+      </ng-container>
+  
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let sp" class="mat-column-actions">
+          <button mat-icon-button color="warn" (click)="deleteSousParc(sp.id!)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="['nom', 'actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['nom', 'actions'];"></tr>
+    </table>
+  </mat-card>
+  

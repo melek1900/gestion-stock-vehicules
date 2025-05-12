@@ -1,0 +1,60 @@
+mat-dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 300px;
+    padding-top: 10px;
+  
+    .full-width {
+      width: 100%;
+    }
+  
+    mat-form-field {
+      width: 100%;
+      background: #fff;
+      border-radius: 8px;
+  
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        border-radius: 8px;
+      }
+    }
+  }
+  
+  mat-dialog-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    padding-bottom: 10px;
+  }
+  
+  mat-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+  
+    button {
+      font-weight: 600;
+      text-transform: uppercase;
+      border-radius: 6px;
+      padding: 6px 16px;
+  
+      &.mat-primary {
+        background-color: #1976d2;
+        color: white;
+  
+        &:hover {
+          background-color: #1565c0;
+        }
+      }
+  
+      &.mat-button {
+        color: #555;
+  
+        &:hover {
+          background-color: #eee;
+        }
+      }
+    }
+  }
+  
