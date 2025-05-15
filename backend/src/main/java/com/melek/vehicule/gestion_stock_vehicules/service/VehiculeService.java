@@ -9,12 +9,15 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,7 +37,8 @@ public class VehiculeService {
     private final VehiculeTransportRepository vehiculeTransportRepository;
     private final ChauffeurRepository chauffeurRepository;
     private final OrdreMissionService ordreMissionService;
-
+    private final TypeMouvementRepository typeMouvementRepository;
+    private final MouvementRepository mouvementRepository;
     public VehiculeService(
             VehiculeRepository vehiculeRepository,
             AvarieRepository avarieRepository,
@@ -48,7 +52,9 @@ public class VehiculeService {
             OrdreMissionRepository ordreMissionRepository,
             VehiculeTransportRepository vehiculeTransportRepository,
             ChauffeurRepository chauffeurRepository,
-            OrdreMissionService ordreMissionService) {
+            OrdreMissionService ordreMissionService,
+            TypeMouvementRepository typeMouvementRepository,
+            MouvementRepository mouvementRepository) {
         this.vehiculeRepository = vehiculeRepository;
         this.avarieRepository = avarieRepository;
         this.parcRepository = parcRepository;
@@ -62,6 +68,8 @@ public class VehiculeService {
         this.vehiculeTransportRepository = vehiculeTransportRepository;
         this.chauffeurRepository = chauffeurRepository;
         this.ordreMissionService = ordreMissionService;
+        this.typeMouvementRepository= typeMouvementRepository;
+        this.mouvementRepository = mouvementRepository;
     }
     @PersistenceContext
     private EntityManager entityManager;
@@ -357,7 +365,6 @@ public class VehiculeService {
                 .orElseThrow(() -> new IllegalStateException("🚨 Véhicule non trouvé"));
 
         Parc parc = parcService.getParcById(parcId);
-
         vehicule.setParc(parc);
 
         Map<String, Avarie> avarieMap = new HashMap<>();
@@ -370,6 +377,7 @@ public class VehiculeService {
             } catch (JsonProcessingException e) {
                 throw new IllegalStateException("❌ Erreur lors du parsing du JSON des avaries", e);
             }
+
             for (Map<String, String> avarieData : avariesList) {
                 String type = avarieData.get("type");
                 String commentaire = avarieData.get("commentaire");
@@ -414,8 +422,34 @@ public class VehiculeService {
         List<Avarie> avariesToSave = new ArrayList<>(avarieMap.values());
         vehicule.setAvaries(avariesToSave);
 
-        return vehiculeRepository.save(vehicule);
+        Vehicule savedVehicule = vehiculeRepository.save(vehicule);
+
+        // 🔐 Récupération de l'utilisateur connecté
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("❌ Utilisateur connecté introuvable"));
+
+        // 🔁 Création du mouvement
+        Mouvement mouvement = new Mouvement();
+        mouvement.setNumeroChassis(numeroChassis);
+        mouvement.setSequence(mouvementRepository.countByNumeroChassis(numeroChassis) + 1);
+        mouvement.setParc(parc);
+        mouvement.setTypeMouvement(
+                typeMouvementRepository.findByLibelTransact("RC")
+                        .orElseThrow(() -> new IllegalStateException("❌ Type mouvement 'RC' introuvable"))
+        );
+        mouvement.setQty(+1);
+        mouvement.setDateMouvement(LocalDate.now());
+        mouvement.setHeureMouvement(LocalTime.now());
+        mouvement.setUtilisateur(utilisateur);
+        mouvement.setUtilisateurNomComplet(utilisateur.getPrenom() + " " + utilisateur.getNom());
+
+        mouvementRepository.save(mouvement);
+
+        return savedVehicule;
     }
+
+
 
 
     private String extractKeyFromFileName(String fileName) {

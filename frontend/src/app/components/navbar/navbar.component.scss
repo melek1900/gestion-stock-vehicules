@@ -8,6 +8,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
+
 .white-navbar {
   background-color: white !important;
   color: #000000;
@@ -107,6 +108,6 @@ button[mat-menu-item] mat-icon {
     display: block;
   }
 }
-.custom-navbar button[mat-icon-button] mat-icon {
-  color: white !important;
+::ng-deep .white-navbar button[mat-icon-button] mat-icon {
+  color: #F4A300 !important;
 }

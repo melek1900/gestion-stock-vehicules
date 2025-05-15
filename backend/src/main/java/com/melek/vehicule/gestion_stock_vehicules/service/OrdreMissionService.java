@@ -15,6 +15,14 @@ import java.util.*;
 
 @Service
 public class OrdreMissionService {
+    @Autowired
+    private MouvementRepository mouvementRepository;
+
+    @Autowired
+    private TypeMouvementRepository typeMouvementRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
 
     private final ParcService parcService;
     private static final String PARC_TRANSFERT = "TRANSFERT";
@@ -23,7 +31,6 @@ public class OrdreMissionService {
     private final VehiculeRepository vehiculeRepository;
     private final ChauffeurRepository chauffeurRepository;
     private final VehiculeTransportRepository vehiculeTransportRepository;
-    private final UtilisateurRepository utilisateurRepository;
     private final MotifDeplacementRepository motifDeplacementRepository;
     private final SousParcRepository sousParcRepository;
 
@@ -64,6 +71,26 @@ public class OrdreMissionService {
         vehicule.setParc(parcTransfert);
         vehicule.setStatut(StatutVehicule.EN_ETAT);
         vehiculeRepository.save(vehicule);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("❌ Utilisateur connecté introuvable"));
+
+// 🔁 Enregistrement du mouvement de transfert
+        Mouvement mouvement = new Mouvement();
+        mouvement.setNumeroChassis(numeroChassis);
+        mouvement.setSequence(mouvementRepository.countByNumeroChassis(numeroChassis) + 1);
+        mouvement.setParc(parcTransfert);
+        mouvement.setTypeMouvement(
+                typeMouvementRepository.findByLibelTransact("T")
+                        .orElseThrow(() -> new IllegalStateException("❌ Type mouvement 'T' introuvable"))
+        );
+        mouvement.setQty(-1);
+        mouvement.setDateMouvement(LocalDate.now());
+        mouvement.setHeureMouvement(LocalTime.now());
+        mouvement.setUtilisateur(utilisateur);
+        mouvement.setUtilisateurNomComplet(utilisateur.getPrenom() + " " + utilisateur.getNom());
+
+        mouvementRepository.save(mouvement);
 
         boolean tousPreleves = ordre.getVehicules().stream().allMatch(this::estPreleve);
         boolean auMoinsUnPreleve = ordre.getVehicules().stream().anyMatch(this::estPreleve);
